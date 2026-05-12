@@ -1,0 +1,24 @@
+{
+"type": "FeatureCollection",
+"name": "ntu_road",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+"features": [
+{ "type": "Feature", "properties": { "id": 1, "name": "royal_palm_blvd", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.538987454668131, 25.017353307091664 ], [ 121.534282298861456, 25.017295127705051 ], [ 121.534108033831572, 25.017228636943738 ], [ 121.533777847459177, 25.016937739439605 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 3, "name": "zhoushan", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.535030976567214, 25.014394455170326 ], [ 121.543520782800655, 25.017796187483253 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 4, "name": "fan_palm_ave", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.533843037262216, 25.018341604150063 ], [ 121.538959095869302, 25.018413369320569 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 5, "name": "water_fir_ave", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.539049357392614, 25.018470781426768 ], [ 121.543211270226763, 25.018505066938225 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 6, "name": "mahogany_ave", "safety": "2" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.53906949198192, 25.02032320678256 ], [ 121.541167986082357, 25.020262223574015 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 7, "name": "mahogany_south", "safety": "2" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.539087846157713, 25.019330839897126 ], [ 121.541180222199586, 25.019364103721557 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 8, "name": "ss_south", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.541347804789794, 25.019831946976144 ], [ 121.543201330833668, 25.019789179532726 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 9, "name": "ee_north", "safety": "2" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.541413951991146, 25.019043063071951 ], [ 121.543206013717025, 25.019058099253332 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 11, "name": "palm_ave", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.538977273591897, 25.020451583058975 ], [ 121.539014271623302, 25.017090553484632 ], [ 121.539846727330357, 25.017065408278199 ], [ 121.539874475853907, 25.016822337683884 ], [ 121.54005021650319, 25.01674690188435 ], [ 121.54020745813672, 25.01647030355619 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 12, "name": "sweetgum_ave", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.541242951575271, 25.020947537965473 ], [ 121.541274192181149, 25.018484649791816 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 13, "name": "law_west", "safety": "4" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.543281938857646, 25.02090184944965 ], [ 121.543265268665479, 25.018507564114795 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 10, "name": "banyan_ave", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.535836224441226, 25.022140477629804 ], [ 121.535852409507356, 25.021113852831924 ], [ 121.535803854308909, 25.021040522160661 ], [ 121.535900964705817, 25.017285933254986 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 14, "name": "freshamn_woman", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.535317362548099, 25.017286964355744 ], [ 121.53534282971934, 25.016040754279775 ], [ 121.535966775414948, 25.016063832359098 ], [ 121.535992242586204, 25.015579191782404 ], [ 121.535151825934946, 25.015129166676907 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 15, "name": "agri", "safety": "3" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.538129286575057, 25.017276461381211 ], [ 121.538116902588982, 25.01615424381427 ], [ 121.538005446714294, 25.015946632440063 ], [ 121.538054982658565, 25.015626798014448 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 16, "name": "men_dorm", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.543198180483628, 25.018469945582719 ], [ 121.543514169963188, 25.017791210285427 ], [ 121.544070077381022, 25.017404117380941 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 17, "name": "golden_rain_ave", "safety": "1" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.537601418734909, 25.015418464873012 ], [ 121.539366269441132, 25.013278210305209 ] ] ] } },
+{ "type": "Feature", "properties": { "id": 2, "name": "rbp_south", "safety": "2" }, "geometry": { "type": "MultiLineString", "coordinates": [ [ [ 121.53439834859536, 25.016982591068206 ], [ 121.538988229449828, 25.017066848803363 ] ] ] } }
+]
+}

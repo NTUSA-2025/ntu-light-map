@@ -1,0 +1,1170 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>台大夜間亮度地圖 — Modern Demo</title>
+
+  <!-- Leaflet CDN -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
+
+  <style>
+    :root{
+      /* ====== refreshed, low-saturation night palette ====== */
+      --bg: rgba(10, 14, 24, .72);
+      --bg-strong: rgba(10, 14, 24, .92);
+      --stroke: rgba(148, 163, 184, .14);
+      --text: #e6e9ef;
+      --muted: #9aa4b2;
+
+      --accent: #7aa2ff;   /* cool blue-violet */
+      --accent-2: #6ee7d2; /* soft mint/teal */
+
+      --radius: 14px;
+      --shadow: 0 8px 24px rgba(0,0,0,.45);
+      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+    }
+
+    html, body {
+      height: 100%;
+      margin: 0;
+      background: #000;
+      font-family: var(--font);
+    }
+    #map {
+      height: 100vh;
+      width: 100vw;
+    }
+
+    /* ===== Leaflet controls reset a bit ===== */
+    .leaflet-control { box-shadow: none; }
+    .leaflet-bar a {
+      background: rgba(12,16,26,.75);
+      color: #eef2f7;
+      border: 1px solid rgba(148,163,184,.12);
+    }
+    .leaflet-bar a:hover {
+      background: rgba(20,26,40,.9);
+    }
+
+    /* ===== Title pill (top-left) ===== */
+    .map-title {
+      padding: 10px 12px;
+      background: var(--bg);
+      color: var(--text);
+      border-radius: 999px;
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: .3px;
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .map-title .dot {
+      width: 8px; height: 8px; border-radius: 50%;
+      background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
+      box-shadow: 0 0 8px rgba(122,162,255,.6);
+    }
+
+    /* ===== Legend (bottom-right) ===== */
+    .legend-box {
+      padding: 10px 12px;
+      background: var(--bg);
+      color: var(--text);
+      border-radius: var(--radius);
+      font-size: 12px;
+      line-height: 1.35;
+      border: 1px solid var(--stroke);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      box-shadow: var(--shadow);
+      min-width: 140px;
+    }
+    .legend-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin: 5px 0;
+    }
+    .legend-color {
+      width: 14px;
+      height: 14px;
+      border-radius: 4px;
+      border: 1px solid rgba(255,255,255,.12);
+      flex-shrink: 0;
+    }
+    .legend-title{
+      font-weight: 700;
+      margin-bottom: 6px;
+      display:flex; align-items:center; gap:6px;
+    }
+    .legend-title .pill{
+      font-size: 10px; color:#0b1020; background:#eef2f7;
+      padding:2px 6px; border-radius:999px; font-weight:800;
+    }
+
+    /* ===== Sidebar layer panel (right) ===== */
+    .layers-panel {
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      width: 260px;
+      max-height: calc(100vh - 32px);
+      background: var(--bg);
+      border: 1px solid var(--stroke);
+      border-radius: 16px;
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      box-shadow: var(--shadow);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      transition: transform .25s ease, opacity .25s ease;
+      z-index: 9999;
+    }
+    .layers-panel.collapsed{
+      transform: translateX(110%);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .layers-header{
+      padding: 10px 12px;
+      border-bottom: 1px solid var(--stroke);
+      display:flex; align-items:center; justify-content:space-between;
+      background: linear-gradient(180deg, var(--bg-strong), transparent);
+    }
+    .layers-header .title{
+      font-size: 13px; font-weight: 800; color: var(--text);
+      display:flex; align-items:center; gap:8px;
+    }
+    .layers-header .title .icon{
+      width: 18px; height: 18px; border-radius: 6px;
+      background: linear-gradient(135deg, #7aa2ff, #6ee7d2);
+      box-shadow: 0 0 10px rgba(122,162,255,.35);
+    }
+    .layers-header button{
+      cursor: pointer;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border-radius: 10px;
+      padding: 6px 8px;
+      font-size: 12px;
+      font-weight: 700;
+      transition: background .2s ease, transform .06s ease;
+    }
+    .layers-header button:hover{ background: rgba(255,255,255,.12); }
+    .layers-header button:active{ transform: translateY(1px); }
+
+    .layers-body{
+      padding: 8px;
+      overflow: auto;
+    }
+
+    /* Accordion */
+    .acc {
+      border-radius: 12px;
+      border: 1px solid var(--stroke);
+      overflow: hidden;
+      margin-bottom: 8px;
+      background: rgba(15, 23, 42, .55);
+    }
+    .acc-summary{
+      list-style: none;
+      cursor: pointer;
+      padding: 9px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text);
+      display:flex; align-items:center; justify-content:space-between;
+      user-select: none;
+    }
+    .acc-summary::-webkit-details-marker{ display:none; }
+    .acc-summary .chev{
+      color: var(--muted);
+      transition: transform .2s ease;
+      font-weight: 900;
+    }
+    details[open] .acc-summary .chev{
+      transform: rotate(90deg);
+    }
+    .acc-content{
+      padding: 6px 8px 8px 8px;
+      border-top: 1px solid var(--stroke);
+      display:flex; flex-direction:column; gap:4px;
+      font-size: 12px;
+    }
+
+    /* Checkbox rows */
+    .layer-row{
+      display:flex; align-items:center; justify-content:space-between;
+      padding: 6px 6px;
+      border-radius: 8px;
+      transition: background .15s ease;
+    }
+    .layer-row:hover{ background: rgba(255,255,255,.05); }
+
+    .layer-left{
+      display:flex; align-items:center; gap:8px; color: var(--text);
+    }
+    .swatch{
+      width: 10px; height: 10px; border-radius: 3px; opacity: .9;
+      border: 1px solid rgba(255,255,255,.2);
+    }
+    .layer-row input[type="checkbox"]{
+      width: 16px; height: 16px; accent-color: #8fb0ff;
+      cursor: pointer;
+    }
+    .layer-desc{
+      font-size: 11px; color: var(--muted);
+      margin-left: 18px; margin-top: -2px;
+    }
+
+    /* Floating button to open panel */
+    .panel-fab{
+      position: fixed;
+      top: 16px;
+      right: 16px;
+      z-index: 9998;
+      background: var(--bg);
+      border: 1px solid var(--stroke);
+      border-radius: 999px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+      color: var(--text);
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display:none;
+      align-items:center; gap:6px;
+    }
+    .panel-fab .mini{
+      width:8px; height:8px; border-radius:50%;
+      background: var(--accent);
+      box-shadow: 0 0 8px rgba(122,162,255,.7);
+    }
+    .panel-fab.show{ display:inline-flex; }
+
+    .incident-fab{
+      position: fixed;
+      left: 16px;
+      bottom: 16px;
+      z-index: 9998;
+      border: 1px solid rgba(110, 231, 210, .35);
+      background: rgba(12, 18, 28, .88);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 10px 14px;
+      font-size: 13px;
+      font-weight: 800;
+      box-shadow: var(--shadow);
+      cursor: pointer;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    .incident-fab:hover{ background: rgba(19, 30, 43, .94); }
+
+    .incident-dialog{
+      position: fixed;
+      left: 16px;
+      bottom: 70px;
+      z-index: 10000;
+      width: min(320px, calc(100vw - 32px));
+      background: var(--bg-strong);
+      color: var(--text);
+      border: 1px solid var(--stroke);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+      overflow: hidden;
+    }
+    .incident-dialog.hidden{ display:none; }
+    .incident-header{
+      padding: 11px 12px;
+      border-bottom: 1px solid var(--stroke);
+      display:flex;
+      align-items:center;
+      justify-content:space-between;
+      gap: 12px;
+    }
+    .incident-header strong{
+      font-size: 13px;
+      line-height: 1.25;
+    }
+    .incident-close{
+      cursor: pointer;
+      border: 1px solid var(--stroke);
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+      border-radius: 10px;
+      width: 32px;
+      height: 32px;
+      font-size: 18px;
+      line-height: 1;
+    }
+    .incident-body{
+      padding: 12px;
+      display:flex;
+      flex-direction:column;
+      gap: 10px;
+      font-size: 12px;
+    }
+    .incident-status{
+      min-height: 18px;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .incident-status.error{ color:#f4a5a5; }
+    .incident-status.ok{ color:#8ee0bd; }
+    .incident-field{
+      display:flex;
+      flex-direction:column;
+      gap: 5px;
+      color: var(--muted);
+      font-weight: 700;
+    }
+    .incident-field input,
+    .incident-field select,
+    .incident-field textarea{
+      border: 1px solid rgba(148,163,184,.22);
+      background: rgba(3, 7, 18, .62);
+      color: var(--text);
+      border-radius: 10px;
+      font: 13px/1.4 var(--font);
+      padding: 9px 10px;
+      outline: none;
+    }
+    .incident-section.hidden{ display:none; }
+    .incident-field textarea{
+      min-height: 78px;
+      resize: vertical;
+    }
+    .incident-actions{
+      display:flex;
+      gap: 8px;
+      justify-content:flex-end;
+    }
+    .incident-actions button{
+      cursor: pointer;
+      border: 1px solid var(--stroke);
+      border-radius: 10px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-weight: 800;
+    }
+    .incident-secondary{
+      background: rgba(255,255,255,.06);
+      color: var(--text);
+    }
+    .incident-primary{
+      background: var(--accent-2);
+      color: #07131a;
+    }
+    .incident-primary:disabled{
+      opacity: .5;
+      cursor: not-allowed;
+    }
+
+    @media (max-width: 640px){
+      .layers-panel{ width: 220px; }
+      .incident-fab{ left: 12px; bottom: 12px; }
+      .incident-dialog{ left: 12px; bottom: 62px; width: calc(100vw - 24px); }
+    }
+  </style>
+</head>
+<body>
+<div id="map"></div>
+
+<!-- panel open button (only when collapsed) -->
+<button id="panelFab" class="panel-fab">
+  <span class="mini"></span> 圖層
+</button>
+
+<button id="incidentFab" class="incident-fab">＋ 安全事件</button>
+
+<div id="incidentDialog" class="incident-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="incidentTitle">
+  <div class="incident-header">
+    <strong id="incidentTitle">新增安全事件</strong>
+    <button id="incidentClose" class="incident-close" aria-label="關閉">×</button>
+  </div>
+  <form id="incidentForm" class="incident-body">
+    <div id="authSection" class="incident-section hidden">
+      <div id="authStatus" class="incident-status">請使用 NTU email 驗證後回報</div>
+      <label class="incident-field">
+        NTU Email
+        <input id="authEmail" type="email" autocomplete="email" placeholder="name@ntu.edu.tw" />
+      </label>
+      <div class="incident-actions">
+        <button type="button" id="authRequestCode" class="incident-primary">寄送驗證碼</button>
+      </div>
+      <label class="incident-field">
+        驗證碼
+        <input id="authCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
+      </label>
+      <div class="incident-actions">
+        <button type="button" id="authVerifyCode" class="incident-primary">驗證</button>
+      </div>
+    </div>
+
+    <div id="reportSection" class="incident-section hidden">
+      <div id="incidentStatus" class="incident-status">請在地圖上點選六邊形</div>
+      <label class="incident-field">
+        事件類型
+        <select id="incidentType" required>
+          <option value="lighting">照明不足</option>
+          <option value="traffic">交通風險</option>
+          <option value="harassment">騷擾或跟蹤</option>
+          <option value="obstacle">路面或障礙</option>
+          <option value="other">其他</option>
+        </select>
+      </label>
+      <label class="incident-field">
+        描述
+        <textarea id="incidentDescription" maxlength="300" required></textarea>
+      </label>
+      <div class="incident-actions">
+        <button type="button" id="incidentCancel" class="incident-secondary">取消</button>
+        <button type="submit" id="incidentSubmit" class="incident-primary" disabled>送出</button>
+      </div>
+    </div>
+  </form>
+</div>
+
+<!-- custom layers sidebar -->
+<div id="layersPanel" class="layers-panel">
+  <div class="layers-header">
+    <div class="title">
+      <span class="icon"></span>
+      圖層與樣式
+    </div>
+    <button id="panelClose">收合</button>
+  </div>
+
+  <div class="layers-body">
+    <!-- 只保留可開關的兩類 -->
+    <details class="acc" open>
+      <summary class="acc-summary">
+        亮度圖層 <span class="chev">›</span>
+      </summary>
+      <div class="acc-content" id="dataLayers"></div>
+    </details>
+
+    <details class="acc" open>
+      <summary class="acc-summary">
+        邊界 <span class="chev">›</span>
+      </summary>
+      <div class="acc-content" id="boundaryLayers"></div>
+    </details>
+  </div>
+</div>
+
+<script>
+// ========== 1) 初始化地圖 ==========
+const map = L.map('map', { zoomControl: false }).setView([25.0173, 121.5398], 16);
+
+// ===== panes: 強制圖層上下順序 =====
+map.createPane('brightnessPane'); // 最上層
+map.getPane('brightnessPane').style.zIndex = 650;
+
+map.createPane('safetyPane');     // 中層
+map.getPane('safetyPane').style.zIndex = 600;
+
+map.createPane('protectPane');    // 下層
+map.getPane('protectPane').style.zIndex = 550;
+
+map.createPane('incidentPane');   // 回報事件
+map.getPane('incidentPane').style.zIndex = 700;
+
+const ASSET_BASE = location.pathname.startsWith('/ntu_light_map/') ? '/ntu_light_map' : '';
+function assetUrl(path) {
+  return `${ASSET_BASE}${path}`;
+}
+
+// 底圖（常駐，不提供關閉）
+const baseTile = L.tileLayer(
+  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+  {
+    attribution: '&copy; OSM contributors &copy; CARTO',
+    subdomains: 'abcd',
+    maxZoom: 20
+  }
+).addTo(map);
+
+// ========== 2) 自訂左上角標題 ==========
+const titleControl = L.control({ position: 'topleft' });
+titleControl.onAdd = function () {
+  const div = L.DomUtil.create('div', 'map-title');
+  div.innerHTML = `<span class="dot"></span> 台大夜間亮度地圖`;
+  return div;
+};
+titleControl.addTo(map);
+
+// ====== 3) Custom Layer Panel Logic ======
+const panel = document.getElementById('layersPanel');
+const fab = document.getElementById('panelFab');
+document.getElementById('panelClose').onclick = () => {
+  panel.classList.add('collapsed');
+  fab.classList.add('show');
+};
+fab.onclick = () => {
+  panel.classList.remove('collapsed');
+  fab.classList.remove('show');
+};
+
+// Prevent map drag when interacting panel
+L.DomEvent.disableClickPropagation(panel);
+L.DomEvent.disableScrollPropagation(panel);
+
+// helper to add checkbox row into panel
+function addLayerToggle(containerId, {
+  label,
+  layer,
+  checked = true,
+  swatchColor = '#999',
+  desc = ''
+}) {
+  const container = document.getElementById(containerId);
+
+  const row = document.createElement('div');
+  row.className = 'layer-row';
+
+  const left = document.createElement('div');
+  left.className = 'layer-left';
+
+  const swatch = document.createElement('span');
+  swatch.className = 'swatch';
+  swatch.style.background = swatchColor;
+
+  const text = document.createElement('div');
+  text.innerHTML = `<div>${label}</div>${desc ? `<div class="layer-desc">${desc}</div>` : ''}`;
+
+  left.appendChild(swatch);
+  left.appendChild(text);
+
+  const cb = document.createElement('input');
+  cb.type = 'checkbox';
+  cb.checked = checked;
+
+  cb.onchange = () => {
+    if (cb.checked) layer.addTo(map);
+    else map.removeLayer(layer);
+  };
+
+  row.appendChild(left);
+  row.appendChild(cb);
+  container.appendChild(row);
+
+  // initial state
+  if (checked) layer.addTo(map);
+}
+
+// ========== 4) 安全事件回報 ==========
+const incidentTypeMeta = {
+  lighting: { label: '照明不足', color: '#f7d96c' },
+  traffic: { label: '交通風險', color: '#ff9b6a' },
+  harassment: { label: '騷擾或跟蹤', color: '#ef718d' },
+  obstacle: { label: '路面或障礙', color: '#b58cff' },
+  other: { label: '其他', color: '#6ee7d2' }
+};
+
+const incidentHexLayer = L.layerGroup();
+const incidentFab = document.getElementById('incidentFab');
+const incidentDialog = document.getElementById('incidentDialog');
+const incidentForm = document.getElementById('incidentForm');
+const incidentClose = document.getElementById('incidentClose');
+const incidentCancel = document.getElementById('incidentCancel');
+const authSection = document.getElementById('authSection');
+const reportSection = document.getElementById('reportSection');
+const authStatus = document.getElementById('authStatus');
+const authEmail = document.getElementById('authEmail');
+const authCode = document.getElementById('authCode');
+const authRequestCode = document.getElementById('authRequestCode');
+const authVerifyCode = document.getElementById('authVerifyCode');
+const incidentStatus = document.getElementById('incidentStatus');
+const incidentType = document.getElementById('incidentType');
+const incidentDescription = document.getElementById('incidentDescription');
+const incidentSubmit = document.getElementById('incidentSubmit');
+
+let authSession = null;
+let reportHexLayer = null;
+let selectedHexLayer = null;
+let selectedHex = null;
+let allIncidents = [];
+const hexFeatureById = new Map();
+
+addLayerToggle('dataLayers', {
+  label: '安全事件回報',
+  layer: incidentHexLayer,
+  checked: true,
+  swatchColor: '#ef718d'
+});
+
+function setIncidentStatus(message, state = '') {
+  incidentStatus.textContent = message;
+  incidentStatus.className = `incident-status ${state}`.trim();
+}
+
+function setAuthStatus(message, state = '') {
+  authStatus.textContent = message;
+  authStatus.className = `incident-status ${state}`.trim();
+}
+
+function showAuthSection() {
+  authSection.classList.remove('hidden');
+  reportSection.classList.add('hidden');
+  if (reportHexLayer && map.hasLayer(reportHexLayer)) {
+    map.removeLayer(reportHexLayer);
+  }
+}
+
+function showReportSection() {
+  authSection.classList.add('hidden');
+  reportSection.classList.remove('hidden');
+  if (reportHexLayer && !map.hasLayer(reportHexLayer)) {
+    reportHexLayer.addTo(map);
+  }
+}
+
+function escapeHtml(value) {
+  return String(value ?? '').replace(/[&<>"']/g, char => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  })[char]);
+}
+
+function incidentLabel(type) {
+  return incidentTypeMeta[type]?.label || incidentTypeMeta.other.label;
+}
+
+function incidentColor(type) {
+  return incidentTypeMeta[type]?.color || incidentTypeMeta.other.color;
+}
+
+function updateIncidentSubmitState() {
+  incidentSubmit.disabled = !selectedHex || incidentDescription.value.trim().length === 0;
+}
+
+function hexCenter(layer) {
+  const center = layer.getBounds().getCenter();
+  return { lat: center.lat, lng: center.lng };
+}
+
+function selectReportHex(feature, layer) {
+  const id = Number(feature.properties?.id);
+  if (!Number.isInteger(id)) return;
+
+  selectedHex = { id, center: hexCenter(layer), feature };
+  if (selectedHexLayer) selectedHexLayer.remove();
+
+  selectedHexLayer = L.geoJSON(feature, {
+    pane: 'incidentPane',
+    style: {
+      color: '#f3f6ff',
+      weight: 2,
+      opacity: 1,
+      fillColor: '#6ee7d2',
+      fillOpacity: 0.24
+    }
+  }).addTo(map);
+
+  setIncidentStatus(`已選 Hex ${id}`, 'ok');
+  updateIncidentSubmitState();
+}
+
+function closeIncidentDialog() {
+  incidentDialog.classList.add('hidden');
+  authSection.classList.add('hidden');
+  reportSection.classList.add('hidden');
+  selectedHex = null;
+  incidentDescription.value = '';
+  authCode.value = '';
+  incidentSubmit.disabled = true;
+  setIncidentStatus('請在地圖上點選六邊形');
+  if (selectedHexLayer) {
+    selectedHexLayer.remove();
+    selectedHexLayer = null;
+  }
+  if (reportHexLayer && map.hasLayer(reportHexLayer)) {
+    map.removeLayer(reportHexLayer);
+  }
+}
+
+function openIncidentDialog() {
+  incidentDialog.classList.remove('hidden');
+  setIncidentStatus('請在地圖上點選六邊形');
+  if (authSession?.authenticated) showReportSection();
+  else showAuthSection();
+}
+
+async function getAuthSession() {
+  try {
+    const response = await fetch('/api/protected/session', {
+      headers: { accept: 'application/json' }
+    });
+    if (!response.ok) return null;
+    return await response.json();
+  } catch {
+    return null;
+  }
+}
+
+async function beginIncidentFlow() {
+  authSession = authSession || await getAuthSession();
+  openIncidentDialog();
+}
+
+function renderIncidentHexes() {
+  incidentHexLayer.clearLayers();
+  const grouped = new Map();
+  allIncidents.forEach(incident => {
+    if (!Number.isInteger(Number(incident.hex_id))) return;
+    const key = Number(incident.hex_id);
+    const list = grouped.get(key) || [];
+    list.push(incident);
+    grouped.set(key, list);
+  });
+
+  grouped.forEach((incidents, hexId) => {
+    const feature = hexFeatureById.get(hexId);
+    if (!feature) return;
+
+    const latest = incidents[0];
+    const color = incidentColor(latest.type);
+    const rows = incidents.slice(0, 5).map(incident => `
+      <div style="border-top:1px solid rgba(15,23,42,.12); padding-top:5px; margin-top:5px;">
+        <b>${escapeHtml(incidentLabel(incident.type))}</b><br/>
+        ${escapeHtml(incident.description)}<br/>
+        <span style="color:#64748b;">${escapeHtml(incident.created_at)}</span>
+      </div>
+    `).join('');
+
+    const layer = L.geoJSON(feature, {
+      pane: 'incidentPane',
+      style: {
+        color,
+        weight: 1.4,
+        opacity: 0.95,
+        fillColor: color,
+        fillOpacity: Math.min(0.62, 0.28 + incidents.length * 0.08)
+      }
+    });
+
+    layer.bindPopup(`
+      <div style="font:12px/1.5 system-ui,sans-serif; min-width:180px;">
+        <b>Hex ${hexId}</b><br/>
+        回報數：${incidents.length}
+        ${rows}
+      </div>
+    `);
+    incidentHexLayer.addLayer(layer);
+  });
+}
+
+async function loadIncidents() {
+  const response = await fetch('/api/incidents', { headers: { accept: 'application/json' } });
+  if (!response.ok) return;
+  const data = await response.json();
+  allIncidents = Array.isArray(data.incidents) ? data.incidents : [];
+  renderIncidentHexes();
+}
+
+async function loadReportHexes() {
+  const geo = await loadJSON(assetUrl('/data/report_hex_4326.geojson'));
+  geo.features.forEach(feature => {
+    const id = Number(feature.properties?.id);
+    if (Number.isInteger(id)) hexFeatureById.set(id, feature);
+  });
+
+  reportHexLayer = L.geoJSON(geo, {
+    pane: 'incidentPane',
+    style: {
+      color: '#cbd5e1',
+      weight: 0.55,
+      opacity: 0.28,
+      fillColor: '#cbd5e1',
+      fillOpacity: 0.01
+    },
+    onEachFeature: (feature, layer) => {
+      layer.on('click', () => selectReportHex(feature, layer));
+      layer.on('mouseover', () => layer.setStyle({ opacity: 0.7, fillOpacity: 0.08, weight: 1 }));
+      layer.on('mouseout', () => layer.setStyle({ opacity: 0.28, fillOpacity: 0.01, weight: 0.55 }));
+    }
+  });
+
+  if (!incidentDialog.classList.contains('hidden') && !map.hasLayer(reportHexLayer)) {
+    reportHexLayer.addTo(map);
+  }
+
+  await loadIncidents();
+}
+
+incidentFab.onclick = beginIncidentFlow;
+incidentClose.onclick = closeIncidentDialog;
+incidentCancel.onclick = closeIncidentDialog;
+incidentDescription.addEventListener('input', updateIncidentSubmitState);
+
+authRequestCode.onclick = async () => {
+  const email = authEmail.value.trim().toLowerCase();
+  if (!email.endsWith('@ntu.edu.tw')) {
+    setAuthStatus('請輸入 @ntu.edu.tw email', 'error');
+    return;
+  }
+
+  authRequestCode.disabled = true;
+  setAuthStatus('寄送中');
+
+  try {
+    const response = await fetch('/api/auth/request-code', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json'
+      },
+      body: JSON.stringify({ email })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      setAuthStatus(errorData.message || errorData.error || '寄送失敗', 'error');
+      return;
+    }
+
+    setAuthStatus('驗證碼已寄出，請檢查信箱', 'ok');
+    authCode.focus();
+  } catch {
+    setAuthStatus('寄送失敗', 'error');
+  } finally {
+    authRequestCode.disabled = false;
+  }
+};
+
+authVerifyCode.onclick = async () => {
+  const email = authEmail.value.trim().toLowerCase();
+  const code = authCode.value.trim();
+  if (!email.endsWith('@ntu.edu.tw') || !/^\d{6}$/.test(code)) {
+    setAuthStatus('請輸入 NTU email 與 6 位數驗證碼', 'error');
+    return;
+  }
+
+  authVerifyCode.disabled = true;
+  setAuthStatus('驗證中');
+
+  try {
+    const response = await fetch('/api/auth/verify-code', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json'
+      },
+      body: JSON.stringify({ email, code })
+    });
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      setAuthStatus(errorData.message || errorData.error || '驗證失敗', 'error');
+      return;
+    }
+
+    authSession = await response.json();
+    setAuthStatus('驗證完成', 'ok');
+    showReportSection();
+    setIncidentStatus('請在地圖上點選六邊形');
+  } catch {
+    setAuthStatus('驗證失敗', 'error');
+  } finally {
+    authVerifyCode.disabled = false;
+  }
+};
+
+incidentForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  if (reportSection.classList.contains('hidden')) return;
+  if (!selectedHex) {
+    setIncidentStatus('請先點選六邊形', 'error');
+    return;
+  }
+
+  incidentSubmit.disabled = true;
+  setIncidentStatus('送出中');
+
+  try {
+    const response = await fetch('/api/protected/incidents', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json'
+      },
+      body: JSON.stringify({
+        hex_id: selectedHex.id,
+        lat: selectedHex.center.lat,
+        lng: selectedHex.center.lng,
+        type: incidentType.value,
+        description: incidentDescription.value.trim()
+      })
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      authSession = null;
+      showAuthSection();
+      setAuthStatus('請先完成 NTU email 驗證', 'error');
+      return;
+    }
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      setIncidentStatus(errorData.message || errorData.error || '送出失敗', 'error');
+      updateIncidentSubmitState();
+      return;
+    }
+
+    const data = await response.json();
+    if (data.incident) {
+      allIncidents.unshift(data.incident);
+      renderIncidentHexes();
+    }
+    closeIncidentDialog();
+  } catch {
+    setIncidentStatus('送出失敗', 'error');
+    updateIncidentSubmitState();
+  }
+});
+
+loadReportHexes().then(() => {
+  if (window.location.hash === '#new-incident') {
+    history.replaceState(null, '', window.location.pathname + window.location.search);
+    beginIncidentFlow();
+  }
+});
+
+// ========== 4) 台大範圍線（常駐，不提供關閉） ==========
+fetch(assetUrl('/data/ntu_area.geojson'))
+  .then(r => r.json())
+  .then(geo => {
+    const ntuLine = L.geoJSON(geo, {
+      style: { color: '#eef2f7', weight: 1.05, opacity: .9 }
+    }).addTo(map);
+
+    map.fitBounds(ntuLine.getBounds());
+  });
+
+// ========== 5) Overlay 依序載入：亮度 → 安全 → 光害 ==========
+let brightnessLegend;
+
+async function loadJSON(url){
+  const r = await fetch(url);
+  return await r.json();
+}
+
+(async function loadOrderedOverlays(){
+
+  // --- (1) 實測亮度六邊形（最上層） ---
+  const geoBrightness = await loadJSON(assetUrl('/data/merge_sur_zhoushan.geojson'));
+
+  const rawVals = geoBrightness.features
+    .map(f => Number(f.properties?.brightness_filled))
+    .filter(v => Number.isFinite(v) && v >= 0);
+
+  if (rawVals.length === 0) {
+    console.warn('merge_sur_zhoushan: brightness_filled 無有效數值');
+    return;
+  }
+
+  const aboveOne = rawVals.filter(v => v > 1).sort((a,b)=>a-b);
+
+  function quantile(sortedArr, p) {
+    if (sortedArr.length === 0) return 1;
+    const pos = (sortedArr.length - 1) * p;
+    const base = Math.floor(pos);
+    const rest = pos - base;
+    if (base + 1 < sortedArr.length) {
+      return sortedArr[base] + rest * (sortedArr[base + 1] - sortedArr[base]);
+    } else {
+      return sortedArr[base];
+    }
+  }
+
+  const q25 = quantile(aboveOne, 0.25);
+  const q50 = quantile(aboveOne, 0.50);
+  const q75 = quantile(aboveOne, 0.75);
+  const q100 = quantile(aboveOne, 1.00);
+
+  // ===== refreshed brightness ramp (deep navy -> cool white) =====
+  const ramp = [
+    '#0b1020',  // near-black navy
+    '#1f2a5a',  // deep indigo
+    '#2f6f9f',  // muted blue
+    '#6fd0c2',  // soft teal
+    '#f3f6ff'   // cool white
+  ];
+
+  function getColor(v) {
+    if (!Number.isFinite(v)) return '#7b8492';
+    if (v <= 1) return ramp[0];
+    if (v <= q25) return ramp[1];
+    if (v <= q50) return ramp[2];
+    if (v <= q75) return ramp[3];
+    return ramp[4];
+  }
+
+  const measuredLayer = L.geoJSON(geoBrightness, {
+    pane: 'brightnessPane',
+    style: f => {
+      const v = Number(f.properties?.brightness_filled);
+      return {
+        color: 'rgba(6, 10, 18, .55)',  // softer edge
+        weight: 0.25,
+        fillColor: getColor(v),
+        fillOpacity: 0.9
+      };
+    },
+    onEachFeature: (feature, layer) => {
+      const v = Number(feature.properties?.brightness_filled);
+      const luxStr = Number.isFinite(v) ? v.toFixed(2) : 'NA';
+      const id = feature.properties?.id ?? '(無 ID)';
+      layer.bindPopup(`
+        <div style="font: 12px/1.5 system-ui, sans-serif; min-width:120px;">
+          <div style="font-weight:800; font-size:13px; margin-bottom:4px;">Hex ${id}</div>
+          <div style="color:#0b1020; background:#f1f5fb; padding:4px 6px; border-radius:6px; display:inline-block;">
+            ${luxStr} lux
+          </div>
+        </div>
+      `);
+    }
+  });
+
+  addLayerToggle('dataLayers', {
+    label: '實測亮度六邊形',
+    layer: measuredLayer,
+    checked: true,
+    swatchColor: ramp[4]
+  });
+
+  // --- legend (亮度) ---
+  if (brightnessLegend) brightnessLegend.remove();
+  brightnessLegend = L.control({ position: 'bottomright' });
+  brightnessLegend.onAdd = function () {
+    const div = L.DomUtil.create('div', 'legend-box');
+
+    function fmt(x) {
+      if (!Number.isFinite(x)) return 'NA';
+      if (Math.abs(x) >= 1000) return x.toFixed(0);
+      return x.toFixed(2);
+    }
+
+    const rows = [
+      { color: ramp[0], label: `0 – 1` },
+      { color: ramp[1], label: `1 – ${fmt(q25)}` },
+      { color: ramp[2], label: `${fmt(q25)} – ${fmt(q50)}` },
+      { color: ramp[3], label: `${fmt(q50)} – ${fmt(q75)}` },
+      { color: ramp[4], label: `${fmt(q75)} – ${fmt(q100)}` },
+    ];
+
+    let html = `
+      <div class="legend-title">
+        <span class="pill">亮度（lux）</span>
+      </div>
+    `;
+    rows.forEach(row => {
+      html += `
+        <div class="legend-row">
+          <span class="legend-color" style="background:${row.color};"></span>
+          <span>${row.label}</span>
+        </div>
+      `;
+    });
+
+    div.innerHTML = html;
+    return div;
+  };
+  brightnessLegend.addTo(map);
+
+
+  // --- (2) 道路安全框線（中層） ---
+  const geoSafety = await loadJSON(assetUrl('/data/hex_hit_with_safe.geojson'));
+
+  // ===== refreshed safety colors (soft, low-sat) =====
+  function safetyColor(s) {
+    if (s === 1) return '#7bcfa1';  // soft green
+    if (s === 2) return '#e6c07a';  // soft amber
+    if (s === 3) return '#e08a8a';  // soft red
+    return '#8aa2d6';              // soft blue
+  }
+
+  const safetyHexLayer = L.geoJSON(geoSafety, {
+    pane: 'safetyPane',
+    style: f => {
+      const s = Number(f.properties?.safe_worst);
+      return {
+        color: safetyColor(s),
+        weight: 1.05,
+        opacity: 0.9,
+        fillOpacity: 0,
+        fill: false
+      };
+    },
+    onEachFeature: (feature, layer) => {
+      const id = feature.properties?.id ?? '(無 ID)';
+      const sWorst = feature.properties?.safe_worst;
+      const sMean = feature.properties?.safe_mean;
+      layer.bindPopup(`
+        <div style="font:12px/1.5 system-ui,sans-serif;">
+          <b>Hex ID</b>：${id}<br/>
+          <b>safe_worst</b>：${sWorst}<br/>
+          <b>safe_mean</b>：${(sMean!=null)?Number(sMean).toFixed(2):'NA'}
+        </div>
+      `);
+    }
+  });
+
+  addLayerToggle('boundaryLayers', {
+    label: '道路安全框線',
+    layer: safetyHexLayer,
+    checked: true,
+    swatchColor: '#7bcfa1'
+  });
+
+
+  // --- (3) 光害控制區（最下層） ---
+  const geoProtect = await loadJSON(assetUrl('/data/protect_square_4326.geojson'));
+
+  // ===== refreshed protect area (soft lavender) =====
+  const protectLayer = L.geoJSON(geoProtect, {
+    pane: 'protectPane',
+    style: {
+      color: '#b79af5',
+      fillColor: '#b79af5',
+      fillOpacity: 0.22,
+      weight: 0
+    }
+  });
+
+  addLayerToggle('boundaryLayers', {
+    label: '光害控制區',
+    layer: protectLayer,
+    checked: true,
+    swatchColor: '#b79af5'
+  });
+
+})();
+</script>
+</body>
+</html>

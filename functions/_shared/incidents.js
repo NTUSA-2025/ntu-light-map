@@ -1,0 +1,72 @@
+export const INCIDENT_TYPES = new Set([
+  "lighting",
+  "traffic",
+  "harassment",
+  "obstacle",
+  "other",
+]);
+
+export function validateIncidentInput(input) {
+  const lat = Number(input?.lat);
+  const lng = Number(input?.lng);
+  const hexId = Number(input?.hex_id);
+  const type = String(input?.type || "");
+  const description = String(input?.description || "").trim();
+
+  const errors = {};
+  if (!Number.isInteger(hexId) || hexId <= 0) {
+    errors.hex_id = "invalid_hex_id";
+  }
+  if (!Number.isFinite(lat) || lat < 25.01 || lat > 25.026) {
+    errors.lat = "lat_out_of_bounds";
+  }
+  if (!Number.isFinite(lng) || lng < 121.53 || lng > 121.549) {
+    errors.lng = "lng_out_of_bounds";
+  }
+  if (!INCIDENT_TYPES.has(type)) {
+    errors.type = "invalid_type";
+  }
+  if (description.length < 1 || description.length > 300) {
+    errors.description = "description_length";
+  }
+
+  if (Object.keys(errors).length > 0) {
+    return { ok: false, errors };
+  }
+
+  return {
+    ok: true,
+    incident: {
+      hex_id: hexId,
+      lat,
+      lng,
+      type,
+      description,
+    },
+  };
+}
+
+export function clientIp(request) {
+  const forwarded = request.headers.get("x-forwarded-for");
+  return request.headers.get("cf-connecting-ip") || forwarded?.split(",")[0]?.trim() || "unknown";
+}
+
+export async function hashValue(value, salt = "") {
+  const data = new TextEncoder().encode(`${salt}:${value}`);
+  const digest = await crypto.subtle.digest("SHA-256", data);
+  return Array.from(new Uint8Array(digest))
+    .map((byte) => byte.toString(16).padStart(2, "0"))
+    .join("");
+}
+
+export function publicIncident(row) {
+  return {
+    id: row.id,
+    hex_id: row.hex_id,
+    lat: row.lat,
+    lng: row.lng,
+    type: row.type,
+    description: row.description,
+    created_at: row.created_at,
+  };
+}

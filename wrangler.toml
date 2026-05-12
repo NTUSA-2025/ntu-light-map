@@ -1,0 +1,15 @@
+name = "ntu-light-map"
+compatibility_date = "2026-05-11"
+pages_build_output_dir = "."
+
+[[d1_databases]]
+binding = "DB"
+database_name = "ntu-light-map"
+database_id = "94ce1432-f3e9-4f60-9cd3-01c3879e130b"
+migrations_dir = "migrations"
+
+[vars]
+SMTP_HOST = "smtp.gmail.com"
+SMTP_PORT = "465"
+SMTP_USER = "light-map@ntusa.ntu.edu.tw"
+SMTP_FROM = "light-map@ntusa.ntu.edu.tw"

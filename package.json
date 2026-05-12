@@ -1,0 +1,12 @@
+{
+  "name": "ntu-light-map",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "npx wrangler pages dev . --port 8788",
+    "dev:auth": "npx wrangler pages dev . --port 8788",
+    "data:report-hexes": "node scripts/generate_report_hexes.mjs",
+    "d1:migrate:local": "npx wrangler d1 migrations apply ntu-light-map --local",
+    "d1:migrate:remote": "npx wrangler d1 migrations apply ntu-light-map --remote"
+  }
+}

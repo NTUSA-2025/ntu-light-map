@@ -8,7 +8,7 @@ const EXTRA_HEX_PATHS = [
   "data/hex_hit_with_safe.geojson",
   "data/merge_sur_zhoushan.geojson",
 ];
-const OUTPUT_PATH = "data/report_hex_4326.geojson";
+const OUTPUT_PATH = "data/report_hex_cells_4326.geojson";
 
 function toMercator([lon, lat]) {
   return [
@@ -240,7 +240,7 @@ for (const path of EXTRA_HEX_PATHS) {
 const features = [...featureById.values()];
 const output = {
   type: "FeatureCollection",
-  name: "report_hex_4326",
+  name: "report_hex_cells_4326",
   crs: areaGeojson.crs,
   features: features.sort((a, b) => a.properties.id - b.properties.id),
 };

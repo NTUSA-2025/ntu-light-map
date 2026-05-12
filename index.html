@@ -424,7 +424,7 @@
     </div>
 
     <div id="reportSection" class="incident-section hidden">
-      <div id="incidentStatus" class="incident-status">請在地圖上點選六邊形</div>
+      <div id="incidentStatus" class="incident-status">請在地圖上點選回報區</div>
       <label class="incident-field">
         事件類型
         <select id="incidentType" required>
@@ -607,7 +607,7 @@ let reportHexLayer = null;
 let selectedHexLayer = null;
 let selectedHex = null;
 let allIncidents = [];
-const hexFeatureById = new Map();
+const reportHexFeatureById = new Map();
 
 addLayerToggle('dataLayers', {
   label: '安全事件回報',
@@ -687,7 +687,7 @@ function selectReportHex(feature, layer) {
     }
   }).addTo(map);
 
-  setIncidentStatus(`已選 Hex ${id}`, 'ok');
+  setIncidentStatus(`已選回報區 ${id}`, 'ok');
   updateIncidentSubmitState();
 }
 
@@ -699,7 +699,7 @@ function closeIncidentDialog() {
   incidentDescription.value = '';
   authCode.value = '';
   incidentSubmit.disabled = true;
-  setIncidentStatus('請在地圖上點選六邊形');
+  setIncidentStatus('請在地圖上點選回報區');
   if (selectedHexLayer) {
     selectedHexLayer.remove();
     selectedHexLayer = null;
@@ -711,7 +711,7 @@ function closeIncidentDialog() {
 
 function openIncidentDialog() {
   incidentDialog.classList.remove('hidden');
-  setIncidentStatus('請在地圖上點選六邊形');
+  setIncidentStatus('請在地圖上點選回報區');
   if (authSession?.authenticated) showReportSection();
   else showAuthSection();
 }
@@ -737,15 +737,15 @@ function renderIncidentHexes() {
   incidentHexLayer.clearLayers();
   const grouped = new Map();
   allIncidents.forEach(incident => {
-    if (!Number.isInteger(Number(incident.hex_id))) return;
-    const key = Number(incident.hex_id);
+    if (!Number.isInteger(Number(incident.report_hex_id))) return;
+    const key = Number(incident.report_hex_id);
     const list = grouped.get(key) || [];
     list.push(incident);
     grouped.set(key, list);
   });
 
-  grouped.forEach((incidents, hexId) => {
-    const feature = hexFeatureById.get(hexId);
+  grouped.forEach((incidents, reportHexId) => {
+    const feature = reportHexFeatureById.get(reportHexId);
     if (!feature) return;
 
     const latest = incidents[0];
@@ -771,7 +771,7 @@ function renderIncidentHexes() {
 
     layer.bindPopup(`
       <div style="font:12px/1.5 system-ui,sans-serif; min-width:180px;">
-        <b>Hex ${hexId}</b><br/>
+        <b>回報區 ${reportHexId}</b><br/>
         回報數：${incidents.length}
         ${rows}
       </div>
@@ -792,7 +792,7 @@ async function loadReportHexes() {
   const geo = await loadJSON(assetUrl('/data/report_hex_4326.geojson'));
   geo.features.forEach(feature => {
     const id = Number(feature.properties?.id);
-    if (Number.isInteger(id)) hexFeatureById.set(id, feature);
+    if (Number.isInteger(id)) reportHexFeatureById.set(id, feature);
   });
 
   reportHexLayer = L.geoJSON(geo, {
@@ -888,7 +888,7 @@ authVerifyCode.onclick = async () => {
     authSession = await response.json();
     setAuthStatus('驗證完成', 'ok');
     showReportSection();
-    setIncidentStatus('請在地圖上點選六邊形');
+    setIncidentStatus('請在地圖上點選回報區');
   } catch {
     setAuthStatus('驗證失敗', 'error');
   } finally {
@@ -900,7 +900,7 @@ incidentForm.addEventListener('submit', async event => {
   event.preventDefault();
   if (reportSection.classList.contains('hidden')) return;
   if (!selectedHex) {
-    setIncidentStatus('請先點選六邊形', 'error');
+    setIncidentStatus('請先點選回報區', 'error');
     return;
   }
 
@@ -915,7 +915,7 @@ incidentForm.addEventListener('submit', async event => {
         accept: 'application/json'
       },
       body: JSON.stringify({
-        hex_id: selectedHex.id,
+        report_hex_id: selectedHex.id,
         lat: selectedHex.center.lat,
         lng: selectedHex.center.lng,
         type: incidentType.value,

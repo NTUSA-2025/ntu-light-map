@@ -25,7 +25,7 @@
       --text-mid:    rgba(255,255,255,0.50);
       --text-lo:     rgba(255,255,255,0.28);
       --dock-w:      52px;
-      --panel-w:     240px;
+      --panel-w:     280px;
     }
 
     html, body {
@@ -125,32 +125,32 @@
     #panel.closed { width: 0; }
 
     .panel-head {
-      padding: 16px 14px 12px;
+      padding: 22px 20px 16px;
       border-bottom: 0.5px solid var(--border);
       flex-shrink: 0;
     }
     .panel-head-title {
       color: var(--text-hi);
-      font-size: 12px;
+      font-size: 1.25rem;
       font-weight: 500;
-      margin-bottom: 3px;
+      margin-bottom: 8px;
       white-space: nowrap;
     }
     .panel-head-sub {
       color: var(--text-lo);
-      font-size: 10px;
+      font-size: 0.875rem;
       font-family: 'DM Mono', monospace;
       white-space: nowrap;
     }
 
     .panel-body {
-      padding: 10px;
+      padding: 16px 18px;
       overflow-y: auto;
       overflow-x: hidden;
       flex: 1;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 14px;
     }
     .panel-body::-webkit-scrollbar { width: 3px; }
     .panel-body::-webkit-scrollbar-track { background: transparent; }
@@ -161,52 +161,52 @@
       background: var(--bg-card);
       border: 0.5px solid var(--border);
       border-radius: 10px;
-      padding: 9px 10px;
+      padding: 16px 18px;
     }
-    .stat-label { color: var(--text-lo); font-size: 10px; margin-bottom: 5px; white-space: nowrap; }
+    .stat-label { color: var(--text-lo); font-size: 1rem; margin-bottom: 10px; white-space: nowrap; }
     .stat-val {
       color: var(--text-hi);
-      font-size: 20px;
+      font-size: 2rem;
       font-weight: 500;
       font-family: 'DM Mono', monospace;
       line-height: 1;
     }
-    .stat-unit { font-size: 10px; color: var(--text-mid); font-weight: 400; margin-left: 2px; }
+    .stat-unit { font-size: 1rem; color: var(--text-mid); font-weight: 400; margin-left: 4px; }
 
     .block {
       background: var(--bg-card);
       border: 0.5px solid var(--border);
       border-radius: 10px;
-      padding: 10px;
+      padding: 16px 18px;
     }
     .block-label {
       color: var(--text-lo);
-      font-size: 10px;
-      margin-bottom: 9px;
+      font-size: 1rem;
+      margin-bottom: 16px;
       text-transform: uppercase;
       letter-spacing: 0.5px;
     }
 
-    .bar-row { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+    .bar-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
     .bar-row:last-child { margin-bottom: 0; }
-    .bar-name { color: var(--text-mid); font-size: 10px; width: 38px; flex-shrink: 0; text-align: right; white-space: nowrap; }
-    .bar-track { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+    .bar-name { color: var(--text-mid); font-size: 0.9375rem; width: 48px; flex-shrink: 0; text-align: right; white-space: nowrap; }
+    .bar-track { flex: 1; height: 8px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
     .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
-    .bar-num { color: var(--text-lo); font-size: 10px; font-family: 'DM Mono', monospace; width: 20px; text-align: right; }
+    .bar-num { color: var(--text-lo); font-size: 0.9375rem; font-family: 'DM Mono', monospace; width: 28px; text-align: right; }
 
-    .lrow { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+    .lrow { display: flex; align-items: center; gap: 12px; margin-bottom: 11px; }
     .lrow:last-child { margin-bottom: 0; }
-    .lswatch { width: 24px; height: 7px; border-radius: 2px; flex-shrink: 0; }
-    .ltxt { color: var(--text-mid); font-size: 10px; font-family: 'DM Mono', monospace; }
+    .lswatch { width: 36px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .ltxt { color: var(--text-mid); font-size: 0.9375rem; font-family: 'DM Mono', monospace; }
 
-    .layer-item { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; }
-    .layer-left { display: flex; align-items: center; gap: 7px; }
-    .layer-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
-    .layer-name { color: var(--text-mid); font-size: 11px; white-space: nowrap; }
+    .layer-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; }
+    .layer-left { display: flex; align-items: center; gap: 12px; }
+    .layer-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
+    .layer-name { color: var(--text-mid); font-size: 1rem; white-space: nowrap; }
 
     .tog {
-      width: 28px;
-      height: 15px;
+      width: 34px;
+      height: 18px;
       border-radius: 999px;
       background: var(--coral);
       position: relative;
@@ -218,8 +218,8 @@
     .tog::after {
       content: '';
       position: absolute;
-      width: 11px;
-      height: 11px;
+      width: 14px;
+      height: 14px;
       border-radius: 50%;
       background: #fff;
       top: 2px;

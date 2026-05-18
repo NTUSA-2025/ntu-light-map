@@ -5,7 +5,8 @@
   "scripts": {
     "dev": "npx wrangler pages dev . --port 8788",
     "dev:auth": "npx wrangler pages dev . --port 8788",
-    "data:report-hexes": "node scripts/generate_report_hexes.mjs",
+    "data:report-hexes": "node scripts/generate_report_hexes.mjs && node scripts/generate_report_hex_clusters.mjs",
+    "data:report-clusters": "node scripts/generate_report_hex_clusters.mjs",
     "d1:migrate:local": "npx wrangler d1 migrations apply ntu-light-map --local",
     "d1:migrate:remote": "npx wrangler d1 migrations apply ntu-light-map --remote"
   }

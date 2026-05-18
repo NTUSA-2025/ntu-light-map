@@ -1,3 +1,5 @@
+import { REPORT_HEX_IDS } from "./reportHexIds.js";
+
 export const INCIDENT_TYPES = new Set([
   "lighting",
   "traffic",
@@ -9,13 +11,13 @@ export const INCIDENT_TYPES = new Set([
 export function validateIncidentInput(input) {
   const lat = Number(input?.lat);
   const lng = Number(input?.lng);
-  const hexId = Number(input?.hex_id);
+  const reportHexId = Number(input?.report_hex_id);
   const type = String(input?.type || "");
   const description = String(input?.description || "").trim();
 
   const errors = {};
-  if (!Number.isInteger(hexId) || hexId <= 0) {
-    errors.hex_id = "invalid_hex_id";
+  if (!Number.isInteger(reportHexId) || !REPORT_HEX_IDS.has(reportHexId)) {
+    errors.report_hex_id = "invalid_report_hex_id";
   }
   if (!Number.isFinite(lat) || lat < 25.01 || lat > 25.026) {
     errors.lat = "lat_out_of_bounds";
@@ -37,7 +39,7 @@ export function validateIncidentInput(input) {
   return {
     ok: true,
     incident: {
-      hex_id: hexId,
+      report_hex_id: reportHexId,
       lat,
       lng,
       type,
@@ -79,7 +81,7 @@ export async function hashValue(value, salt) {
 export function publicIncident(row) {
   return {
     id: row.id,
-    hex_id: row.hex_id,
+    report_hex_id: row.report_hex_id,
     lat: row.lat,
     lng: row.lng,
     type: row.type,

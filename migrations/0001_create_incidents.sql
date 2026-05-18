@@ -2,7 +2,7 @@ CREATE TABLE IF NOT EXISTS incidents (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   lat REAL NOT NULL,
   lng REAL NOT NULL,
-  type TEXT NOT NULL CHECK (type IN ('lighting', 'traffic', 'harassment', 'obstacle', 'other')),
+  type TEXT NOT NULL CHECK (type IN ('harassment','accident')),
   description TEXT NOT NULL CHECK (length(description) BETWEEN 1 AND 300),
   status TEXT NOT NULL DEFAULT 'public' CHECK (status IN ('public', 'hidden')),
   reporter_email_hash TEXT NOT NULL,

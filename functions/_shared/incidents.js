@@ -1,9 +1,6 @@
 export const INCIDENT_TYPES = new Set([
-  "lighting",
-  "traffic",
   "harassment",
-  "obstacle",
-  "other",
+  "accident",
 ]);
 
 export function validateIncidentInput(input) {

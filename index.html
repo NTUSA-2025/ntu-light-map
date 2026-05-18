@@ -428,11 +428,8 @@
       <label class="incident-field">
         事件類型
         <select id="incidentType" required>
-          <option value="lighting">照明不足</option>
-          <option value="traffic">交通風險</option>
-          <option value="harassment">騷擾或跟蹤</option>
-          <option value="obstacle">路面或障礙</option>
-          <option value="other">其他</option>
+          <option value="accident">事故</option>
+          <option value="harassment">騷擾</option>
         </select>
       </label>
       <label class="incident-field">
@@ -577,11 +574,8 @@ function addLayerToggle(containerId, {
 
 // ========== 4) 安全事件回報 ==========
 const incidentTypeMeta = {
-  lighting: { label: '照明不足', color: '#f7d96c' },
-  traffic: { label: '交通風險', color: '#ff9b6a' },
-  harassment: { label: '騷擾或跟蹤', color: '#ef718d' },
-  obstacle: { label: '路面或障礙', color: '#b58cff' },
-  other: { label: '其他', color: '#6ee7d2' }
+  accident: { label: '事故', color: '#ff9b6a' },
+  harassment: { label: '騷擾', color: '#ef718d' }
 };
 
 const incidentHexLayer = L.layerGroup();
@@ -653,11 +647,11 @@ function escapeHtml(value) {
 }
 
 function incidentLabel(type) {
-  return incidentTypeMeta[type]?.label || incidentTypeMeta.other.label;
+  return incidentTypeMeta[type]?.label || incidentTypeMeta.accident.label;
 }
 
 function incidentColor(type) {
-  return incidentTypeMeta[type]?.color || incidentTypeMeta.other.color;
+  return incidentTypeMeta[type]?.color || incidentTypeMeta.accident.color;
 }
 
 function updateIncidentSubmitState() {

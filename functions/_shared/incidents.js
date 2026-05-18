@@ -1,11 +1,8 @@
 import { REPORT_HEX_IDS } from "./reportHexIds.js";
 
 export const INCIDENT_TYPES = new Set([
-  "lighting",
-  "traffic",
+  "accident",
   "harassment",
-  "obstacle",
-  "other",
 ]);
 
 export function validateIncidentInput(input) {

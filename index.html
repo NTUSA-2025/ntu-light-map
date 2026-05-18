@@ -3,598 +3,650 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>台大夜間亮度地圖 — Modern Demo</title>
+  <title>台大夜間亮度地圖</title>
 
-  <!-- Leaflet CDN -->
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
-    crossorigin=""
-  />
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
-    crossorigin=""
-  ></script>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" crossorigin=""></script>
 
   <style>
-    :root{
-      /* ====== refreshed, low-saturation night palette ====== */
-      --bg: rgba(10, 14, 24, .72);
-      --bg-strong: rgba(10, 14, 24, .92);
-      --stroke: rgba(148, 163, 184, .14);
-      --text: #e6e9ef;
-      --muted: #9aa4b2;
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
 
-      --accent: #7aa2ff;   /* cool blue-violet */
-      --accent-2: #6ee7d2; /* soft mint/teal */
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-      --radius: 14px;
-      --shadow: 0 8px 24px rgba(0,0,0,.45);
-      --font: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial;
+    :root {
+      --coral:       #D85A30;
+      --coral-light: #F0997B;
+      --coral-dim:   rgba(216,90,48,0.15);
+      --bg-shell:    #08101e;
+      --bg-panel:    #0c1628;
+      --bg-card:     rgba(255,255,255,0.04);
+      --border:      rgba(255,255,255,0.07);
+      --text-hi:     rgba(255,255,255,0.88);
+      --text-mid:    rgba(255,255,255,0.50);
+      --text-lo:     rgba(255,255,255,0.28);
+      --dock-w:      52px;
+      --panel-w:     240px;
     }
 
     html, body {
       height: 100%;
-      margin: 0;
-      background: #000;
-      font-family: var(--font);
-    }
-    #map {
-      height: 100vh;
-      width: 100vw;
+      background: var(--bg-shell);
+      font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+      overflow: hidden;
     }
 
-    /* ===== Leaflet controls reset a bit ===== */
-    .leaflet-control { box-shadow: none; }
-    .leaflet-bar a {
-      background: rgba(12,16,26,.75);
-      color: #eef2f7;
-      border: 1px solid rgba(148,163,184,.12);
-    }
-    .leaflet-bar a:hover {
-      background: rgba(20,26,40,.9);
-    }
-
-    /* ===== Title pill (top-left) ===== */
-    .map-title {
-      padding: 10px 12px;
-      background: var(--bg);
-      color: var(--text);
-      border-radius: 999px;
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: .3px;
-      border: 1px solid var(--stroke);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: var(--shadow);
-      display: inline-flex;
-      align-items: center;
-      gap: 8px;
-    }
-    .map-title .dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: radial-gradient(circle at 30% 30%, #fff, var(--accent));
-      box-shadow: 0 0 8px rgba(122,162,255,.6);
-    }
-
-    /* ===== Legend (bottom-right) ===== */
-    .legend-box {
-      padding: 10px 12px;
-      background: var(--bg);
-      color: var(--text);
-      border-radius: var(--radius);
-      font-size: 12px;
-      line-height: 1.35;
-      border: 1px solid var(--stroke);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      box-shadow: var(--shadow);
-      min-width: 140px;
-    }
-    .legend-row {
+    #shell {
       display: flex;
-      align-items: center;
-      gap: 8px;
-      margin: 5px 0;
-    }
-    .legend-color {
-      width: 14px;
-      height: 14px;
-      border-radius: 4px;
-      border: 1px solid rgba(255,255,255,.12);
-      flex-shrink: 0;
-    }
-    .legend-title{
-      font-weight: 700;
-      margin-bottom: 6px;
-      display:flex; align-items:center; gap:6px;
-    }
-    .legend-title .pill{
-      font-size: 10px; color:#0b1020; background:#eef2f7;
-      padding:2px 6px; border-radius:999px; font-weight:800;
+      width: 100vw;
+      height: 100vh;
     }
 
-    /* ===== Sidebar layer panel (right) ===== */
-    .layers-panel {
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      width: 260px;
-      max-height: calc(100vh - 32px);
-      background: var(--bg);
-      border: 1px solid var(--stroke);
-      border-radius: 16px;
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      box-shadow: var(--shadow);
+    #dock {
+      width: var(--dock-w);
+      background: var(--bg-panel);
+      border-right: 0.5px solid var(--border);
       display: flex;
       flex-direction: column;
-      overflow: hidden;
-      transition: transform .25s ease, opacity .25s ease;
+      align-items: center;
+      padding: 14px 0;
+      gap: 2px;
+      flex-shrink: 0;
+      z-index: 500;
+    }
+
+    .dock-logo {
+      width: 30px;
+      height: 30px;
+      border-radius: 9px;
+      background: var(--coral);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 14px;
+    }
+    .dock-logo svg { width: 15px; height: 15px; fill: none; stroke: #fff; stroke-width: 2; }
+
+    .dock-btn {
+      position: relative;
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      color: var(--text-mid);
+      font-size: 17px;
+      border: none;
+      background: transparent;
+      transition: background 0.15s, color 0.15s;
+    }
+    .dock-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-hi); }
+    .dock-btn.active { background: var(--coral-dim); color: var(--coral-light); }
+
+    .dock-tip {
+      position: absolute;
+      left: calc(100% + 10px);
+      top: 50%;
+      transform: translateY(-50%);
+      background: #1a2640;
+      color: var(--text-hi);
+      font-size: 11px;
+      padding: 4px 9px;
+      border-radius: 6px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+      border: 0.5px solid rgba(255,255,255,0.1);
       z-index: 9999;
     }
-    .layers-panel.collapsed{
-      transform: translateX(110%);
-      opacity: 0;
-      pointer-events: none;
-    }
-    .layers-header{
-      padding: 10px 12px;
-      border-bottom: 1px solid var(--stroke);
-      display:flex; align-items:center; justify-content:space-between;
-      background: linear-gradient(180deg, var(--bg-strong), transparent);
-    }
-    .layers-header .title{
-      font-size: 13px; font-weight: 800; color: var(--text);
-      display:flex; align-items:center; gap:8px;
-    }
-    .layers-header .title .icon{
-      width: 18px; height: 18px; border-radius: 6px;
-      background: linear-gradient(135deg, #7aa2ff, #6ee7d2);
-      box-shadow: 0 0 10px rgba(122,162,255,.35);
-    }
-    .layers-header button{
-      cursor: pointer;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      border-radius: 10px;
-      padding: 6px 8px;
-      font-size: 12px;
-      font-weight: 700;
-      transition: background .2s ease, transform .06s ease;
-    }
-    .layers-header button:hover{ background: rgba(255,255,255,.12); }
-    .layers-header button:active{ transform: translateY(1px); }
+    .dock-btn:hover .dock-tip { opacity: 1; }
 
-    .layers-body{
-      padding: 8px;
-      overflow: auto;
+    .dock-div {
+      width: 22px;
+      height: 0.5px;
+      background: var(--border);
+      margin: 6px 0;
     }
+    .dock-spacer { flex: 1; }
 
-    /* Accordion */
-    .acc {
-      border-radius: 12px;
-      border: 1px solid var(--stroke);
+    #panel {
+      width: var(--panel-w);
+      background: var(--bg-panel);
+      border-right: 0.5px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
       overflow: hidden;
-      margin-bottom: 8px;
-      background: rgba(15, 23, 42, .55);
+      transition: width 0.25s cubic-bezier(.4,0,.2,1);
+      z-index: 400;
     }
-    .acc-summary{
-      list-style: none;
-      cursor: pointer;
+    #panel.closed { width: 0; }
+
+    .panel-head {
+      padding: 16px 14px 12px;
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    .panel-head-title {
+      color: var(--text-hi);
+      font-size: 12px;
+      font-weight: 500;
+      margin-bottom: 3px;
+      white-space: nowrap;
+    }
+    .panel-head-sub {
+      color: var(--text-lo);
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+      white-space: nowrap;
+    }
+
+    .panel-body {
+      padding: 10px;
+      overflow-y: auto;
+      overflow-x: hidden;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .panel-body::-webkit-scrollbar { width: 3px; }
+    .panel-body::-webkit-scrollbar-track { background: transparent; }
+    .panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
+    .stat-grid { display: grid; grid-template-columns: 1fr; gap: 6px; }
+    .stat-card {
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
       padding: 9px 10px;
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--text);
-      display:flex; align-items:center; justify-content:space-between;
-      user-select: none;
     }
-    .acc-summary::-webkit-details-marker{ display:none; }
-    .acc-summary .chev{
-      color: var(--muted);
-      transition: transform .2s ease;
-      font-weight: 900;
-    }
-    details[open] .acc-summary .chev{
-      transform: rotate(90deg);
-    }
-    .acc-content{
-      padding: 6px 8px 8px 8px;
-      border-top: 1px solid var(--stroke);
-      display:flex; flex-direction:column; gap:4px;
-      font-size: 12px;
-    }
-
-    /* Checkbox rows */
-    .layer-row{
-      display:flex; align-items:center; justify-content:space-between;
-      padding: 6px 6px;
-      border-radius: 8px;
-      transition: background .15s ease;
-    }
-    .layer-row:hover{ background: rgba(255,255,255,.05); }
-
-    .layer-left{
-      display:flex; align-items:center; gap:8px; color: var(--text);
-    }
-    .swatch{
-      width: 10px; height: 10px; border-radius: 3px; opacity: .9;
-      border: 1px solid rgba(255,255,255,.2);
-    }
-    .layer-row input[type="checkbox"]{
-      width: 16px; height: 16px; accent-color: #8fb0ff;
-      cursor: pointer;
-    }
-    .layer-desc{
-      font-size: 11px; color: var(--muted);
-      margin-left: 18px; margin-top: -2px;
-    }
-
-    /* Floating button to open panel */
-    .panel-fab{
-      position: fixed;
-      top: 16px;
-      right: 16px;
-      z-index: 9998;
-      background: var(--bg);
-      border: 1px solid var(--stroke);
-      border-radius: 999px;
-      padding: 8px 10px;
-      font-size: 12px;
-      font-weight: 800;
-      color: var(--text);
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-      display:none;
-      align-items:center; gap:6px;
-    }
-    .panel-fab .mini{
-      width:8px; height:8px; border-radius:50%;
-      background: var(--accent);
-      box-shadow: 0 0 8px rgba(122,162,255,.7);
-    }
-    .panel-fab.show{ display:inline-flex; }
-
-    .incident-fab{
-      position: fixed;
-      left: 16px;
-      bottom: 16px;
-      z-index: 9998;
-      border: 1px solid rgba(110, 231, 210, .35);
-      background: rgba(12, 18, 28, .88);
-      color: var(--text);
-      border-radius: 999px;
-      padding: 10px 14px;
-      font-size: 13px;
-      font-weight: 800;
-      box-shadow: var(--shadow);
-      cursor: pointer;
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    .incident-fab:hover{ background: rgba(19, 30, 43, .94); }
-
-    .incident-dialog{
-      position: fixed;
-      left: 16px;
-      bottom: 70px;
-      z-index: 10000;
-      width: min(320px, calc(100vw - 32px));
-      background: var(--bg-strong);
-      color: var(--text);
-      border: 1px solid var(--stroke);
-      border-radius: var(--radius);
-      box-shadow: var(--shadow);
-      backdrop-filter: blur(12px);
-      -webkit-backdrop-filter: blur(12px);
-      overflow: hidden;
-    }
-    .incident-dialog.hidden{ display:none; }
-    .incident-header{
-      padding: 11px 12px;
-      border-bottom: 1px solid var(--stroke);
-      display:flex;
-      align-items:center;
-      justify-content:space-between;
-      gap: 12px;
-    }
-    .incident-header strong{
-      font-size: 13px;
-      line-height: 1.25;
-    }
-    .incident-close{
-      cursor: pointer;
-      border: 1px solid var(--stroke);
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-      border-radius: 10px;
-      width: 32px;
-      height: 32px;
-      font-size: 18px;
+    .stat-label { color: var(--text-lo); font-size: 10px; margin-bottom: 5px; white-space: nowrap; }
+    .stat-val {
+      color: var(--text-hi);
+      font-size: 20px;
+      font-weight: 500;
+      font-family: 'DM Mono', monospace;
       line-height: 1;
     }
-    .incident-body{
-      padding: 12px;
-      display:flex;
-      flex-direction:column;
-      gap: 10px;
-      font-size: 12px;
-    }
-    .incident-status{
-      min-height: 18px;
-      color: var(--muted);
-      line-height: 1.45;
-    }
-    .incident-status.error{ color:#f4a5a5; }
-    .incident-status.ok{ color:#8ee0bd; }
-    .incident-field{
-      display:flex;
-      flex-direction:column;
-      gap: 5px;
-      color: var(--muted);
-      font-weight: 700;
-    }
-    .incident-field input,
-    .incident-field select,
-    .incident-field textarea{
-      border: 1px solid rgba(148,163,184,.22);
-      background: rgba(3, 7, 18, .62);
-      color: var(--text);
+    .stat-unit { font-size: 10px; color: var(--text-mid); font-weight: 400; margin-left: 2px; }
+
+    .block {
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
       border-radius: 10px;
-      font: 13px/1.4 var(--font);
-      padding: 9px 10px;
-      outline: none;
+      padding: 10px;
     }
-    .incident-section.hidden{ display:none; }
-    .incident-field textarea{
-      min-height: 78px;
-      resize: vertical;
-    }
-    .incident-actions{
-      display:flex;
-      gap: 8px;
-      justify-content:flex-end;
-    }
-    .incident-actions button{
-      cursor: pointer;
-      border: 1px solid var(--stroke);
-      border-radius: 10px;
-      padding: 8px 10px;
-      font-size: 12px;
-      font-weight: 800;
-    }
-    .incident-secondary{
-      background: rgba(255,255,255,.06);
-      color: var(--text);
-    }
-    .incident-primary{
-      background: var(--accent-2);
-      color: #07131a;
-    }
-    .incident-primary:disabled{
-      opacity: .5;
-      cursor: not-allowed;
+    .block-label {
+      color: var(--text-lo);
+      font-size: 10px;
+      margin-bottom: 9px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
     }
 
-    @media (max-width: 640px){
-      .layers-panel{ width: 220px; }
-      .incident-fab{ left: 12px; bottom: 12px; }
-      .incident-dialog{ left: 12px; bottom: 62px; width: calc(100vw - 24px); }
+    .bar-row { display: flex; align-items: center; gap: 7px; margin-bottom: 6px; }
+    .bar-row:last-child { margin-bottom: 0; }
+    .bar-name { color: var(--text-mid); font-size: 10px; width: 38px; flex-shrink: 0; text-align: right; white-space: nowrap; }
+    .bar-track { flex: 1; height: 5px; background: rgba(255,255,255,0.06); border-radius: 3px; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
+    .bar-num { color: var(--text-lo); font-size: 10px; font-family: 'DM Mono', monospace; width: 20px; text-align: right; }
+
+    .lrow { display: flex; align-items: center; gap: 8px; margin-bottom: 5px; }
+    .lrow:last-child { margin-bottom: 0; }
+    .lswatch { width: 24px; height: 7px; border-radius: 2px; flex-shrink: 0; }
+    .ltxt { color: var(--text-mid); font-size: 10px; font-family: 'DM Mono', monospace; }
+
+    .layer-item { display: flex; align-items: center; justify-content: space-between; padding: 5px 0; }
+    .layer-left { display: flex; align-items: center; gap: 7px; }
+    .layer-dot { width: 8px; height: 8px; border-radius: 2px; flex-shrink: 0; }
+    .layer-name { color: var(--text-mid); font-size: 11px; white-space: nowrap; }
+
+    .tog {
+      width: 28px;
+      height: 15px;
+      border-radius: 999px;
+      background: var(--coral);
+      position: relative;
+      cursor: pointer;
+      flex-shrink: 0;
+      transition: background 0.2s;
+      border: none;
     }
+    .tog::after {
+      content: '';
+      position: absolute;
+      width: 11px;
+      height: 11px;
+      border-radius: 50%;
+      background: #fff;
+      top: 2px;
+      right: 2px;
+      transition: right 0.2s, left 0.2s;
+    }
+    .tog.off { background: rgba(255,255,255,0.12); }
+    .tog.off::after { right: auto; left: 2px; }
+
+    #map-wrap { flex: 1; position: relative; overflow: hidden; z-index: 1; }
+    #map { width: 100%; height: 100%; }
+
+    .leaflet-control { box-shadow: none !important; }
+    .leaflet-bar { background: transparent !important; border: none !important; }
+    .leaflet-bar a {
+      background: rgba(12,22,40,0.88) !important;
+      color: var(--text-hi) !important;
+      border: 0.5px solid var(--border) !important;
+      width: 28px !important;
+      height: 28px !important;
+      line-height: 28px !important;
+      font-size: 16px !important;
+    }
+    .leaflet-bar a:hover { background: rgba(20,36,60,0.95) !important; }
+    .leaflet-control-zoom { margin: 14px !important; }
+
+    #topbar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+      background: rgba(8,16,30,0.65);
+      border-bottom: 0.5px solid var(--border);
+      z-index: 300;
+      pointer-events: none;
+    }
+    .topbar-title {
+      color: var(--text-hi);
+      font-size: 12px;
+      font-weight: 500;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .topbar-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--coral);
+    }
+    .topbar-meta {
+      color: var(--text-lo);
+      font-size: 10px;
+      font-family: 'DM Mono', monospace;
+    }
+
+    #hex-tooltip {
+      position: absolute;
+      top: 50px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(12,22,40,0.92);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      padding: 6px 14px;
+      color: var(--text-hi);
+      font-size: 11px;
+      font-family: 'DM Mono', monospace;
+      z-index: 400;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.2s;
+      white-space: nowrap;
+    }
+    #hex-tooltip.show { opacity: 1; }
+
+    #inc-fab {
+      position: absolute;
+      bottom: 16px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--coral);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 9px 18px;
+      font-size: 12px;
+      font-weight: 500;
+      font-family: 'DM Sans', sans-serif;
+      cursor: pointer;
+      z-index: 400;
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+      transition: background 0.15s;
+    }
+    #inc-fab:hover { background: #c04e26; }
+    #inc-fab svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 2; fill: none; }
+
+    #inc-dialog {
+      position: absolute;
+      bottom: 62px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: min(320px, 90vw);
+      background: rgba(10,18,32,0.96);
+      border: 0.5px solid rgba(255,255,255,0.12);
+      border-radius: 14px;
+      z-index: 500;
+      overflow: hidden;
+      display: none;
+    }
+    #inc-dialog.show { display: block; }
+
+    .dlg-head {
+      padding: 11px 14px;
+      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .dlg-head-title { color: var(--text-hi); font-size: 12px; font-weight: 500; }
+    .dlg-close {
+      background: rgba(255,255,255,0.07);
+      border: 0.5px solid var(--border);
+      color: var(--text-mid);
+      border-radius: 7px;
+      width: 26px;
+      height: 26px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: 15px;
+    }
+
+    .dlg-body { padding: 12px; display: flex; flex-direction: column; gap: 9px; }
+
+    .dlg-status {
+      font-size: 11px;
+      color: var(--text-mid);
+      padding: 6px 9px;
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-radius: 7px;
+      font-family: 'DM Mono', monospace;
+    }
+    .dlg-status.ok { color: #7bcfa1; }
+    .dlg-status.err { color: var(--coral-light); }
+
+    .dlg-field { display: flex; flex-direction: column; gap: 5px; }
+    .dlg-field label { color: var(--text-lo); font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .dlg-field select,
+    .dlg-field textarea,
+    .dlg-field input {
+      background: rgba(0,0,0,0.35);
+      border: 0.5px solid rgba(255,255,255,0.14);
+      color: var(--text-hi);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      width: 100%;
+    }
+    .dlg-field select option { background: #0c1628; }
+    .dlg-field textarea { min-height: 72px; resize: vertical; }
+    .dlg-field input:focus,
+    .dlg-field select:focus,
+    .dlg-field textarea:focus { border-color: rgba(216,90,48,0.5); }
+
+    .dlg-actions { display: flex; gap: 7px; justify-content: flex-end; }
+    .btn-sec {
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border);
+      color: var(--text-mid);
+      border-radius: 8px;
+      padding: 7px 12px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-pri {
+      background: var(--coral);
+      border: none;
+      color: #fff;
+      border-radius: 8px;
+      padding: 7px 14px;
+      font-size: 12px;
+      font-weight: 500;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-pri:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-pri:not(:disabled):hover { background: #c04e26; }
+
+    .inc-section { display: flex; flex-direction: column; gap: 9px; }
+    .inc-section.hidden { display: none; }
   </style>
 </head>
 <body>
-<div id="map"></div>
-
-<!-- panel open button (only when collapsed) -->
-<button id="panelFab" class="panel-fab">
-  <span class="mini"></span> 圖層
-</button>
-
-<button id="incidentFab" class="incident-fab">＋ 安全事件</button>
-
-<div id="incidentDialog" class="incident-dialog hidden" role="dialog" aria-modal="true" aria-labelledby="incidentTitle">
-  <div class="incident-header">
-    <strong id="incidentTitle">新增安全事件</strong>
-    <button id="incidentClose" class="incident-close" aria-label="關閉">×</button>
-  </div>
-  <form id="incidentForm" class="incident-body">
-    <div id="authSection" class="incident-section hidden">
-      <div id="authStatus" class="incident-status">請使用 NTU email 驗證後回報</div>
-      <label class="incident-field">
-        NTU Email
-        <input id="authEmail" type="email" autocomplete="email" placeholder="name@ntu.edu.tw" />
-      </label>
-      <div class="incident-actions">
-        <button type="button" id="authRequestCode" class="incident-primary">寄送驗證碼</button>
-      </div>
-      <label class="incident-field">
-        驗證碼
-        <input id="authCode" inputmode="numeric" maxlength="6" autocomplete="one-time-code" />
-      </label>
-      <div class="incident-actions">
-        <button type="button" id="authVerifyCode" class="incident-primary">驗證</button>
-      </div>
+<div id="shell">
+  <nav id="dock" aria-label="主導覽">
+    <div class="dock-logo" aria-hidden="true">
+      <svg viewBox="0 0 16 16"><polygon points="8,1 15,5 15,11 8,15 1,11 1,5"/></svg>
     </div>
 
-    <div id="reportSection" class="incident-section hidden">
-      <div id="incidentStatus" class="incident-status">請在地圖上點選回報區</div>
-      <label class="incident-field">
-        事件類型
-        <select id="incidentType" required>
-          <option value="accident">事故</option>
-          <option value="harassment">騷擾</option>
-        </select>
-      </label>
-      <label class="incident-field">
-        描述
-        <textarea id="incidentDescription" maxlength="300" required></textarea>
-      </label>
-      <div class="incident-actions">
-        <button type="button" id="incidentCancel" class="incident-secondary">取消</button>
-        <button type="submit" id="incidentSubmit" class="incident-primary" disabled>送出</button>
+    <button class="dock-btn active" id="btnPanel" aria-label="數據面板">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="10" rx="1"/><rect x="14" y="17" width="7" height="4" rx="1"/>
+      </svg>
+      <span class="dock-tip">數據面板</span>
+    </button>
+
+    <div class="dock-div"></div>
+
+    <button class="dock-btn" id="btnReport" aria-label="回報事件">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
+        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
+      </svg>
+      <span class="dock-tip">回報事件</span>
+    </button>
+
+    <div class="dock-spacer"></div>
+    <div class="dock-div"></div>
+
+    <button class="dock-btn" aria-label="設定">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="3"/>
+        <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
+      </svg>
+      <span class="dock-tip">設定</span>
+    </button>
+  </nav>
+
+  <aside id="panel" aria-label="數據面板">
+    <div class="panel-head">
+      <div class="panel-head-title">台大校園概況</div>
+      <div class="panel-head-sub">NTU Campus · Live</div>
+    </div>
+    <div class="panel-body">
+      <div class="stat-grid">
+        <div class="stat-card">
+          <div class="stat-label">回報事件</div>
+          <div class="stat-val" id="stat-incident-count">0<span class="stat-unit">件</span></div>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">事件類型分佈</div>
+        <div class="bar-row">
+          <span class="bar-name">事故</span>
+          <div class="bar-track"><div class="bar-fill" id="bar-accident" style="width:0%;background:#F0997B;"></div></div>
+          <span class="bar-num" id="bar-accident-num">0</span>
+        </div>
+        <div class="bar-row">
+          <span class="bar-name">騷擾</span>
+          <div class="bar-track"><div class="bar-fill" id="bar-harassment" style="width:0%;background:#ef718d;"></div></div>
+          <span class="bar-num" id="bar-harassment-num">0</span>
+        </div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">亮度圖例（lux）</div>
+        <div class="lrow"><span class="lswatch" style="background:#0b1020;"></span><span class="ltxt">0 - 1</span></div>
+        <div class="lrow"><span class="lswatch" style="background:#1f2a5a;"></span><span class="ltxt">1 - 12</span></div>
+        <div class="lrow"><span class="lswatch" style="background:#2f6f9f;"></span><span class="ltxt">12 - 29</span></div>
+        <div class="lrow"><span class="lswatch" style="background:#6fd0c2;"></span><span class="ltxt">29 - 54</span></div>
+        <div class="lrow"><span class="lswatch" style="background:#f3f6ff;"></span><span class="ltxt">54 +</span></div>
+      </div>
+
+      <div class="block">
+        <div class="block-label">圖層</div>
+        <div class="layer-item">
+          <div class="layer-left">
+            <span class="layer-dot" style="background:#f3f6ff;"></span>
+            <span class="layer-name">實測亮度</span>
+          </div>
+          <button class="tog" id="tog-brightness" aria-label="切換實測亮度圖層"></button>
+        </div>
+        <div class="layer-item">
+          <div class="layer-left">
+            <span class="layer-dot" style="background:#7bcfa1;"></span>
+            <span class="layer-name">道路安全框線</span>
+          </div>
+          <button class="tog" id="tog-safety" aria-label="切換道路安全圖層"></button>
+        </div>
+        <div class="layer-item">
+          <div class="layer-left">
+            <span class="layer-dot" style="background:#D85A30;"></span>
+            <span class="layer-name">安全事件</span>
+          </div>
+          <button class="tog" id="tog-incident" aria-label="切換安全事件圖層"></button>
+        </div>
+        <div class="layer-item">
+          <div class="layer-left">
+            <span class="layer-dot" style="background:#b79af5;"></span>
+            <span class="layer-name">光害控制區</span>
+          </div>
+          <button class="tog" id="tog-protect" aria-label="切換光害控制區圖層"></button>
+        </div>
       </div>
     </div>
-  </form>
-</div>
+  </aside>
 
-<!-- custom layers sidebar -->
-<div id="layersPanel" class="layers-panel">
-  <div class="layers-header">
-    <div class="title">
-      <span class="icon"></span>
-      圖層與樣式
+  <div id="map-wrap">
+    <div id="topbar" aria-hidden="true">
+      <div class="topbar-title">
+        <span class="topbar-dot"></span>
+        台大夜間亮度地圖
+      </div>
+      <div class="topbar-meta">NTU Campus</div>
     </div>
-    <button id="panelClose">收合</button>
-  </div>
 
-  <div class="layers-body">
-    <!-- 只保留可開關的兩類 -->
-    <details class="acc" open>
-      <summary class="acc-summary">
-        亮度圖層 <span class="chev">›</span>
-      </summary>
-      <div class="acc-content" id="dataLayers"></div>
-    </details>
+    <div id="hex-tooltip" role="status" aria-live="polite"></div>
+    <div id="map"></div>
 
-    <details class="acc" open>
-      <summary class="acc-summary">
-        邊界 <span class="chev">›</span>
-      </summary>
-      <div class="acc-content" id="boundaryLayers"></div>
-    </details>
+    <button id="inc-fab" aria-label="回報安全事件">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      回報安全事件
+    </button>
+
+    <div id="inc-dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
+      <div class="dlg-head">
+        <span class="dlg-head-title" id="dlg-title">新增安全事件</span>
+        <button class="dlg-close" id="dlg-close" aria-label="關閉">×</button>
+      </div>
+      <div class="dlg-body">
+        <div class="inc-section" id="auth-section">
+          <div class="dlg-status" id="auth-status">請使用 NTU email 驗證後回報</div>
+          <div class="dlg-field">
+            <label for="auth-email">NTU Email</label>
+            <input id="auth-email" type="email" placeholder="name@ntu.edu.tw" autocomplete="email"/>
+          </div>
+          <div class="dlg-actions">
+            <button class="btn-pri" id="btn-request-code">寄送驗證碼</button>
+          </div>
+          <div class="dlg-field">
+            <label for="auth-code">驗證碼</label>
+            <input id="auth-code" inputmode="numeric" maxlength="6" placeholder="6 位數字" autocomplete="one-time-code"/>
+          </div>
+          <div class="dlg-actions">
+            <button class="btn-pri" id="btn-verify-code">驗證</button>
+          </div>
+        </div>
+
+        <div class="inc-section hidden" id="report-section">
+          <div class="dlg-status" id="report-status">請在地圖上點選回報區</div>
+          <div class="dlg-field">
+            <label for="inc-type">事件類型</label>
+            <select id="inc-type" required>
+              <option value="accident">事故</option>
+              <option value="harassment">騷擾</option>
+            </select>
+          </div>
+          <div class="dlg-field">
+            <label for="inc-desc">描述</label>
+            <textarea id="inc-desc" maxlength="300" required placeholder="請描述事件情況..."></textarea>
+          </div>
+          <div class="dlg-actions">
+            <button class="btn-sec" id="btn-cancel">取消</button>
+            <button class="btn-pri" id="btn-submit" disabled>送出</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
 <script>
-// ========== 1) 初始化地圖 ==========
-const map = L.map('map', { zoomControl: false }).setView([25.0173, 121.5398], 16);
+const map = L.map('map', { zoomControl: true }).setView([25.0173, 121.5398], 16);
 
-// ===== panes: 強制圖層上下順序 =====
-map.createPane('brightnessPane'); // 最上層
-map.getPane('brightnessPane').style.zIndex = 650;
-
-map.createPane('safetyPane');     // 中層
-map.getPane('safetyPane').style.zIndex = 600;
-
-map.createPane('protectPane');    // 下層
-map.getPane('protectPane').style.zIndex = 550;
-
-map.createPane('incidentPane');   // 回報事件
-map.getPane('incidentPane').style.zIndex = 700;
+map.createPane('brightnessPane'); map.getPane('brightnessPane').style.zIndex = 350;
+map.createPane('safetyPane');     map.getPane('safetyPane').style.zIndex = 300;
+map.createPane('protectPane');    map.getPane('protectPane').style.zIndex = 250;
+map.createPane('incidentPane');   map.getPane('incidentPane').style.zIndex = 400;
 
 const ASSET_BASE = location.pathname.startsWith('/ntu_light_map/') ? '/ntu_light_map' : '';
-function assetUrl(path) {
-  return `${ASSET_BASE}${path}`;
+const assetUrl = path => `${ASSET_BASE}${path}`;
+
+L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+  attribution: '&copy; OSM contributors &copy; CARTO',
+  subdomains: 'abcd',
+  maxZoom: 20
+}).addTo(map);
+
+const panel = document.getElementById('panel');
+const btnPanel = document.getElementById('btnPanel');
+const btnReport = document.getElementById('btnReport');
+
+btnPanel.addEventListener('click', () => {
+  const closed = panel.classList.toggle('closed');
+  btnPanel.classList.toggle('active', !closed);
+});
+
+const layerMap = {};
+
+function makeToggle(id, layerKey) {
+  const btn = document.getElementById(id);
+  btn.addEventListener('click', () => {
+    btn.classList.toggle('off');
+    const layer = layerMap[layerKey];
+    if (!layer) return;
+    if (btn.classList.contains('off')) map.removeLayer(layer);
+    else layer.addTo(map);
+  });
 }
 
-// 底圖（常駐，不提供關閉）
-const baseTile = L.tileLayer(
-  'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-  {
-    attribution: '&copy; OSM contributors &copy; CARTO',
-    subdomains: 'abcd',
-    maxZoom: 20
-  }
-).addTo(map);
+makeToggle('tog-brightness', 'brightness');
+makeToggle('tog-safety', 'safety');
+makeToggle('tog-incident', 'incident');
+makeToggle('tog-protect', 'protect');
 
-// ========== 2) 自訂左上角標題 ==========
-const titleControl = L.control({ position: 'topleft' });
-titleControl.onAdd = function () {
-  const div = L.DomUtil.create('div', 'map-title');
-  div.innerHTML = `<span class="dot"></span> 台大夜間亮度地圖`;
-  return div;
-};
-titleControl.addTo(map);
-
-// ====== 3) Custom Layer Panel Logic ======
-const panel = document.getElementById('layersPanel');
-const fab = document.getElementById('panelFab');
-document.getElementById('panelClose').onclick = () => {
-  panel.classList.add('collapsed');
-  fab.classList.add('show');
-};
-fab.onclick = () => {
-  panel.classList.remove('collapsed');
-  fab.classList.remove('show');
-};
-
-// Prevent map drag when interacting panel
-L.DomEvent.disableClickPropagation(panel);
-L.DomEvent.disableScrollPropagation(panel);
-
-// helper to add checkbox row into panel
-function addLayerToggle(containerId, {
-  label,
-  layer,
-  checked = true,
-  swatchColor = '#999',
-  desc = ''
-}) {
-  const container = document.getElementById(containerId);
-
-  const row = document.createElement('div');
-  row.className = 'layer-row';
-
-  const left = document.createElement('div');
-  left.className = 'layer-left';
-
-  const swatch = document.createElement('span');
-  swatch.className = 'swatch';
-  swatch.style.background = swatchColor;
-
-  const text = document.createElement('div');
-  text.innerHTML = `<div>${label}</div>${desc ? `<div class="layer-desc">${desc}</div>` : ''}`;
-
-  left.appendChild(swatch);
-  left.appendChild(text);
-
-  const cb = document.createElement('input');
-  cb.type = 'checkbox';
-  cb.checked = checked;
-
-  cb.onchange = () => {
-    if (cb.checked) layer.addTo(map);
-    else map.removeLayer(layer);
-  };
-
-  row.appendChild(left);
-  row.appendChild(cb);
-  container.appendChild(row);
-
-  // initial state
-  if (checked) layer.addTo(map);
-}
-
-// ========== 4) 安全事件回報 ==========
 const incidentTypeMeta = {
-  accident: { label: '事故', color: '#ff9b6a' },
+  accident: { label: '事故', color: '#F0997B' },
   harassment: { label: '騷擾', color: '#ef718d' }
 };
 
-const incidentHexLayer = L.layerGroup();
-const incidentFab = document.getElementById('incidentFab');
-const incidentDialog = document.getElementById('incidentDialog');
-const incidentForm = document.getElementById('incidentForm');
-const incidentClose = document.getElementById('incidentClose');
-const incidentCancel = document.getElementById('incidentCancel');
-const authSection = document.getElementById('authSection');
-const reportSection = document.getElementById('reportSection');
-const authStatus = document.getElementById('authStatus');
-const authEmail = document.getElementById('authEmail');
-const authCode = document.getElementById('authCode');
-const authRequestCode = document.getElementById('authRequestCode');
-const authVerifyCode = document.getElementById('authVerifyCode');
-const incidentStatus = document.getElementById('incidentStatus');
-const incidentType = document.getElementById('incidentType');
-const incidentDescription = document.getElementById('incidentDescription');
-const incidentSubmit = document.getElementById('incidentSubmit');
+const incidentHexLayer = L.layerGroup().addTo(map);
+layerMap.incident = incidentHexLayer;
 
 let authSession = null;
 let reportHexLayer = null;
@@ -603,37 +655,64 @@ let selectedHex = null;
 let allIncidents = [];
 const reportHexFeatureById = new Map();
 
-addLayerToggle('dataLayers', {
-  label: '安全事件回報',
-  layer: incidentHexLayer,
-  checked: true,
-  swatchColor: '#ef718d'
+const incFab = document.getElementById('inc-fab');
+const incDialog = document.getElementById('inc-dialog');
+const dlgClose = document.getElementById('dlg-close');
+const authSec = document.getElementById('auth-section');
+const reportSec = document.getElementById('report-section');
+const authStatus = document.getElementById('auth-status');
+const reportStatus = document.getElementById('report-status');
+const authEmail = document.getElementById('auth-email');
+const authCode = document.getElementById('auth-code');
+const btnRequestCode = document.getElementById('btn-request-code');
+const btnVerifyCode = document.getElementById('btn-verify-code');
+const incType = document.getElementById('inc-type');
+const incDesc = document.getElementById('inc-desc');
+const btnSubmit = document.getElementById('btn-submit');
+const btnCancel = document.getElementById('btn-cancel');
+const hexTooltip = document.getElementById('hex-tooltip');
+
+btnReport.addEventListener('click', () => {
+  btnReport.classList.toggle('active');
+  beginIncidentFlow();
 });
 
-function setIncidentStatus(message, state = '') {
-  incidentStatus.textContent = message;
-  incidentStatus.className = `incident-status ${state}`.trim();
+function setStatus(el, message, state = '') {
+  el.textContent = message;
+  el.className = `dlg-status ${state}`.trim();
 }
 
-function setAuthStatus(message, state = '') {
-  authStatus.textContent = message;
-  authStatus.className = `incident-status ${state}`.trim();
+function showAuth() {
+  authSec.classList.remove('hidden');
+  reportSec.classList.add('hidden');
+  if (reportHexLayer && map.hasLayer(reportHexLayer)) map.removeLayer(reportHexLayer);
 }
 
-function showAuthSection() {
-  authSection.classList.remove('hidden');
-  reportSection.classList.add('hidden');
-  if (reportHexLayer && map.hasLayer(reportHexLayer)) {
-    map.removeLayer(reportHexLayer);
+function showReport() {
+  authSec.classList.add('hidden');
+  reportSec.classList.remove('hidden');
+  if (reportHexLayer && !map.hasLayer(reportHexLayer)) reportHexLayer.addTo(map);
+}
+
+function closeDialog() {
+  incDialog.classList.remove('show');
+  btnReport.classList.remove('active');
+  authSec.classList.remove('hidden');
+  reportSec.classList.add('hidden');
+  selectedHex = null;
+  incDesc.value = '';
+  authCode.value = '';
+  btnSubmit.disabled = true;
+  setStatus(reportStatus, '請在地圖上點選回報區');
+  if (selectedHexLayer) {
+    selectedHexLayer.remove();
+    selectedHexLayer = null;
   }
+  if (reportHexLayer && map.hasLayer(reportHexLayer)) map.removeLayer(reportHexLayer);
 }
 
-function showReportSection() {
-  authSection.classList.add('hidden');
-  reportSection.classList.remove('hidden');
-  if (reportHexLayer && !map.hasLayer(reportHexLayer)) {
-    reportHexLayer.addTo(map);
-  }
+function updateSubmitState() {
+  btnSubmit.disabled = !selectedHex || incDesc.value.trim().length === 0;
 }
 
 function escapeHtml(value) {
@@ -654,85 +733,29 @@ function incidentColor(type) {
   return incidentTypeMeta[type]?.color || incidentTypeMeta.accident.color;
 }
 
-function updateIncidentSubmitState() {
-  incidentSubmit.disabled = !selectedHex || incidentDescription.value.trim().length === 0;
+function updateStatsPanel() {
+  const total = allIncidents.length;
+  const accidentCount = allIncidents.filter(incident => incident.type === 'accident').length;
+  const harassmentCount = allIncidents.filter(incident => incident.type === 'harassment').length;
+  const maxCount = Math.max(accidentCount, harassmentCount, 1);
+
+  document.getElementById('stat-incident-count').innerHTML =
+    `${total}<span class="stat-unit">件</span>`;
+  document.getElementById('bar-accident').style.width =
+    `${Math.round(accidentCount / maxCount * 100)}%`;
+  document.getElementById('bar-accident-num').textContent = accidentCount;
+  document.getElementById('bar-harassment').style.width =
+    `${Math.round(harassmentCount / maxCount * 100)}%`;
+  document.getElementById('bar-harassment-num').textContent = harassmentCount;
 }
 
-function hexCenter(layer) {
-  const center = layer.getBounds().getCenter();
-  return { lat: center.lat, lng: center.lng };
-}
-
-function selectReportHex(feature, layer) {
-  const id = Number(feature.properties?.id);
-  if (!Number.isInteger(id)) return;
-
-  selectedHex = { id, center: hexCenter(layer), feature };
-  if (selectedHexLayer) selectedHexLayer.remove();
-
-  selectedHexLayer = L.geoJSON(feature, {
-    pane: 'incidentPane',
-    style: {
-      color: '#f3f6ff',
-      weight: 2,
-      opacity: 1,
-      fillColor: '#6ee7d2',
-      fillOpacity: 0.24
-    }
-  }).addTo(map);
-
-  setIncidentStatus(`已選回報區 ${id}`, 'ok');
-  updateIncidentSubmitState();
-}
-
-function closeIncidentDialog() {
-  incidentDialog.classList.add('hidden');
-  authSection.classList.add('hidden');
-  reportSection.classList.add('hidden');
-  selectedHex = null;
-  incidentDescription.value = '';
-  authCode.value = '';
-  incidentSubmit.disabled = true;
-  setIncidentStatus('請在地圖上點選回報區');
-  if (selectedHexLayer) {
-    selectedHexLayer.remove();
-    selectedHexLayer = null;
-  }
-  if (reportHexLayer && map.hasLayer(reportHexLayer)) {
-    map.removeLayer(reportHexLayer);
-  }
-}
-
-function openIncidentDialog() {
-  incidentDialog.classList.remove('hidden');
-  setIncidentStatus('請在地圖上點選回報區');
-  if (authSession?.authenticated) showReportSection();
-  else showAuthSection();
-}
-
-async function getAuthSession() {
-  try {
-    const response = await fetch('/api/protected/session', {
-      headers: { accept: 'application/json' }
-    });
-    if (!response.ok) return null;
-    return await response.json();
-  } catch {
-    return null;
-  }
-}
-
-async function beginIncidentFlow() {
-  authSession = authSession || await getAuthSession();
-  openIncidentDialog();
-}
-
-function renderIncidentHexes() {
+function renderIncidents() {
   incidentHexLayer.clearLayers();
   const grouped = new Map();
+
   allIncidents.forEach(incident => {
-    if (!Number.isInteger(Number(incident.report_hex_id))) return;
     const key = Number(incident.report_hex_id);
+    if (!Number.isInteger(key)) return;
     const list = grouped.get(key) || [];
     list.push(incident);
     grouped.set(key, list);
@@ -772,6 +795,36 @@ function renderIncidentHexes() {
     `);
     incidentHexLayer.addLayer(layer);
   });
+
+  updateStatsPanel();
+}
+
+function selectReportHex(feature, layer) {
+  const id = Number(feature.properties?.id);
+  if (!Number.isInteger(id)) return;
+
+  selectedHex = { id, center: layer.getBounds().getCenter(), feature };
+  if (selectedHexLayer) selectedHexLayer.remove();
+
+  selectedHexLayer = L.geoJSON(feature, {
+    pane: 'incidentPane',
+    interactive: false,
+    style: {
+      color: '#F0997B',
+      weight: 2.5,
+      opacity: 1,
+      fillColor: '#D85A30',
+      fillOpacity: 0.35
+    }
+  }).addTo(map);
+
+  setStatus(reportStatus, `已選回報區 ${id}`, 'ok');
+  updateSubmitState();
+}
+
+async function loadJSON(url) {
+  const response = await fetch(url);
+  return response.json();
 }
 
 async function loadIncidents() {
@@ -779,7 +832,7 @@ async function loadIncidents() {
   if (!response.ok) return;
   const data = await response.json();
   allIncidents = Array.isArray(data.incidents) ? data.incidents : [];
-  renderIncidentHexes();
+  renderIncidents();
 }
 
 async function loadReportHexes() {
@@ -805,27 +858,47 @@ async function loadReportHexes() {
     }
   });
 
-  if (!incidentDialog.classList.contains('hidden') && !map.hasLayer(reportHexLayer)) {
-    reportHexLayer.addTo(map);
-  }
-
   await loadIncidents();
 }
 
-incidentFab.onclick = beginIncidentFlow;
-incidentClose.onclick = closeIncidentDialog;
-incidentCancel.onclick = closeIncidentDialog;
-incidentDescription.addEventListener('input', updateIncidentSubmitState);
+async function getAuthSession() {
+  try {
+    const response = await fetch('/api/protected/session', {
+      headers: { accept: 'application/json' }
+    });
+    if (!response.ok) return null;
+    return response.json();
+  } catch {
+    return null;
+  }
+}
 
-authRequestCode.onclick = async () => {
+async function beginIncidentFlow() {
+  if (incDialog.classList.contains('show')) {
+    closeDialog();
+    return;
+  }
+  authSession = authSession || await getAuthSession();
+  incDialog.classList.add('show');
+  btnReport.classList.add('active');
+  if (authSession?.authenticated) showReport();
+  else showAuth();
+}
+
+incFab.addEventListener('click', beginIncidentFlow);
+dlgClose.addEventListener('click', closeDialog);
+btnCancel.addEventListener('click', closeDialog);
+incDesc.addEventListener('input', updateSubmitState);
+
+btnRequestCode.addEventListener('click', async () => {
   const email = authEmail.value.trim().toLowerCase();
   if (!email.endsWith('@ntu.edu.tw')) {
-    setAuthStatus('請輸入 @ntu.edu.tw email', 'error');
+    setStatus(authStatus, '請輸入 @ntu.edu.tw email', 'err');
     return;
   }
 
-  authRequestCode.disabled = true;
-  setAuthStatus('寄送中');
+  btnRequestCode.disabled = true;
+  setStatus(authStatus, '寄送中');
 
   try {
     const response = await fetch('/api/auth/request-code', {
@@ -839,29 +912,29 @@ authRequestCode.onclick = async () => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      setAuthStatus(errorData.message || errorData.error || '寄送失敗', 'error');
+      setStatus(authStatus, errorData.message || errorData.error || '寄送失敗', 'err');
       return;
     }
 
-    setAuthStatus('驗證碼已寄出，請檢查信箱', 'ok');
+    setStatus(authStatus, '驗證碼已寄出，請檢查信箱', 'ok');
     authCode.focus();
   } catch {
-    setAuthStatus('寄送失敗', 'error');
+    setStatus(authStatus, '寄送失敗', 'err');
   } finally {
-    authRequestCode.disabled = false;
+    btnRequestCode.disabled = false;
   }
-};
+});
 
-authVerifyCode.onclick = async () => {
+btnVerifyCode.addEventListener('click', async () => {
   const email = authEmail.value.trim().toLowerCase();
   const code = authCode.value.trim();
   if (!email.endsWith('@ntu.edu.tw') || !/^\d{6}$/.test(code)) {
-    setAuthStatus('請輸入 NTU email 與 6 位數驗證碼', 'error');
+    setStatus(authStatus, '請輸入 NTU email 與 6 位數驗證碼', 'err');
     return;
   }
 
-  authVerifyCode.disabled = true;
-  setAuthStatus('驗證中');
+  btnVerifyCode.disabled = true;
+  setStatus(authStatus, '驗證中');
 
   try {
     const response = await fetch('/api/auth/verify-code', {
@@ -875,31 +948,30 @@ authVerifyCode.onclick = async () => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      setAuthStatus(errorData.message || errorData.error || '驗證失敗', 'error');
+      setStatus(authStatus, errorData.message || errorData.error || '驗證失敗', 'err');
       return;
     }
 
     authSession = await response.json();
-    setAuthStatus('驗證完成', 'ok');
-    showReportSection();
-    setIncidentStatus('請在地圖上點選回報區');
+    setStatus(authStatus, '驗證完成', 'ok');
+    showReport();
+    setStatus(reportStatus, '請在地圖上點選回報區');
   } catch {
-    setAuthStatus('驗證失敗', 'error');
+    setStatus(authStatus, '驗證失敗', 'err');
   } finally {
-    authVerifyCode.disabled = false;
+    btnVerifyCode.disabled = false;
   }
-};
+});
 
-incidentForm.addEventListener('submit', async event => {
-  event.preventDefault();
-  if (reportSection.classList.contains('hidden')) return;
+btnSubmit.addEventListener('click', async () => {
+  if (reportSec.classList.contains('hidden')) return;
   if (!selectedHex) {
-    setIncidentStatus('請先點選回報區', 'error');
+    setStatus(reportStatus, '請先點選回報區', 'err');
     return;
   }
 
-  incidentSubmit.disabled = true;
-  setIncidentStatus('送出中');
+  btnSubmit.disabled = true;
+  setStatus(reportStatus, '送出中');
 
   try {
     const response = await fetch('/api/protected/incidents', {
@@ -912,252 +984,122 @@ incidentForm.addEventListener('submit', async event => {
         report_hex_id: selectedHex.id,
         lat: selectedHex.center.lat,
         lng: selectedHex.center.lng,
-        type: incidentType.value,
-        description: incidentDescription.value.trim()
+        type: incType.value,
+        description: incDesc.value.trim()
       })
     });
 
     if (response.status === 401 || response.status === 403) {
       authSession = null;
-      showAuthSection();
-      setAuthStatus('請先完成 NTU email 驗證', 'error');
+      showAuth();
+      setStatus(authStatus, '請先完成 NTU email 驗證', 'err');
       return;
     }
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      setIncidentStatus(errorData.message || errorData.error || '送出失敗', 'error');
-      updateIncidentSubmitState();
+      setStatus(reportStatus, errorData.message || errorData.error || '送出失敗', 'err');
+      updateSubmitState();
       return;
     }
 
     const data = await response.json();
     if (data.incident) {
       allIncidents.unshift(data.incident);
-      renderIncidentHexes();
+      renderIncidents();
     }
-    closeIncidentDialog();
+    closeDialog();
   } catch {
-    setIncidentStatus('送出失敗', 'error');
-    updateIncidentSubmitState();
+    setStatus(reportStatus, '送出失敗', 'err');
+    updateSubmitState();
   }
 });
 
-loadReportHexes().then(() => {
-  if (window.location.hash === '#new-incident') {
-    history.replaceState(null, '', window.location.pathname + window.location.search);
-    beginIncidentFlow();
-  }
-});
-
-// ========== 4) 台大範圍線（常駐，不提供關閉） ==========
 fetch(assetUrl('/data/ntu_area.geojson'))
-  .then(r => r.json())
+  .then(response => response.json())
   .then(geo => {
     const ntuLine = L.geoJSON(geo, {
-      style: { color: '#eef2f7', weight: 1.05, opacity: .9 }
+      style: { color: '#eef2f7', weight: 1.05, opacity: 0.9 }
     }).addTo(map);
-
     map.fitBounds(ntuLine.getBounds());
   });
 
-// ========== 5) Overlay 依序載入：亮度 → 安全 → 光害 ==========
-let brightnessLegend;
-
-async function loadJSON(url){
-  const r = await fetch(url);
-  return await r.json();
-}
-
-(async function loadOrderedOverlays(){
-
-  // --- (1) 實測亮度六邊形（最上層） ---
+(async () => {
   const geoBrightness = await loadJSON(assetUrl('/data/merge_sur_zhoushan.geojson'));
-
   const rawVals = geoBrightness.features
-    .map(f => Number(f.properties?.brightness_filled))
-    .filter(v => Number.isFinite(v) && v >= 0);
+    .map(feature => Number(feature.properties?.brightness_filled))
+    .filter(value => Number.isFinite(value) && value >= 0);
 
-  if (rawVals.length === 0) {
-    console.warn('merge_sur_zhoushan: brightness_filled 無有效數值');
-    return;
-  }
+  if (!rawVals.length) return;
 
-  const aboveOne = rawVals.filter(v => v > 1).sort((a,b)=>a-b);
-
-  function quantile(sortedArr, p) {
-    if (sortedArr.length === 0) return 1;
-    const pos = (sortedArr.length - 1) * p;
+  const above = rawVals.filter(value => value > 1).sort((a, b) => a - b);
+  const quantile = (arr, p) => {
+    if (!arr.length) return 1;
+    const pos = (arr.length - 1) * p;
     const base = Math.floor(pos);
-    const rest = pos - base;
-    if (base + 1 < sortedArr.length) {
-      return sortedArr[base] + rest * (sortedArr[base + 1] - sortedArr[base]);
-    } else {
-      return sortedArr[base];
-    }
-  }
-
-  const q25 = quantile(aboveOne, 0.25);
-  const q50 = quantile(aboveOne, 0.50);
-  const q75 = quantile(aboveOne, 0.75);
-  const q100 = quantile(aboveOne, 1.00);
-
-  // ===== refreshed brightness ramp (deep navy -> cool white) =====
-  const ramp = [
-    '#0b1020',  // near-black navy
-    '#1f2a5a',  // deep indigo
-    '#2f6f9f',  // muted blue
-    '#6fd0c2',  // soft teal
-    '#f3f6ff'   // cool white
-  ];
-
-  function getColor(v) {
-    if (!Number.isFinite(v)) return '#7b8492';
-    if (v <= 1) return ramp[0];
-    if (v <= q25) return ramp[1];
-    if (v <= q50) return ramp[2];
-    if (v <= q75) return ramp[3];
-    return ramp[4];
-  }
-
-  const measuredLayer = L.geoJSON(geoBrightness, {
-    pane: 'brightnessPane',
-    style: f => {
-      const v = Number(f.properties?.brightness_filled);
-      return {
-        color: 'rgba(6, 10, 18, .55)',  // softer edge
-        weight: 0.25,
-        fillColor: getColor(v),
-        fillOpacity: 0.9
-      };
-    },
-    onEachFeature: (feature, layer) => {
-      const v = Number(feature.properties?.brightness_filled);
-      const luxStr = Number.isFinite(v) ? v.toFixed(2) : 'NA';
-      const id = feature.properties?.id ?? '(無 ID)';
-      layer.bindPopup(`
-        <div style="font: 12px/1.5 system-ui, sans-serif; min-width:120px;">
-          <div style="font-weight:800; font-size:13px; margin-bottom:4px;">Hex ${id}</div>
-          <div style="color:#0b1020; background:#f1f5fb; padding:4px 6px; border-radius:6px; display:inline-block;">
-            ${luxStr} lux
-          </div>
-        </div>
-      `);
-    }
-  });
-
-  addLayerToggle('dataLayers', {
-    label: '實測亮度六邊形',
-    layer: measuredLayer,
-    checked: true,
-    swatchColor: ramp[4]
-  });
-
-  // --- legend (亮度) ---
-  if (brightnessLegend) brightnessLegend.remove();
-  brightnessLegend = L.control({ position: 'bottomright' });
-  brightnessLegend.onAdd = function () {
-    const div = L.DomUtil.create('div', 'legend-box');
-
-    function fmt(x) {
-      if (!Number.isFinite(x)) return 'NA';
-      if (Math.abs(x) >= 1000) return x.toFixed(0);
-      return x.toFixed(2);
-    }
-
-    const rows = [
-      { color: ramp[0], label: `0 – 1` },
-      { color: ramp[1], label: `1 – ${fmt(q25)}` },
-      { color: ramp[2], label: `${fmt(q25)} – ${fmt(q50)}` },
-      { color: ramp[3], label: `${fmt(q50)} – ${fmt(q75)}` },
-      { color: ramp[4], label: `${fmt(q75)} – ${fmt(q100)}` },
-    ];
-
-    let html = `
-      <div class="legend-title">
-        <span class="pill">亮度（lux）</span>
-      </div>
-    `;
-    rows.forEach(row => {
-      html += `
-        <div class="legend-row">
-          <span class="legend-color" style="background:${row.color};"></span>
-          <span>${row.label}</span>
-        </div>
-      `;
-    });
-
-    div.innerHTML = html;
-    return div;
+    return base + 1 < arr.length ? arr[base] + (pos - base) * (arr[base + 1] - arr[base]) : arr[base];
   };
-  brightnessLegend.addTo(map);
+  const [q25, q50, q75] = [0.25, 0.50, 0.75].map(p => quantile(above, p));
+  const ramp = ['#0b1020', '#1f2a5a', '#2f6f9f', '#6fd0c2', '#f3f6ff'];
+  const getColor = value => !Number.isFinite(value)
+    ? '#7b8492'
+    : value <= 1 ? ramp[0]
+    : value <= q25 ? ramp[1]
+    : value <= q50 ? ramp[2]
+    : value <= q75 ? ramp[3]
+    : ramp[4];
 
-
-  // --- (2) 道路安全框線（中層） ---
-  const geoSafety = await loadJSON(assetUrl('/data/hex_hit_with_safe.geojson'));
-
-  // ===== refreshed safety colors (soft, low-sat) =====
-  function safetyColor(s) {
-    if (s === 1) return '#7bcfa1';  // soft green
-    if (s === 2) return '#e6c07a';  // soft amber
-    if (s === 3) return '#e08a8a';  // soft red
-    return '#8aa2d6';              // soft blue
-  }
-
-  const safetyHexLayer = L.geoJSON(geoSafety, {
-    pane: 'safetyPane',
-    style: f => {
-      const s = Number(f.properties?.safe_worst);
-      return {
-        color: safetyColor(s),
-        weight: 1.05,
-        opacity: 0.9,
-        fillOpacity: 0,
-        fill: false
-      };
-    },
+  const brightLayer = L.geoJSON(geoBrightness, {
+    pane: 'brightnessPane',
+    style: feature => ({
+      color: 'rgba(6,10,18,.55)',
+      weight: 0.25,
+      fillColor: getColor(Number(feature.properties?.brightness_filled)),
+      fillOpacity: 0.9
+    }),
     onEachFeature: (feature, layer) => {
-      const id = feature.properties?.id ?? '(無 ID)';
-      const sWorst = feature.properties?.safe_worst;
-      const sMean = feature.properties?.safe_mean;
-      layer.bindPopup(`
-        <div style="font:12px/1.5 system-ui,sans-serif;">
-          <b>Hex ID</b>：${id}<br/>
-          <b>safe_worst</b>：${sWorst}<br/>
-          <b>safe_mean</b>：${(sMean!=null)?Number(sMean).toFixed(2):'NA'}
-        </div>
-      `);
+      const value = Number(feature.properties?.brightness_filled);
+      const id = feature.properties?.id ?? '-';
+      layer.on('mouseover', () => {
+        hexTooltip.textContent = `Hex ${id}  ·  ${Number.isFinite(value) ? value.toFixed(2) : 'N/A'} lux`;
+        hexTooltip.classList.add('show');
+      });
+      layer.on('mouseout', () => hexTooltip.classList.remove('show'));
+      layer.bindPopup(`<div style="font:12px/1.5 system-ui;min-width:120px;"><b style="font-size:13px">Hex ${escapeHtml(String(id))}</b><br><span style="background:#f1f5fb;padding:3px 6px;border-radius:5px;display:inline-block;margin-top:4px;">${Number.isFinite(value) ? value.toFixed(2) : 'N/A'} lux</span></div>`);
     }
-  });
+  }).addTo(map);
+  layerMap.brightness = brightLayer;
 
-  addLayerToggle('boundaryLayers', {
-    label: '道路安全框線',
-    layer: safetyHexLayer,
-    checked: true,
-    swatchColor: '#7bcfa1'
-  });
+  const geoSafety = await loadJSON(assetUrl('/data/hex_hit_with_safe.geojson'));
+  const safeColor = score => score === 1 ? '#7bcfa1' : score === 2 ? '#e6c07a' : score === 3 ? '#e08a8a' : '#8aa2d6';
+  const safetyLayer = L.geoJSON(geoSafety, {
+    pane: 'safetyPane',
+    style: feature => ({
+      color: safeColor(Number(feature.properties?.safe_worst)),
+      weight: 1.05,
+      opacity: 0.9,
+      fillOpacity: 0,
+      fill: false
+    }),
+    onEachFeature: (feature, layer) => {
+      const id = feature.properties?.id ?? '-';
+      layer.bindPopup(`<div style="font:12px/1.5 system-ui;"><b>Hex ${escapeHtml(String(id))}</b><br>safe_worst: ${feature.properties?.safe_worst}<br>safe_mean: ${feature.properties?.safe_mean != null ? Number(feature.properties.safe_mean).toFixed(2) : 'N/A'}</div>`);
+    }
+  }).addTo(map);
+  layerMap.safety = safetyLayer;
 
-
-  // --- (3) 光害控制區（最下層） ---
   const geoProtect = await loadJSON(assetUrl('/data/protect_square_4326.geojson'));
-
-  // ===== refreshed protect area (soft lavender) =====
   const protectLayer = L.geoJSON(geoProtect, {
     pane: 'protectPane',
-    style: {
-      color: '#b79af5',
-      fillColor: '#b79af5',
-      fillOpacity: 0.22,
-      weight: 0
-    }
-  });
+    style: { color: '#b79af5', fillColor: '#b79af5', fillOpacity: 0.18, weight: 0 }
+  }).addTo(map);
+  layerMap.protect = protectLayer;
 
-  addLayerToggle('boundaryLayers', {
-    label: '光害控制區',
-    layer: protectLayer,
-    checked: true,
-    swatchColor: '#b79af5'
-  });
+  await loadReportHexes();
 
+  if (window.location.hash === '#new-incident') {
+    history.replaceState(null, '', location.pathname + location.search);
+    beginIncidentFlow();
+  }
 })();
 </script>
 </body>

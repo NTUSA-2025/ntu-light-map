@@ -1051,21 +1051,13 @@ fetch(assetUrl('/data/ntu_area.geojson'))
 
   if (!rawVals.length) return;
 
-  const above = rawVals.filter(value => value > 1).sort((a, b) => a - b);
-  const quantile = (arr, p) => {
-    if (!arr.length) return 1;
-    const pos = (arr.length - 1) * p;
-    const base = Math.floor(pos);
-    return base + 1 < arr.length ? arr[base] + (pos - base) * (arr[base + 1] - arr[base]) : arr[base];
-  };
-  const [q25, q50, q75] = [0.25, 0.50, 0.75].map(p => quantile(above, p));
   const ramp = ['#0b1020', '#1f2a5a', '#2f6f9f', '#6fd0c2', '#f3f6ff'];
   const getColor = value => !Number.isFinite(value)
     ? '#7b8492'
     : value <= 1 ? ramp[0]
-    : value <= q25 ? ramp[1]
-    : value <= q50 ? ramp[2]
-    : value <= q75 ? ramp[3]
+    : value <= 12 ? ramp[1]
+    : value <= 29 ? ramp[2]
+    : value <= 54 ? ramp[3]
     : ramp[4];
 
   const brightLayer = L.geoJSON(geoBrightness, {

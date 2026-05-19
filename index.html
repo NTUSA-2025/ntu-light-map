@@ -489,12 +489,12 @@
       <div class="block">
         <div class="block-label">事件類型分佈</div>
         <div class="bar-row">
-          <span class="bar-name">事故</span>
+          <span class="bar-name">夜間事故</span>
           <div class="bar-track"><div class="bar-fill" id="bar-accident" style="width:0%;background:#F0997B;"></div></div>
           <span class="bar-num" id="bar-accident-num">0</span>
         </div>
         <div class="bar-row">
-          <span class="bar-name">騷擾</span>
+          <span class="bar-name">夜間騷擾</span>
           <div class="bar-track"><div class="bar-fill" id="bar-harassment" style="width:0%;background:#ef718d;"></div></div>
           <span class="bar-num" id="bar-harassment-num">0</span>
         </div>
@@ -589,8 +589,8 @@
           <div class="dlg-field">
             <label for="inc-type">事件類型</label>
             <select id="inc-type" required>
-              <option value="accident">事故</option>
-              <option value="harassment">騷擾</option>
+              <option value="accident">夜間事故</option>
+              <option value="harassment">夜間騷擾</option>
             </select>
           </div>
           <div class="dlg-field">
@@ -653,8 +653,8 @@ makeToggle('tog-incident', 'incident');
 makeToggle('tog-protect', 'protect');
 
 const incidentTypeMeta = {
-  accident: { label: '事故', color: '#F0997B' },
-  harassment: { label: '騷擾', color: '#ef718d' }
+  accident: { label: '夜間事故', color: '#F0997B' },
+  harassment: { label: '夜間騷擾', color: '#ef718d' }
 };
 
 const incidentHexLayer = L.layerGroup().addTo(map);

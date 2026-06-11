@@ -100,7 +100,8 @@ cp .dev.vars.example .dev.vars
 ```
 
 本機測試時，`.dev.vars.example` 預設啟用 `ALLOW_DEV_AUTH=true`，並設定
-`DEV_EMAIL_CODE=123456` 與 `DEV_USER_EMAIL=admin@ntu.edu.tw`，所以可以不寄真實 email 也能完成驗證流程並看到後台入口。
+`DEV_EMAIL_CODE=123456`，所以可以不寄真實 email 也能完成驗證流程。若要看到後台入口，請在本機 `.dev.vars` 加上
+`DEV_USER_EMAIL=<admin email>` 與對應的 `ADMIN_EMAILS=<admin email>`。
 
 接著執行：
 

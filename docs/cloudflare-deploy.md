@@ -80,6 +80,17 @@ openssl rand -base64 32
 
 不要把 `HASH_SALT` 或 app password commit 進 Git。`HASH_SALT` 會用來雜湊 reporter email、session token、驗證碼與 IP。後端會把缺少 `HASH_SALT` 視為部署設定錯誤，直接回傳 `server_misconfigured`。
 
+## 後台管理員
+
+後台使用既有 NTU email session，再用 `ADMIN_EMAILS` 白名單判斷管理員。請在 Pages 專案的
+**Settings** → **Variables and Secrets** 新增 production variable：
+
+```text
+ADMIN_EMAILS=admin1@ntu.edu.tw,admin2@ntu.edu.tw
+```
+
+多個 email 可以用逗號、空白或換行分隔。管理員登入後，左側導覽會出現「後台管理」，可以檢視事件列表並刪除事件。刪除會把事件狀態改成 `hidden`，不會從 D1 硬刪資料。
+
 ## 本機開發
 
 Wrangler Pages Functions 會從 `.dev.vars` 讀取本機 bindings。先從範例檔建立：
@@ -89,7 +100,7 @@ cp .dev.vars.example .dev.vars
 ```
 
 本機測試時，`.dev.vars.example` 預設啟用 `ALLOW_DEV_AUTH=true`，並設定
-`DEV_EMAIL_CODE=123456`，所以可以不寄真實 email 也能完成驗證流程。
+`DEV_EMAIL_CODE=123456` 與 `DEV_USER_EMAIL=admin@ntu.edu.tw`，所以可以不寄真實 email 也能完成驗證流程並看到後台入口。
 
 接著執行：
 

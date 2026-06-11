@@ -94,6 +94,12 @@
     }
     .dock-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-hi); }
     .dock-btn.active { background: var(--coral-dim); color: var(--coral-light); }
+    .dock-btn:disabled {
+      cursor: not-allowed;
+      color: var(--text-lo);
+      opacity: 0.45;
+    }
+    .dock-btn:disabled:hover { background: transparent; color: var(--text-lo); }
 
     .dock-tip {
       position: absolute;
@@ -471,6 +477,15 @@
       </svg>
       <span class="dock-tip">設定</span>
     </button>
+
+    <button class="dock-btn" id="btnLogout" aria-label="登出" disabled>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+        <polyline points="16 17 21 12 16 7"/>
+        <line x1="21" y1="12" x2="9" y2="12"/>
+      </svg>
+      <span class="dock-tip">登出</span>
+    </button>
   </nav>
 
   <aside id="panel" aria-label="數據面板">
@@ -627,6 +642,7 @@ L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
 const panel = document.getElementById('panel');
 const btnPanel = document.getElementById('btnPanel');
 const btnReport = document.getElementById('btnReport');
+const btnLogout = document.getElementById('btnLogout');
 
 btnPanel.addEventListener('click', () => {
   const closed = panel.classList.toggle('closed');
@@ -692,6 +708,11 @@ btnReport.addEventListener('click', () => {
 function setStatus(el, message, state = '') {
   el.textContent = message;
   el.className = `dlg-status ${state}`.trim();
+}
+
+function setAuthSession(session) {
+  authSession = session?.authenticated ? session : null;
+  btnLogout.disabled = !authSession;
 }
 
 function showAuth() {
@@ -893,12 +914,16 @@ async function getAuthSession() {
   }
 }
 
+async function refreshAuthSession() {
+  setAuthSession(await getAuthSession());
+}
+
 async function beginIncidentFlow() {
   if (incDialog.classList.contains('show')) {
     closeDialog();
     return;
   }
-  authSession = authSession || await getAuthSession();
+  if (!authSession) await refreshAuthSession();
   incDialog.classList.add('show');
   btnReport.classList.add('active');
   if (authSession?.authenticated) showReport();
@@ -909,6 +934,22 @@ incFab.addEventListener('click', beginIncidentFlow);
 dlgClose.addEventListener('click', closeDialog);
 btnCancel.addEventListener('click', closeDialog);
 incDesc.addEventListener('input', updateSubmitState);
+
+btnLogout.addEventListener('click', async () => {
+  if (btnLogout.disabled) return;
+  btnLogout.disabled = true;
+
+  try {
+    await fetch('/api/auth/logout', {
+      method: 'POST',
+      headers: { accept: 'application/json' }
+    });
+  } finally {
+    setAuthSession(null);
+    closeDialog();
+    setStatus(authStatus, '已登出，請重新驗證後回報');
+  }
+});
 
 btnRequestCode.addEventListener('click', async () => {
   const email = authEmail.value.trim().toLowerCase();
@@ -972,7 +1013,7 @@ btnVerifyCode.addEventListener('click', async () => {
       return;
     }
 
-    authSession = await response.json();
+    setAuthSession(await response.json());
     setStatus(authStatus, '驗證完成', 'ok');
     showReport();
     setStatus(reportStatus, '請在地圖上點選回報區');
@@ -1010,7 +1051,7 @@ btnSubmit.addEventListener('click', async () => {
     });
 
     if (response.status === 401 || response.status === 403) {
-      authSession = null;
+      setAuthSession(null);
       showAuth();
       setStatus(authStatus, '請先完成 NTU email 驗證', 'err');
       return;
@@ -1033,6 +1074,8 @@ btnSubmit.addEventListener('click', async () => {
     updateSubmitState();
   }
 });
+
+refreshAuthSession();
 
 fetch(assetUrl('/data/ntu_area.geojson'))
   .then(response => response.json())

@@ -1,4 +1,4 @@
-import { clientIp, hashValue, requireHashSalt } from "./incidents.js";
+import { clientIp, hashSalt, hashValue, requireHashSalt } from "./incidents.js";
 
 const SESSION_COOKIE = "ntu_light_map_session";
 const SESSION_DAYS = 30;
@@ -83,6 +83,18 @@ export async function getSessionEmail(request, env) {
   ).bind(tokenHash).first();
 
   return session?.email?.toLowerCase() || null;
+}
+
+export async function destroySession(request, env) {
+  const token = parseCookies(request)[SESSION_COOKIE];
+  const salt = hashSalt(env);
+  if (!token || !salt || !env.DB) return;
+
+  const tokenHash = await hashValue(token, salt);
+  await env.DB.prepare(
+    `DELETE FROM auth_sessions
+     WHERE token_hash = ?`,
+  ).bind(tokenHash).run();
 }
 
 export async function authRateLimited(request, env, email) {

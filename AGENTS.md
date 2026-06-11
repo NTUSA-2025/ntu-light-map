@@ -15,4 +15,4 @@
 - Do commit automatically.
 - Commit frequently instead of doing a large commit at the end of the work.
 - Use conventional commits.
-- Do not run any git commands other than `git add *` and `git commit -m`. Do not use commit amendments. Instead, just submit a new commit.
+- Do not run any git commands other than `git add` and `git commit -m`. Do not use commit amendments. Instead, just submit a new commit.

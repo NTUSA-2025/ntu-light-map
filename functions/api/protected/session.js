@@ -30,5 +30,5 @@ export async function onRequestGet({ request, env }) {
     return Response.redirect(redirectTo, 302);
   }
 
-  return json({ authenticated: true, email, admin: isAdminEmail(email, env) });
+  return json({ authenticated: true, email, admin: await isAdminEmail(email, env) });
 }

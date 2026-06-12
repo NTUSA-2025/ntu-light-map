@@ -230,6 +230,24 @@
       min-width: 0;
     }
     .admin-list { display: flex; flex-direction: column; gap: 8px; }
+    .admin-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .admin-input {
+      background: rgba(0,0,0,0.35);
+      border: 0.5px solid rgba(255,255,255,0.14);
+      color: var(--text-hi);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      width: 100%;
+    }
+    .admin-input:focus { border-color: rgba(216,90,48,0.5); }
     .admin-item {
       background: var(--bg-card);
       border: 0.5px solid var(--border);
@@ -277,6 +295,7 @@
     }
     .admin-actions {
       display: flex;
+      gap: 7px;
       justify-content: flex-end;
     }
     .btn-danger {
@@ -633,7 +652,18 @@
         <div class="admin-status" id="admin-status">尚未載入</div>
         <button class="btn-sec" id="btn-admin-refresh">重新整理</button>
       </div>
-      <div class="admin-list" id="admin-list"></div>
+      <div class="block">
+        <div class="block-label">管理員</div>
+        <div class="admin-form">
+          <input class="admin-input" id="admin-email" type="email" placeholder="name@ntu.edu.tw" autocomplete="off"/>
+          <button class="btn-pri" id="btn-admin-add">新增管理員</button>
+        </div>
+      </div>
+      <div class="admin-list" id="admin-users-list"></div>
+      <div class="block">
+        <div class="block-label">事件列表</div>
+      </div>
+      <div class="admin-list" id="admin-incidents-list"></div>
     </div>
   </aside>
 
@@ -727,7 +757,10 @@ const panelSub = document.getElementById('panel-sub');
 const dashboardPanel = document.getElementById('dashboard-panel');
 const adminPanel = document.getElementById('admin-panel');
 const adminStatus = document.getElementById('admin-status');
-const adminList = document.getElementById('admin-list');
+const adminUsersList = document.getElementById('admin-users-list');
+const adminIncidentsList = document.getElementById('admin-incidents-list');
+const adminEmail = document.getElementById('admin-email');
+const btnAdminAdd = document.getElementById('btn-admin-add');
 const btnAdminRefresh = document.getElementById('btn-admin-refresh');
 
 btnPanel.addEventListener('click', () => {
@@ -773,6 +806,7 @@ let selectedHexLayer = null;
 let selectedHex = null;
 let allIncidents = [];
 let allAdminIncidents = [];
+let allAdminUsers = [];
 const reportHexFeatureById = new Map();
 
 const incFab = document.getElementById('inc-fab');
@@ -802,7 +836,11 @@ btnAdmin.addEventListener('click', () => {
 });
 
 btnAdminRefresh.addEventListener('click', () => {
-  loadAdminIncidents();
+  loadAdminData();
+});
+
+btnAdminAdd.addEventListener('click', () => {
+  createAdminUser();
 });
 
 function setStatus(el, message, state = '') {
@@ -846,8 +884,8 @@ async function showAdminPanel() {
   panelSub.textContent = 'Incident Admin';
   window.setTimeout(() => map.invalidateSize(), 280);
 
-  if (allAdminIncidents.length === 0) {
-    await loadAdminIncidents();
+  if (allAdminIncidents.length === 0 && allAdminUsers.length === 0) {
+    await loadAdminData();
   }
 }
 
@@ -918,13 +956,13 @@ function updateStatsPanel() {
   document.getElementById('bar-harassment-num').textContent = harassmentCount;
 }
 
-function renderAdminList() {
+function renderAdminIncidentList() {
   if (allAdminIncidents.length === 0) {
-    adminList.innerHTML = '<div class="admin-status">目前沒有事件</div>';
+    adminIncidentsList.innerHTML = '<div class="admin-status">目前沒有事件</div>';
     return;
   }
 
-  adminList.innerHTML = allAdminIncidents.map(incident => {
+  adminIncidentsList.innerHTML = allAdminIncidents.map(incident => {
     const isHidden = incident.status === 'hidden';
     const disabled = isHidden ? 'disabled' : '';
     return `
@@ -941,6 +979,26 @@ function renderAdminList() {
       </article>
     `;
   }).join('');
+}
+
+function renderAdminUserList() {
+  if (allAdminUsers.length === 0) {
+    adminUsersList.innerHTML = '<div class="admin-status">目前沒有管理員</div>';
+    return;
+  }
+
+  adminUsersList.innerHTML = allAdminUsers.map(user => `
+    <article class="admin-item" data-admin-email="${escapeHtml(user.email)}">
+      <div class="admin-item-head">
+        <div class="admin-item-title">${escapeHtml(user.email)}</div>
+        <span class="admin-badge public">admin</span>
+      </div>
+      <div class="admin-meta">新增者 ${escapeHtml(user.created_by || '-')} · ${escapeHtml(user.created_at)}</div>
+      <div class="admin-actions">
+        <button class="btn-danger" data-delete-admin="${escapeHtml(user.email)}">刪除</button>
+      </div>
+    </article>
+  `).join('');
 }
 
 function renderIncidents() {
@@ -1029,12 +1087,66 @@ async function loadIncidents() {
   renderIncidents();
 }
 
-async function loadAdminIncidents() {
+async function loadAdminData() {
   btnAdminRefresh.disabled = true;
   setAdminStatus('載入中');
 
   try {
-    const response = await fetch('/api/admin/incidents', { headers: { accept: 'application/json' } });
+    const [incidentsResponse, usersResponse] = await Promise.all([
+      fetch('/api/admin/incidents', { headers: { accept: 'application/json' } }),
+      fetch('/api/admin/users', { headers: { accept: 'application/json' } })
+    ]);
+
+    if (
+      incidentsResponse.status === 401 ||
+      incidentsResponse.status === 403 ||
+      usersResponse.status === 401 ||
+      usersResponse.status === 403
+    ) {
+      authSession = null;
+      setAdminButtonVisible(false);
+      showDashboardPanel();
+      return;
+    }
+    if (!incidentsResponse.ok || !usersResponse.ok) {
+      setAdminStatus('載入失敗');
+      return;
+    }
+
+    const incidentsData = await incidentsResponse.json();
+    const usersData = await usersResponse.json();
+    allAdminIncidents = Array.isArray(incidentsData.incidents) ? incidentsData.incidents : [];
+    allAdminUsers = Array.isArray(usersData.admins) ? usersData.admins : [];
+    renderAdminIncidentList();
+    renderAdminUserList();
+    setAdminStatus(`${allAdminIncidents.length} 件事件 · ${allAdminUsers.length} 位管理員`);
+  } catch {
+    setAdminStatus('載入失敗');
+  } finally {
+    btnAdminRefresh.disabled = false;
+  }
+}
+
+async function createAdminUser() {
+  const email = adminEmail.value.trim().toLowerCase();
+  if (!email.endsWith('@ntu.edu.tw')) {
+    setAdminStatus('請輸入 @ntu.edu.tw email');
+    return;
+  }
+
+  btnAdminAdd.disabled = true;
+  setAdminStatus('新增管理員中');
+
+  try {
+    const response = await fetch('/api/admin/users', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json'
+      },
+      body: JSON.stringify({ email })
+    });
+
     if (response.status === 401 || response.status === 403) {
       authSession = null;
       setAdminButtonVisible(false);
@@ -1042,18 +1154,22 @@ async function loadAdminIncidents() {
       return;
     }
     if (!response.ok) {
-      setAdminStatus('載入失敗');
+      setAdminStatus('新增管理員失敗');
       return;
     }
 
     const data = await response.json();
-    allAdminIncidents = Array.isArray(data.incidents) ? data.incidents : [];
-    renderAdminList();
-    setAdminStatus(`${allAdminIncidents.length} 件事件`);
+    allAdminUsers = [
+      data.admin,
+      ...allAdminUsers.filter(user => user.email !== data.admin.email)
+    ];
+    adminEmail.value = '';
+    renderAdminUserList();
+    setAdminStatus(`${allAdminIncidents.length} 件事件 · ${allAdminUsers.length} 位管理員`);
   } catch {
-    setAdminStatus('載入失敗');
+    setAdminStatus('新增管理員失敗');
   } finally {
-    btnAdminRefresh.disabled = false;
+    btnAdminAdd.disabled = false;
   }
 }
 
@@ -1199,7 +1315,7 @@ btnVerifyCode.addEventListener('click', async () => {
   }
 });
 
-adminList.addEventListener('click', async event => {
+adminIncidentsList.addEventListener('click', async event => {
   const button = event.target.closest('[data-delete-incident]');
   if (!button) return;
 
@@ -1233,11 +1349,54 @@ adminList.addEventListener('click', async event => {
       Number(incident.id) === id ? data.incident : incident
     );
     allIncidents = allIncidents.filter(incident => Number(incident.id) !== id);
-    renderAdminList();
+    renderAdminIncidentList();
     renderIncidents();
-    setAdminStatus(`${allAdminIncidents.length} 件事件`);
+    setAdminStatus(`${allAdminIncidents.length} 件事件 · ${allAdminUsers.length} 位管理員`);
   } catch {
     setAdminStatus('刪除失敗');
+    button.disabled = false;
+  }
+});
+
+adminUsersList.addEventListener('click', async event => {
+  const button = event.target.closest('[data-delete-admin]');
+  if (!button) return;
+
+  const email = button.dataset.deleteAdmin;
+  if (!email) return;
+  if (!window.confirm(`確定刪除管理員 ${email}？`)) return;
+
+  button.disabled = true;
+  setAdminStatus('刪除管理員中');
+
+  try {
+    const response = await fetch(`/api/admin/users/${encodeURIComponent(email)}`, {
+      method: 'DELETE',
+      headers: { accept: 'application/json' }
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      authSession = null;
+      setAdminButtonVisible(false);
+      showDashboardPanel();
+      return;
+    }
+    if (response.status === 409) {
+      setAdminStatus('不能刪除最後一位管理員');
+      button.disabled = false;
+      return;
+    }
+    if (!response.ok) {
+      setAdminStatus('刪除管理員失敗');
+      button.disabled = false;
+      return;
+    }
+
+    allAdminUsers = allAdminUsers.filter(user => user.email !== email);
+    renderAdminUserList();
+    setAdminStatus(`${allAdminIncidents.length} 件事件 · ${allAdminUsers.length} 位管理員`);
+  } catch {
+    setAdminStatus('刪除管理員失敗');
     button.disabled = false;
   }
 });

@@ -7,16 +7,18 @@ export function isAllowedNtuEmail(email) {
   return typeof email === "string" && email.toLowerCase().endsWith("@ntu.edu.tw");
 }
 
-export function isAdminEmail(email, env) {
+export async function isAdminEmail(email, env) {
   if (typeof email !== "string") return false;
   const normalized = email.trim().toLowerCase();
   if (!normalized) return false;
 
-  return String(env.ADMIN_EMAILS || "")
-    .split(/[\s,]+/)
-    .map((value) => value.trim().toLowerCase())
-    .filter(Boolean)
-    .includes(normalized);
+  const admin = await env.DB.prepare(
+    `SELECT email
+     FROM admin_users
+     WHERE email = ?`,
+  ).bind(normalized).first();
+
+  return Boolean(admin);
 }
 
 export function randomDigits(length = 6) {

@@ -1,23 +1,8 @@
-import { getSessionEmail, isAdminEmail, isAllowedNtuEmail } from "../../../_shared/auth.js";
-import { badRequest, json, methodNotAllowed, serverMisconfigured } from "../../../_shared/http.js";
-import { adminIncident, hashSalt } from "../../../_shared/incidents.js";
-
-async function requireAdmin(request, env) {
-  const email = await getSessionEmail(request, env);
-  if (!isAllowedNtuEmail(email)) {
-    return { ok: false, response: json({ error: "unauthorized" }, { status: 401 }) };
-  }
-  if (!isAdminEmail(email, env)) {
-    return { ok: false, response: json({ error: "forbidden" }, { status: 403 }) };
-  }
-  return { ok: true, email };
-}
+import { requireAdmin } from "../../../_shared/admin.js";
+import { badRequest, json, methodNotAllowed } from "../../../_shared/http.js";
+import { adminIncident } from "../../../_shared/incidents.js";
 
 export async function onRequestDelete({ request, env, params }) {
-  if (!hashSalt(env)) {
-    return serverMisconfigured("missing_hash_salt");
-  }
-
   const admin = await requireAdmin(request, env);
   if (!admin.ok) return admin.response;
 

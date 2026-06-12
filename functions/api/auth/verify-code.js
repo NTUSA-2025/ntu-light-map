@@ -52,7 +52,7 @@ export async function onRequestPost({ request, env }) {
 
   const token = await createSession(env, email);
   return json(
-    { authenticated: true, email, admin: isAdminEmail(email, env) },
+    { authenticated: true, email, admin: await isAdminEmail(email, env) },
     { headers: { "set-cookie": sessionCookie(token) } },
   );
 }

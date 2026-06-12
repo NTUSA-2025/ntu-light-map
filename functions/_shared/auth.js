@@ -7,6 +7,20 @@ export function isAllowedNtuEmail(email) {
   return typeof email === "string" && email.toLowerCase().endsWith("@ntu.edu.tw");
 }
 
+export async function isAdminEmail(email, env) {
+  if (typeof email !== "string") return false;
+  const normalized = email.trim().toLowerCase();
+  if (!normalized) return false;
+
+  const admin = await env.DB.prepare(
+    `SELECT email
+     FROM admin_users
+     WHERE email = ?`,
+  ).bind(normalized).first();
+
+  return Boolean(admin);
+}
+
 export function randomDigits(length = 6) {
   const bytes = new Uint8Array(length);
   crypto.getRandomValues(bytes);

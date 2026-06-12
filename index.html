@@ -974,7 +974,7 @@ function renderAdminIncidentList() {
         <div class="admin-desc">${escapeHtml(incident.description)}</div>
         <div class="admin-meta">區域 ${escapeHtml(incident.report_hex_id)} · ${escapeHtml(incident.created_at)}</div>
         <div class="admin-actions">
-          <button class="btn-danger" data-delete-incident="${escapeHtml(incident.id)}" ${disabled}>刪除</button>
+          <button class="btn-danger" data-delete-incident="${escapeHtml(incident.id)}" ${disabled}>封存</button>
         </div>
       </article>
     `;
@@ -1321,10 +1321,10 @@ adminIncidentsList.addEventListener('click', async event => {
 
   const id = Number(button.dataset.deleteIncident);
   if (!Number.isInteger(id)) return;
-  if (!window.confirm(`確定刪除事件 #${id}？`)) return;
+  if (!window.confirm(`確定封存事件 #${id}？`)) return;
 
   button.disabled = true;
-  setAdminStatus('刪除中');
+  setAdminStatus('封存中');
 
   try {
     const response = await fetch(`/api/admin/incidents/${id}`, {
@@ -1339,7 +1339,7 @@ adminIncidentsList.addEventListener('click', async event => {
       return;
     }
     if (!response.ok) {
-      setAdminStatus('刪除失敗');
+      setAdminStatus('封存失敗');
       button.disabled = false;
       return;
     }
@@ -1353,7 +1353,7 @@ adminIncidentsList.addEventListener('click', async event => {
     renderIncidents();
     setAdminStatus(`${allAdminIncidents.length} 件事件 · ${allAdminUsers.length} 位管理員`);
   } catch {
-    setAdminStatus('刪除失敗');
+    setAdminStatus('封存失敗');
     button.disabled = false;
   }
 });

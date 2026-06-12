@@ -86,3 +86,10 @@ export function publicIncident(row) {
     created_at: row.created_at,
   };
 }
+
+export function adminIncident(row) {
+  return {
+    ...publicIncident(row),
+    status: row.status,
+  };
+}

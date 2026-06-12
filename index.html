@@ -100,6 +100,7 @@
       opacity: 0.45;
     }
     .dock-btn:disabled:hover { background: transparent; color: var(--text-lo); }
+    .dock-btn.hidden { display: none; }
 
     .dock-tip {
       position: absolute;
@@ -169,6 +170,7 @@
       flex-direction: column;
       gap: 12px;
     }
+    .panel-body.hidden { display: none; }
     .panel-body::-webkit-scrollbar { width: 3px; }
     .panel-body::-webkit-scrollbar-track { background: transparent; }
     .panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
@@ -220,6 +222,102 @@
     .layer-left { display: flex; align-items: center; gap: 10px; }
     .layer-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
     .layer-name { color: var(--text-mid); font-size: 0.875rem; white-space: nowrap; }
+
+    .admin-tools {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .admin-status {
+      color: var(--text-lo);
+      font-size: 0.75rem;
+      font-family: 'DM Mono', monospace;
+      min-width: 0;
+    }
+    .admin-list { display: flex; flex-direction: column; gap: 8px; }
+    .admin-form {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-top: 10px;
+    }
+    .admin-input {
+      background: rgba(0,0,0,0.35);
+      border: 0.5px solid rgba(255,255,255,0.14);
+      color: var(--text-hi);
+      border-radius: 8px;
+      padding: 8px 10px;
+      font-size: 12px;
+      font-family: 'DM Sans', sans-serif;
+      outline: none;
+      width: 100%;
+    }
+    .admin-input:focus { border-color: rgba(216,90,48,0.5); }
+    .admin-item {
+      background: var(--bg-card);
+      border: 0.5px solid var(--border);
+      border-radius: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .admin-item.hidden-incident { opacity: 0.55; }
+    .admin-item-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
+    .admin-item-title {
+      color: var(--text-hi);
+      font-size: 0.8125rem;
+      font-weight: 500;
+      min-width: 0;
+    }
+    .admin-badge {
+      border-radius: 999px;
+      padding: 2px 7px;
+      background: rgba(255,255,255,0.07);
+      color: var(--text-mid);
+      font-size: 0.6875rem;
+      font-family: 'DM Mono', monospace;
+      flex-shrink: 0;
+    }
+    .admin-badge.public { color: #7bcfa1; }
+    .admin-badge.hidden { color: var(--coral-light); }
+    .admin-desc {
+      color: var(--text-mid);
+      font-size: 0.8125rem;
+      line-height: 1.45;
+      overflow-wrap: anywhere;
+    }
+    .admin-meta {
+      color: var(--text-lo);
+      font-size: 0.6875rem;
+      font-family: 'DM Mono', monospace;
+      line-height: 1.45;
+    }
+    .admin-actions {
+      display: flex;
+      gap: 7px;
+      justify-content: flex-end;
+    }
+    .btn-danger {
+      background: rgba(216,90,48,0.16);
+      border: 0.5px solid rgba(216,90,48,0.36);
+      color: var(--coral-light);
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-danger:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
 
     .tog {
       width: 34px;
@@ -467,6 +565,14 @@
       <span class="dock-tip">回報事件</span>
     </button>
 
+    <button class="dock-btn hidden" id="btnAdmin" aria-label="後台管理">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/>
+        <path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>
+      </svg>
+      <span class="dock-tip">後台管理</span>
+    </button>
+
     <div class="dock-spacer"></div>
     <div class="dock-div"></div>
 
@@ -490,10 +596,10 @@
 
   <aside id="panel" aria-label="數據面板">
     <div class="panel-head">
-      <div class="panel-head-title">台大校園概況</div>
-      <div class="panel-head-sub">NTU Campus · Live</div>
+      <div class="panel-head-title" id="panel-title">台大校園概況</div>
+      <div class="panel-head-sub" id="panel-sub">NTU Campus · Live</div>
     </div>
-    <div class="panel-body">
+    <div class="panel-body" id="dashboard-panel">
       <div class="stat-grid">
         <div class="stat-card">
           <div class="stat-label">回報事件</div>
@@ -555,6 +661,24 @@
           <button class="tog" id="tog-protect" aria-label="切換光害控制區圖層"></button>
         </div>
       </div>
+    </div>
+    <div class="panel-body hidden" id="admin-panel">
+      <div class="block admin-tools">
+        <div class="admin-status" id="admin-status">尚未載入</div>
+        <button class="btn-sec" id="btn-admin-refresh">重新整理</button>
+      </div>
+      <div class="block">
+        <div class="block-label">管理員</div>
+        <div class="admin-form">
+          <input class="admin-input" id="admin-email" type="email" placeholder="name@ntu.edu.tw" autocomplete="off"/>
+          <button class="btn-pri" id="btn-admin-add">新增管理員</button>
+        </div>
+      </div>
+      <div class="admin-list" id="admin-users-list"></div>
+      <div class="block">
+        <div class="block-label">事件列表</div>
+      </div>
+      <div class="admin-list" id="admin-incidents-list"></div>
     </div>
   </aside>
 
@@ -643,8 +767,24 @@ const panel = document.getElementById('panel');
 const btnPanel = document.getElementById('btnPanel');
 const btnReport = document.getElementById('btnReport');
 const btnLogout = document.getElementById('btnLogout');
+const btnAdmin = document.getElementById('btnAdmin');
+const panelTitle = document.getElementById('panel-title');
+const panelSub = document.getElementById('panel-sub');
+const dashboardPanel = document.getElementById('dashboard-panel');
+const adminPanel = document.getElementById('admin-panel');
+const adminStatus = document.getElementById('admin-status');
+const adminUsersList = document.getElementById('admin-users-list');
+const adminIncidentsList = document.getElementById('admin-incidents-list');
+const adminEmail = document.getElementById('admin-email');
+const btnAdminAdd = document.getElementById('btn-admin-add');
+const btnAdminRefresh = document.getElementById('btn-admin-refresh');
 
 btnPanel.addEventListener('click', () => {
+  if (dashboardPanel.classList.contains('hidden')) {
+    showDashboardPanel();
+    return;
+  }
+
   const closed = panel.classList.toggle('closed');
   btnPanel.classList.toggle('active', !closed);
   window.setTimeout(() => map.invalidateSize(), 280);
@@ -681,6 +821,8 @@ let reportHexLayer = null;
 let selectedHexLayer = null;
 let selectedHex = null;
 let allIncidents = [];
+let allAdminIncidents = [];
+let allAdminUsers = [];
 const reportHexFeatureById = new Map();
 
 const incFab = document.getElementById('inc-fab');
@@ -705,6 +847,18 @@ btnReport.addEventListener('click', () => {
   beginIncidentFlow();
 });
 
+btnAdmin.addEventListener('click', () => {
+  showAdminPanel();
+});
+
+btnAdminRefresh.addEventListener('click', () => {
+  loadAdminData();
+});
+
+btnAdminAdd.addEventListener('click', () => {
+  createAdminUser();
+});
+
 function setStatus(el, message, state = '') {
   el.textContent = message;
   el.className = `dlg-status ${state}`.trim();
@@ -713,6 +867,49 @@ function setStatus(el, message, state = '') {
 function setAuthSession(session) {
   authSession = session?.authenticated ? session : null;
   btnLogout.disabled = !authSession;
+  setAdminButtonVisible(Boolean(authSession?.admin));
+  if (!authSession?.admin && !adminPanel.classList.contains('hidden')) showDashboardPanel();
+}
+
+function setAdminStatus(message) {
+  adminStatus.textContent = message;
+}
+
+function setAdminButtonVisible(visible) {
+  btnAdmin.classList.toggle('hidden', !visible);
+}
+
+function showDashboardPanel() {
+  panel.classList.remove('closed');
+  dashboardPanel.classList.remove('hidden');
+  adminPanel.classList.add('hidden');
+  btnPanel.classList.add('active');
+  btnAdmin.classList.remove('active');
+  panelTitle.textContent = '台大校園概況';
+  panelSub.textContent = 'NTU Campus · Live';
+  window.setTimeout(() => map.invalidateSize(), 280);
+}
+
+async function showAdminPanel() {
+  authSession = authSession || await getAuthSession();
+  if (!authSession?.admin) {
+    setAuthSession(authSession);
+    showDashboardPanel();
+    return;
+  }
+
+  panel.classList.remove('closed');
+  dashboardPanel.classList.add('hidden');
+  adminPanel.classList.remove('hidden');
+  btnPanel.classList.remove('active');
+  btnAdmin.classList.add('active');
+  panelTitle.textContent = '事件後台';
+  panelSub.textContent = 'Incident Admin';
+  window.setTimeout(() => map.invalidateSize(), 280);
+
+  if (allAdminIncidents.length === 0 && allAdminUsers.length === 0) {
+    await loadAdminData();
+  }
 }
 
 function showAuth() {
@@ -780,6 +977,51 @@ function updateStatsPanel() {
   document.getElementById('bar-harassment').style.width =
     `${Math.round(harassmentCount / maxCount * 100)}%`;
   document.getElementById('bar-harassment-num').textContent = harassmentCount;
+}
+
+function renderAdminIncidentList() {
+  if (allAdminIncidents.length === 0) {
+    adminIncidentsList.innerHTML = '<div class="admin-status">目前沒有事件</div>';
+    return;
+  }
+
+  adminIncidentsList.innerHTML = allAdminIncidents.map(incident => {
+    const isHidden = incident.status === 'hidden';
+    const disabled = isHidden ? 'disabled' : '';
+    return `
+      <article class="admin-item ${isHidden ? 'hidden-incident' : ''}" data-incident-id="${escapeHtml(incident.id)}">
+        <div class="admin-item-head">
+          <div class="admin-item-title">${escapeHtml(incidentLabel(incident.type))} · #${escapeHtml(incident.id)}</div>
+          <span class="admin-badge ${escapeHtml(incident.status)}">${escapeHtml(incident.status)}</span>
+        </div>
+        <div class="admin-desc">${escapeHtml(incident.description)}</div>
+        <div class="admin-meta">區域 ${escapeHtml(incident.report_hex_id)} · ${escapeHtml(incident.created_at)}</div>
+        <div class="admin-actions">
+          <button class="btn-danger" data-delete-incident="${escapeHtml(incident.id)}" ${disabled}>封存</button>
+        </div>
+      </article>
+    `;
+  }).join('');
+}
+
+function renderAdminUserList() {
+  if (allAdminUsers.length === 0) {
+    adminUsersList.innerHTML = '<div class="admin-status">目前沒有管理員</div>';
+    return;
+  }
+
+  adminUsersList.innerHTML = allAdminUsers.map(user => `
+    <article class="admin-item" data-admin-email="${escapeHtml(user.email)}">
+      <div class="admin-item-head">
+        <div class="admin-item-title">${escapeHtml(user.email)}</div>
+        <span class="admin-badge public">admin</span>
+      </div>
+      <div class="admin-meta">新增者 ${escapeHtml(user.created_by || '-')} · ${escapeHtml(user.created_at)}</div>
+      <div class="admin-actions">
+        <button class="btn-danger" data-delete-admin="${escapeHtml(user.email)}">刪除</button>
+      </div>
+    </article>
+  `).join('');
 }
 
 function renderIncidents() {
@@ -866,6 +1108,90 @@ async function loadIncidents() {
   const data = await response.json();
   allIncidents = Array.isArray(data.incidents) ? data.incidents : [];
   renderIncidents();
+}
+
+async function loadAdminData() {
+  btnAdminRefresh.disabled = true;
+  setAdminStatus('載入中');
+
+  try {
+    const [incidentsResponse, usersResponse] = await Promise.all([
+      fetch('/api/admin/incidents', { headers: { accept: 'application/json' } }),
+      fetch('/api/admin/users', { headers: { accept: 'application/json' } })
+    ]);
+
+    if (
+      incidentsResponse.status === 401 ||
+      incidentsResponse.status === 403 ||
+      usersResponse.status === 401 ||
+      usersResponse.status === 403
+    ) {
+      setAuthSession(null);
+      showDashboardPanel();
+      return;
+    }
+    if (!incidentsResponse.ok || !usersResponse.ok) {
+      setAdminStatus('載入失敗');
+      return;
+    }
+
+    const incidentsData = await incidentsResponse.json();
+    const usersData = await usersResponse.json();
+    allAdminIncidents = Array.isArray(incidentsData.incidents) ? incidentsData.incidents : [];
+    allAdminUsers = Array.isArray(usersData.admins) ? usersData.admins : [];
+    renderAdminIncidentList();
+    renderAdminUserList();
+    setAdminStatus(`${allAdminIncidents.length} 件事件 · ${allAdminUsers.length} 位管理員`);
+  } catch {
+    setAdminStatus('載入失敗');
+  } finally {
+    btnAdminRefresh.disabled = false;
+  }
+}
+
+async function createAdminUser() {
+  const email = adminEmail.value.trim().toLowerCase();
+  if (!email.endsWith('@ntu.edu.tw')) {
+    setAdminStatus('請輸入 @ntu.edu.tw email');
+    return;
+  }
+
+  btnAdminAdd.disabled = true;
+  setAdminStatus('新增管理員中');
+
+  try {
+    const response = await fetch('/api/admin/users', {
+      method: 'POST',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json'
+      },
+      body: JSON.stringify({ email })
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      setAuthSession(null);
+      showDashboardPanel();
+      return;
+    }
+    if (!response.ok) {
+      setAdminStatus('新增管理員失敗');
+      return;
+    }
+
+    const data = await response.json();
+    allAdminUsers = [
+      data.admin,
+      ...allAdminUsers.filter(user => user.email !== data.admin.email)
+    ];
+    adminEmail.value = '';
+    renderAdminUserList();
+    setAdminStatus(`${allAdminIncidents.length} 件事件 · ${allAdminUsers.length} 位管理員`);
+  } catch {
+    setAdminStatus('新增管理員失敗');
+  } finally {
+    btnAdminAdd.disabled = false;
+  }
 }
 
 async function loadReportHexes() {
@@ -1021,6 +1347,90 @@ btnVerifyCode.addEventListener('click', async () => {
     setStatus(authStatus, '驗證失敗', 'err');
   } finally {
     btnVerifyCode.disabled = false;
+  }
+});
+
+adminIncidentsList.addEventListener('click', async event => {
+  const button = event.target.closest('[data-delete-incident]');
+  if (!button) return;
+
+  const id = Number(button.dataset.deleteIncident);
+  if (!Number.isInteger(id)) return;
+  if (!window.confirm(`確定封存事件 #${id}？`)) return;
+
+  button.disabled = true;
+  setAdminStatus('封存中');
+
+  try {
+    const response = await fetch(`/api/admin/incidents/${id}`, {
+      method: 'DELETE',
+      headers: { accept: 'application/json' }
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      setAuthSession(null);
+      showDashboardPanel();
+      return;
+    }
+    if (!response.ok) {
+      setAdminStatus('封存失敗');
+      button.disabled = false;
+      return;
+    }
+
+    const data = await response.json();
+    allAdminIncidents = allAdminIncidents.map(incident =>
+      Number(incident.id) === id ? data.incident : incident
+    );
+    allIncidents = allIncidents.filter(incident => Number(incident.id) !== id);
+    renderAdminIncidentList();
+    renderIncidents();
+    setAdminStatus(`${allAdminIncidents.length} 件事件 · ${allAdminUsers.length} 位管理員`);
+  } catch {
+    setAdminStatus('封存失敗');
+    button.disabled = false;
+  }
+});
+
+adminUsersList.addEventListener('click', async event => {
+  const button = event.target.closest('[data-delete-admin]');
+  if (!button) return;
+
+  const email = button.dataset.deleteAdmin;
+  if (!email) return;
+  if (!window.confirm(`確定刪除管理員 ${email}？`)) return;
+
+  button.disabled = true;
+  setAdminStatus('刪除管理員中');
+
+  try {
+    const response = await fetch(`/api/admin/users/${encodeURIComponent(email)}`, {
+      method: 'DELETE',
+      headers: { accept: 'application/json' }
+    });
+
+    if (response.status === 401 || response.status === 403) {
+      setAuthSession(null);
+      showDashboardPanel();
+      return;
+    }
+    if (response.status === 409) {
+      setAdminStatus('不能刪除最後一位管理員');
+      button.disabled = false;
+      return;
+    }
+    if (!response.ok) {
+      setAdminStatus('刪除管理員失敗');
+      button.disabled = false;
+      return;
+    }
+
+    allAdminUsers = allAdminUsers.filter(user => user.email !== email);
+    renderAdminUserList();
+    setAdminStatus(`${allAdminIncidents.length} 件事件 · ${allAdminUsers.length} 位管理員`);
+  } catch {
+    setAdminStatus('刪除管理員失敗');
+    button.disabled = false;
   }
 });
 

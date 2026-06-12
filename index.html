@@ -318,7 +318,7 @@
     .admin-screen {
       position: absolute;
       inset: 0;
-      z-index: 450;
+      z-index: 1200;
       display: flex;
       flex-direction: column;
       background: var(--bg-shell);
@@ -334,6 +334,34 @@
       background: var(--bg-panel);
       border-bottom: 0.5px solid var(--border);
       flex-shrink: 0;
+    }
+    .admin-close {
+      width: 34px;
+      height: 34px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(255,255,255,0.06);
+      border: 0.5px solid var(--border);
+      border-radius: 8px;
+      color: var(--text-mid);
+      cursor: pointer;
+      flex-shrink: 0;
+    }
+    .admin-close:hover {
+      color: var(--text-hi);
+      background: rgba(255,255,255,0.1);
+    }
+    .admin-status-log {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
     }
     .admin-screen-body {
       flex: 1;
@@ -801,7 +829,13 @@
           <div class="panel-head-title">事件後台</div>
           <div class="panel-head-sub">Incident Admin</div>
         </div>
-        <div class="admin-status" id="admin-status">尚未載入</div>
+        <div class="admin-status-log" id="admin-status" aria-live="polite">尚未載入</div>
+        <button class="admin-close" id="btn-admin-close" type="button" aria-label="關閉事件後台">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true">
+            <path d="M18 6 6 18"/>
+            <path d="m6 6 12 12"/>
+          </svg>
+        </button>
       </header>
       <div class="admin-screen-body">
         <section class="admin-section">
@@ -810,11 +844,6 @@
               <div class="admin-section-title">管理員</div>
               <div class="admin-section-sub">Admin Users</div>
             </div>
-            <span class="admin-count" id="admin-user-count">0</span>
-          </div>
-          <div class="admin-toolbar">
-            <span class="admin-toolbar-label">名單維護</span>
-            <button class="btn-sec" id="btn-admin-refresh">重新整理</button>
           </div>
           <div class="block">
             <div class="block-label">新增管理員</div>
@@ -831,7 +860,6 @@
               <div class="admin-section-title">事件管理</div>
               <div class="admin-section-sub">Incident Review</div>
             </div>
-            <span class="admin-count" id="admin-incident-count">0</span>
           </div>
           <div class="admin-list" id="admin-incidents-list"></div>
         </section>
@@ -1055,8 +1083,8 @@ async function showAdminPanel() {
   adminPanel.classList.remove('hidden');
   btnPanel.classList.add('active');
   btnAdmin.classList.add('active');
-  panelTitle.textContent = '台大校園概況';
-  panelSub.textContent = 'NTU Campus · Live';
+  panelTitle.textContent = '台大校園夜間亮度地圖';
+  panelSub.textContent = 'NTU Nighttime Light Map';
   window.setTimeout(() => map.invalidateSize(), 280);
 
   if (allAdminIncidents.length === 0 && allAdminUsers.length === 0) {

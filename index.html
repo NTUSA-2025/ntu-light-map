@@ -1531,7 +1531,6 @@ adminIncidentsList.addEventListener('click', async event => {
 
   const isRestoring = nextStatus === 'public';
   const actionLabel = isRestoring ? '恢復' : '封存';
-  if (!window.confirm(`確定${actionLabel}事件 #${id}？`)) return;
 
   button.disabled = true;
   setAdminStatus(`${actionLabel}中`);

@@ -217,17 +217,23 @@
     .layer-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
     .layer-name { color: var(--text-mid); font-size: 0.875rem; white-space: nowrap; }
 
-    .admin-tools {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      justify-content: space-between;
-    }
     .admin-status {
       color: var(--text-lo);
       font-size: 0.75rem;
       font-family: 'DM Mono', monospace;
       min-width: 0;
+    }
+    .admin-count {
+      min-width: 34px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      border: 0.5px solid var(--border);
+      color: var(--text-hi);
+      font-size: 0.75rem;
+      font-family: 'DM Mono', monospace;
+      line-height: 1;
+      padding: 6px 9px;
+      text-align: center;
     }
     .admin-list { display: flex; flex-direction: column; gap: 8px; }
     .admin-form {
@@ -257,7 +263,11 @@
       flex-direction: column;
       gap: 8px;
     }
-    .admin-item.hidden-incident { opacity: 0.55; }
+    .admin-item.hidden-incident {
+      background: rgba(216,90,48,0.08);
+      border-color: rgba(216,90,48,0.22);
+      opacity: 0.82;
+    }
     .admin-item-head {
       display: flex;
       align-items: center;
@@ -281,6 +291,7 @@
     }
     .admin-badge.public { color: #7bcfa1; }
     .admin-badge.hidden { color: var(--coral-light); }
+    .admin-badge.admin-role { color: #9ac7f5; }
     .admin-desc {
       color: var(--text-mid);
       font-size: 0.8125rem;
@@ -322,20 +333,56 @@
       flex: 1;
       display: grid;
       grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
-      gap: 14px;
+      gap: 18px;
       padding: 18px 24px 24px;
       overflow-y: auto;
     }
     .admin-screen-body::-webkit-scrollbar { width: 3px; }
     .admin-screen-body::-webkit-scrollbar-track { background: transparent; }
     .admin-screen-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
-    .admin-column {
+    .admin-section {
       display: flex;
       flex-direction: column;
       gap: 12px;
       min-width: 0;
+      padding-top: 2px;
     }
-    .admin-tools .block-label { margin-bottom: 0; }
+    .admin-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 42px;
+      padding-bottom: 10px;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .admin-section-title {
+      color: var(--text-hi);
+      font-size: 0.875rem;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+    .admin-section-sub {
+      color: var(--text-lo);
+      font-size: 0.6875rem;
+      font-family: 'DM Mono', monospace;
+      margin-top: 4px;
+    }
+    .admin-toolbar {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .admin-toolbar-label {
+      color: var(--text-lo);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
     .admin-main .admin-list {
       display: grid;
       grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
@@ -742,26 +789,37 @@
         <div class="admin-status" id="admin-status">尚未載入</div>
       </header>
       <div class="admin-screen-body">
-        <div class="admin-column">
-          <div class="block admin-tools">
-            <div class="block-label">管理工具</div>
+        <section class="admin-section">
+          <div class="admin-section-head">
+            <div>
+              <div class="admin-section-title">管理員</div>
+              <div class="admin-section-sub">Admin Users</div>
+            </div>
+            <span class="admin-count" id="admin-user-count">0</span>
+          </div>
+          <div class="admin-toolbar">
+            <span class="admin-toolbar-label">名單維護</span>
             <button class="btn-sec" id="btn-admin-refresh">重新整理</button>
           </div>
           <div class="block">
-            <div class="block-label">管理員</div>
+            <div class="block-label">新增管理員</div>
             <div class="admin-form">
               <input class="admin-input" id="admin-email" type="email" placeholder="name@ntu.edu.tw" autocomplete="off"/>
               <button class="btn-pri" id="btn-admin-add">新增管理員</button>
             </div>
           </div>
           <div class="admin-list" id="admin-users-list"></div>
-        </div>
-        <div class="admin-column admin-main">
-          <div class="block">
-            <div class="block-label">事件列表</div>
+        </section>
+        <section class="admin-section admin-main">
+          <div class="admin-section-head">
+            <div>
+              <div class="admin-section-title">事件管理</div>
+              <div class="admin-section-sub">Incident Review</div>
+            </div>
+            <span class="admin-count" id="admin-incident-count">0</span>
           </div>
           <div class="admin-list" id="admin-incidents-list"></div>
-        </div>
+        </section>
       </div>
     </section>
 
@@ -843,6 +901,8 @@ const panelSub = document.getElementById('panel-sub');
 const dashboardPanel = document.getElementById('dashboard-panel');
 const adminPanel = document.getElementById('admin-panel');
 const adminStatus = document.getElementById('admin-status');
+const adminUserCount = document.getElementById('admin-user-count');
+const adminIncidentCount = document.getElementById('admin-incident-count');
 const adminUsersList = document.getElementById('admin-users-list');
 const adminIncidentsList = document.getElementById('admin-incidents-list');
 const adminEmail = document.getElementById('admin-email');
@@ -1032,6 +1092,10 @@ function incidentColor(type) {
   return incidentTypeMeta[type]?.color || incidentTypeMeta.accident.color;
 }
 
+function incidentStatusLabel(status) {
+  return status === 'hidden' ? '已封存' : '公開';
+}
+
 function updateStatsPanel() {
   const total = allIncidents.length;
   const accidentCount = allIncidents.filter(incident => incident.type === 'accident').length;
@@ -1049,6 +1113,8 @@ function updateStatsPanel() {
 }
 
 function renderAdminIncidentList() {
+  adminIncidentCount.textContent = allAdminIncidents.length;
+
   if (allAdminIncidents.length === 0) {
     adminIncidentsList.innerHTML = '<div class="admin-status">目前沒有事件</div>';
     return;
@@ -1063,7 +1129,7 @@ function renderAdminIncidentList() {
       <article class="admin-item ${isHidden ? 'hidden-incident' : ''}" data-incident-id="${escapeHtml(incident.id)}">
         <div class="admin-item-head">
           <div class="admin-item-title">${escapeHtml(incidentLabel(incident.type))} · #${escapeHtml(incident.id)}</div>
-          <span class="admin-badge ${escapeHtml(incident.status)}">${escapeHtml(incident.status)}</span>
+          <span class="admin-badge ${escapeHtml(incident.status)}">${incidentStatusLabel(incident.status)}</span>
         </div>
         <div class="admin-desc">${escapeHtml(incident.description)}</div>
         <div class="admin-meta">區域 ${escapeHtml(incident.report_hex_id)} · ${escapeHtml(incident.created_at)}</div>
@@ -1076,6 +1142,8 @@ function renderAdminIncidentList() {
 }
 
 function renderAdminUserList() {
+  adminUserCount.textContent = allAdminUsers.length;
+
   if (allAdminUsers.length === 0) {
     adminUsersList.innerHTML = '<div class="admin-status">目前沒有管理員</div>';
     return;
@@ -1085,7 +1153,7 @@ function renderAdminUserList() {
     <article class="admin-item" data-admin-email="${escapeHtml(user.email)}">
       <div class="admin-item-head">
         <div class="admin-item-title">${escapeHtml(user.email)}</div>
-        <span class="admin-badge public">admin</span>
+        <span class="admin-badge admin-role">admin</span>
       </div>
       <div class="admin-meta">新增者 ${escapeHtml(user.created_by || '-')} · ${escapeHtml(user.created_at)}</div>
       <div class="admin-actions">

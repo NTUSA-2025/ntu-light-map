@@ -1263,17 +1263,27 @@ incDesc.addEventListener('input', updateSubmitState);
 
 btnLogout.addEventListener('click', async () => {
   if (btnLogout.disabled) return;
+  const previousSession = authSession;
   btnLogout.disabled = true;
 
   try {
-    await fetch('/api/auth/logout', {
+    const response = await fetch('/api/auth/logout', {
       method: 'POST',
       headers: { accept: 'application/json' }
     });
-  } finally {
+    if (!response.ok) throw new Error('logout_failed');
+
     setAuthSession(null);
     closeDialog();
-    setStatus(authStatus, '已登出，請重新驗證後回報');
+    setStatus(authStatus, '已登出，請重新登入');
+  } catch {
+    setAuthSession(previousSession);
+    if (!incDialog.classList.contains('show')) {
+      incDialog.classList.add('show');
+      btnReport.classList.add('active');
+    }
+    showReport();
+    setStatus(reportStatus, '登出失敗，請稍後再試', 'err');
   }
 });
 

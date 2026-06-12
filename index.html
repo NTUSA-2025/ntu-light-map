@@ -223,17 +223,23 @@
     .layer-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
     .layer-name { color: var(--text-mid); font-size: 0.875rem; white-space: nowrap; }
 
-    .admin-tools {
-      display: flex;
-      gap: 8px;
-      align-items: center;
-      justify-content: space-between;
-    }
     .admin-status {
       color: var(--text-lo);
       font-size: 0.75rem;
       font-family: 'DM Mono', monospace;
       min-width: 0;
+    }
+    .admin-count {
+      min-width: 34px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.07);
+      border: 0.5px solid var(--border);
+      color: var(--text-hi);
+      font-size: 0.75rem;
+      font-family: 'DM Mono', monospace;
+      line-height: 1;
+      padding: 6px 9px;
+      text-align: center;
     }
     .admin-list { display: flex; flex-direction: column; gap: 8px; }
     .admin-form {
@@ -263,7 +269,11 @@
       flex-direction: column;
       gap: 8px;
     }
-    .admin-item.hidden-incident { opacity: 0.55; }
+    .admin-item.hidden-incident {
+      background: rgba(216,90,48,0.08);
+      border-color: rgba(216,90,48,0.22);
+      opacity: 0.82;
+    }
     .admin-item-head {
       display: flex;
       align-items: center;
@@ -287,6 +297,7 @@
     }
     .admin-badge.public { color: #7bcfa1; }
     .admin-badge.hidden { color: var(--coral-light); }
+    .admin-badge.admin-role { color: #9ac7f5; }
     .admin-desc {
       color: var(--text-mid);
       font-size: 0.8125rem;
@@ -304,6 +315,85 @@
       gap: 7px;
       justify-content: flex-end;
     }
+    .admin-screen {
+      position: absolute;
+      inset: 0;
+      z-index: 450;
+      display: flex;
+      flex-direction: column;
+      background: var(--bg-shell);
+      overflow: hidden;
+    }
+    .admin-screen.hidden { display: none; }
+    .admin-screen-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      padding: 18px 24px 14px;
+      background: var(--bg-panel);
+      border-bottom: 0.5px solid var(--border);
+      flex-shrink: 0;
+    }
+    .admin-screen-body {
+      flex: 1;
+      display: grid;
+      grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+      gap: 18px;
+      padding: 18px 24px 24px;
+      overflow-y: auto;
+    }
+    .admin-screen-body::-webkit-scrollbar { width: 3px; }
+    .admin-screen-body::-webkit-scrollbar-track { background: transparent; }
+    .admin-screen-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+    .admin-section {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      min-width: 0;
+      padding-top: 2px;
+    }
+    .admin-section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      min-height: 42px;
+      padding-bottom: 10px;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .admin-section-title {
+      color: var(--text-hi);
+      font-size: 0.875rem;
+      font-weight: 500;
+      line-height: 1.2;
+    }
+    .admin-section-sub {
+      color: var(--text-lo);
+      font-size: 0.6875rem;
+      font-family: 'DM Mono', monospace;
+      margin-top: 4px;
+    }
+    .admin-toolbar {
+      min-height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      padding: 10px 0;
+      border-bottom: 0.5px solid var(--border);
+    }
+    .admin-toolbar-label {
+      color: var(--text-lo);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+    .admin-main .admin-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 10px;
+    }
     .btn-danger {
       background: rgba(216,90,48,0.16);
       border: 0.5px solid rgba(216,90,48,0.36);
@@ -315,6 +405,20 @@
       font-family: 'DM Sans', sans-serif;
     }
     .btn-danger:disabled {
+      opacity: 0.45;
+      cursor: not-allowed;
+    }
+    .btn-restore {
+      background: rgba(123,207,161,0.14);
+      border: 0.5px solid rgba(123,207,161,0.36);
+      color: #7bcfa1;
+      border-radius: 8px;
+      padding: 6px 10px;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: 'DM Sans', sans-serif;
+    }
+    .btn-restore:disabled {
       opacity: 0.45;
       cursor: not-allowed;
     }
@@ -539,6 +643,17 @@
 
     .inc-section { display: flex; flex-direction: column; gap: 9px; }
     .inc-section.hidden { display: none; }
+
+    @media (max-width: 860px) {
+      .admin-screen-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+      .admin-screen-body {
+        grid-template-columns: 1fr;
+        padding: 14px;
+      }
+    }
   </style>
 </head>
 <body>
@@ -565,16 +680,20 @@
       <span class="dock-tip">回報事件</span>
     </button>
 
+    <div class="dock-spacer"></div>
+    <div class="dock-div"></div>
+
     <button class="dock-btn hidden" id="btnAdmin" aria-label="後台管理">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/>
-        <path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/>
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/>
+        <path d="M2 6h4"/>
+        <path d="M2 10h4"/>
+        <path d="M2 14h4"/>
+        <path d="M2 18h4"/>
+        <path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/>
       </svg>
       <span class="dock-tip">後台管理</span>
     </button>
-
-    <div class="dock-spacer"></div>
-    <div class="dock-div"></div>
 
     <button class="dock-btn" aria-label="設定">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
@@ -662,24 +781,6 @@
         </div>
       </div>
     </div>
-    <div class="panel-body hidden" id="admin-panel">
-      <div class="block admin-tools">
-        <div class="admin-status" id="admin-status">尚未載入</div>
-        <button class="btn-sec" id="btn-admin-refresh">重新整理</button>
-      </div>
-      <div class="block">
-        <div class="block-label">管理員</div>
-        <div class="admin-form">
-          <input class="admin-input" id="admin-email" type="email" placeholder="name@ntu.edu.tw" autocomplete="off"/>
-          <button class="btn-pri" id="btn-admin-add">新增管理員</button>
-        </div>
-      </div>
-      <div class="admin-list" id="admin-users-list"></div>
-      <div class="block">
-        <div class="block-label">事件列表</div>
-      </div>
-      <div class="admin-list" id="admin-incidents-list"></div>
-    </div>
   </aside>
 
   <div id="map-wrap">
@@ -693,6 +794,49 @@
 
     <div id="hex-tooltip" role="status" aria-live="polite"></div>
     <div id="map"></div>
+
+    <section class="admin-screen hidden" id="admin-panel" aria-label="事件後台">
+      <header class="admin-screen-head">
+        <div>
+          <div class="panel-head-title">事件後台</div>
+          <div class="panel-head-sub">Incident Admin</div>
+        </div>
+        <div class="admin-status" id="admin-status">尚未載入</div>
+      </header>
+      <div class="admin-screen-body">
+        <section class="admin-section">
+          <div class="admin-section-head">
+            <div>
+              <div class="admin-section-title">管理員</div>
+              <div class="admin-section-sub">Admin Users</div>
+            </div>
+            <span class="admin-count" id="admin-user-count">0</span>
+          </div>
+          <div class="admin-toolbar">
+            <span class="admin-toolbar-label">名單維護</span>
+            <button class="btn-sec" id="btn-admin-refresh">重新整理</button>
+          </div>
+          <div class="block">
+            <div class="block-label">新增管理員</div>
+            <div class="admin-form">
+              <input class="admin-input" id="admin-email" type="email" placeholder="name@ntu.edu.tw" autocomplete="off"/>
+              <button class="btn-pri" id="btn-admin-add">新增管理員</button>
+            </div>
+          </div>
+          <div class="admin-list" id="admin-users-list"></div>
+        </section>
+        <section class="admin-section admin-main">
+          <div class="admin-section-head">
+            <div>
+              <div class="admin-section-title">事件管理</div>
+              <div class="admin-section-sub">Incident Review</div>
+            </div>
+            <span class="admin-count" id="admin-incident-count">0</span>
+          </div>
+          <div class="admin-list" id="admin-incidents-list"></div>
+        </section>
+      </div>
+    </section>
 
     <button id="inc-fab" aria-label="回報安全事件">
       <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
@@ -773,6 +917,8 @@ const panelSub = document.getElementById('panel-sub');
 const dashboardPanel = document.getElementById('dashboard-panel');
 const adminPanel = document.getElementById('admin-panel');
 const adminStatus = document.getElementById('admin-status');
+const adminUserCount = document.getElementById('admin-user-count');
+const adminIncidentCount = document.getElementById('admin-incident-count');
 const adminUsersList = document.getElementById('admin-users-list');
 const adminIncidentsList = document.getElementById('admin-incidents-list');
 const adminEmail = document.getElementById('admin-email');
@@ -780,6 +926,11 @@ const btnAdminAdd = document.getElementById('btn-admin-add');
 const btnAdminRefresh = document.getElementById('btn-admin-refresh');
 
 btnPanel.addEventListener('click', () => {
+  if (!adminPanel.classList.contains('hidden')) {
+    showDashboardPanel();
+    return;
+  }
+
   if (dashboardPanel.classList.contains('hidden')) {
     showDashboardPanel();
     return;
@@ -898,13 +1049,14 @@ async function showAdminPanel() {
     return;
   }
 
+  if (incDialog.classList.contains('show')) closeDialog();
   panel.classList.remove('closed');
-  dashboardPanel.classList.add('hidden');
+  dashboardPanel.classList.remove('hidden');
   adminPanel.classList.remove('hidden');
-  btnPanel.classList.remove('active');
+  btnPanel.classList.add('active');
   btnAdmin.classList.add('active');
-  panelTitle.textContent = '事件後台';
-  panelSub.textContent = 'Incident Admin';
+  panelTitle.textContent = '台大校園概況';
+  panelSub.textContent = 'NTU Campus · Live';
   window.setTimeout(() => map.invalidateSize(), 280);
 
   if (allAdminIncidents.length === 0 && allAdminUsers.length === 0) {
@@ -963,6 +1115,10 @@ function incidentColor(type) {
   return incidentTypeMeta[type]?.color || incidentTypeMeta.accident.color;
 }
 
+function incidentStatusLabel(status) {
+  return status === 'hidden' ? '已封存' : '公開';
+}
+
 function updateStatsPanel() {
   const total = allIncidents.length;
   const accidentCount = allIncidents.filter(incident => incident.type === 'accident').length;
@@ -980,6 +1136,8 @@ function updateStatsPanel() {
 }
 
 function renderAdminIncidentList() {
+  adminIncidentCount.textContent = allAdminIncidents.length;
+
   if (allAdminIncidents.length === 0) {
     adminIncidentsList.innerHTML = '<div class="admin-status">目前沒有事件</div>';
     return;
@@ -987,17 +1145,19 @@ function renderAdminIncidentList() {
 
   adminIncidentsList.innerHTML = allAdminIncidents.map(incident => {
     const isHidden = incident.status === 'hidden';
-    const disabled = isHidden ? 'disabled' : '';
+    const nextStatus = isHidden ? 'public' : 'hidden';
+    const actionLabel = isHidden ? '恢復' : '封存';
+    const actionClass = isHidden ? 'btn-restore' : 'btn-danger';
     return `
       <article class="admin-item ${isHidden ? 'hidden-incident' : ''}" data-incident-id="${escapeHtml(incident.id)}">
         <div class="admin-item-head">
           <div class="admin-item-title">${escapeHtml(incidentLabel(incident.type))} · #${escapeHtml(incident.id)}</div>
-          <span class="admin-badge ${escapeHtml(incident.status)}">${escapeHtml(incident.status)}</span>
+          <span class="admin-badge ${escapeHtml(incident.status)}">${incidentStatusLabel(incident.status)}</span>
         </div>
         <div class="admin-desc">${escapeHtml(incident.description)}</div>
         <div class="admin-meta">區域 ${escapeHtml(incident.report_hex_id)} · ${escapeHtml(incident.created_at)}</div>
         <div class="admin-actions">
-          <button class="btn-danger" data-delete-incident="${escapeHtml(incident.id)}" ${disabled}>封存</button>
+          <button class="${actionClass}" data-incident-status="${nextStatus}">${actionLabel}</button>
         </div>
       </article>
     `;
@@ -1005,6 +1165,8 @@ function renderAdminIncidentList() {
 }
 
 function renderAdminUserList() {
+  adminUserCount.textContent = allAdminUsers.length;
+
   if (allAdminUsers.length === 0) {
     adminUsersList.innerHTML = '<div class="admin-status">目前沒有管理員</div>';
     return;
@@ -1014,7 +1176,7 @@ function renderAdminUserList() {
     <article class="admin-item" data-admin-email="${escapeHtml(user.email)}">
       <div class="admin-item-head">
         <div class="admin-item-title">${escapeHtml(user.email)}</div>
-        <span class="admin-badge public">admin</span>
+        <span class="admin-badge admin-role">admin</span>
       </div>
       <div class="admin-meta">新增者 ${escapeHtml(user.created_by || '-')} · ${escapeHtml(user.created_at)}</div>
       <div class="admin-actions">
@@ -1245,6 +1407,8 @@ async function refreshAuthSession() {
 }
 
 async function beginIncidentFlow() {
+  if (!adminPanel.classList.contains('hidden')) showDashboardPanel();
+
   if (incDialog.classList.contains('show')) {
     closeDialog();
     return;
@@ -1361,20 +1525,30 @@ btnVerifyCode.addEventListener('click', async () => {
 });
 
 adminIncidentsList.addEventListener('click', async event => {
-  const button = event.target.closest('[data-delete-incident]');
+  const button = event.target.closest('[data-incident-status]');
   if (!button) return;
 
-  const id = Number(button.dataset.deleteIncident);
+  const item = button.closest('[data-incident-id]');
+  const id = Number(item?.dataset.incidentId);
+  const nextStatus = button.dataset.incidentStatus;
   if (!Number.isInteger(id)) return;
-  if (!window.confirm(`確定封存事件 #${id}？`)) return;
+  if (nextStatus !== 'public' && nextStatus !== 'hidden') return;
+
+  const isRestoring = nextStatus === 'public';
+  const actionLabel = isRestoring ? '恢復' : '封存';
+  if (!window.confirm(`確定${actionLabel}事件 #${id}？`)) return;
 
   button.disabled = true;
-  setAdminStatus('封存中');
+  setAdminStatus(`${actionLabel}中`);
 
   try {
     const response = await fetch(`/api/admin/incidents/${id}`, {
-      method: 'DELETE',
-      headers: { accept: 'application/json' }
+      method: 'PATCH',
+      headers: {
+        'content-type': 'application/json',
+        accept: 'application/json'
+      },
+      body: JSON.stringify({ status: nextStatus })
     });
 
     if (response.status === 401 || response.status === 403) {
@@ -1383,7 +1557,7 @@ adminIncidentsList.addEventListener('click', async event => {
       return;
     }
     if (!response.ok) {
-      setAdminStatus('封存失敗');
+      setAdminStatus(`${actionLabel}失敗`);
       button.disabled = false;
       return;
     }
@@ -1392,12 +1566,19 @@ adminIncidentsList.addEventListener('click', async event => {
     allAdminIncidents = allAdminIncidents.map(incident =>
       Number(incident.id) === id ? data.incident : incident
     );
-    allIncidents = allIncidents.filter(incident => Number(incident.id) !== id);
+    if (isRestoring) {
+      allIncidents = [
+        data.incident,
+        ...allIncidents.filter(incident => Number(incident.id) !== id)
+      ].sort((a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+    } else {
+      allIncidents = allIncidents.filter(incident => Number(incident.id) !== id);
+    }
     renderAdminIncidentList();
     renderIncidents();
     setAdminStatus(`${allAdminIncidents.length} 件事件 · ${allAdminUsers.length} 位管理員`);
   } catch {
-    setAdminStatus('封存失敗');
+    setAdminStatus(`${actionLabel}失敗`);
     button.disabled = false;
   }
 });

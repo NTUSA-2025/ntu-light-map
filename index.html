@@ -764,6 +764,9 @@
     }
 
     .leaflet-container { background: #09111e; }
+    .leaflet-tile-pane {
+      filter: invert(0.9) hue-rotate(180deg) saturate(0.55) brightness(0.62) contrast(1.2);
+    }
     .leaflet-control { box-shadow: none !important; }
     .leaflet-bar { border: 0 !important; background: transparent !important; }
 
@@ -1439,10 +1442,9 @@ map.createPane('incidentPane');   map.getPane('incidentPane').style.zIndex = 400
 const ASSET_BASE = location.pathname.startsWith('/ntu_light_map/') ? '/ntu_light_map' : '';
 const assetUrl = path => `${ASSET_BASE}${path}`;
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OSM contributors &copy; CARTO',
-  subdomains: 'abcd',
-  maxZoom: 20
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19
 }).addTo(map);
 
 const panel = document.getElementById('panel');

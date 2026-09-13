@@ -681,7 +681,7 @@ btnSubmit.addEventListener('click', async () => {
     if (response.status === 401 || response.status === 403) {
       setAuthSession(null);
       showAuth();
-      setStatus(authStatus, '請先完成 NTU email 驗證', 'err');
+      setStatus(authStatus, '請先驗證 NTU Email，再送出回報', 'err');
       return;
     }
     if (!response.ok) {

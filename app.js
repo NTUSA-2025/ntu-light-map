@@ -161,6 +161,7 @@ function showReport() {
 function closeDialog() {
   incDialog.classList.remove('show');
   mapLegend.classList.remove('hidden');
+  mapLegend.classList.remove('reporting');
   btnReport.classList.remove('active');
   btnReport.setAttribute('aria-pressed', 'false');
   authSec.classList.remove('hidden');
@@ -179,6 +180,13 @@ function closeDialog() {
 
 function updateSubmitState() {
   btnSubmit.disabled = !state.selectedHex || incDesc.value.trim().length === 0;
+}
+
+function incidentSubmitErrorMessage(errorData) {
+  if (errorData?.error === 'rate_limited') return '近期回報次數已達上限，請稍後再試';
+  if (errorData?.error === 'incident_create_failed') return '系統暫時無法儲存，請稍後再試';
+  if (errorData?.message === 'invalid_incident') return '回報資料無效，請重新選擇回報區';
+  return errorData?.message || errorData?.error || '送出失敗';
 }
 
 function selectReportHex(feature, layer) {
@@ -323,8 +331,7 @@ async function beginIncidentFlow() {
   }
   if (!state.authSession) await refreshAuthSession();
   incDialog.classList.add('show');
-  mapLegend.classList.add('hidden');
-  btnReport.classList.add('active');
+  mapLegend.classList.add('reporting');
   btnReport.setAttribute('aria-pressed', 'true');
   if (state.authSession?.authenticated) showReport();
   else showAuth();
@@ -354,8 +361,7 @@ btnLogout.addEventListener('click', async () => {
     setAuthSession(previousSession);
     if (!incDialog.classList.contains('show')) {
       incDialog.classList.add('show');
-      mapLegend.classList.add('hidden');
-      btnReport.classList.add('active');
+      mapLegend.classList.add('reporting');
       btnReport.setAttribute('aria-pressed', 'true');
     }
     showReport();
@@ -570,7 +576,7 @@ btnSubmit.addEventListener('click', async () => {
     }
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      setStatus(reportStatus, errorData.message || errorData.error || '送出失敗', 'err');
+      setStatus(reportStatus, incidentSubmitErrorMessage(errorData), 'err');
       updateSubmitState();
       return;
     }
@@ -582,7 +588,7 @@ btnSubmit.addEventListener('click', async () => {
     }
     closeDialog();
   } catch {
-    setStatus(reportStatus, '送出失敗', 'err');
+    setStatus(reportStatus, '網路連線失敗，請稍後再試', 'err');
     updateSubmitState();
   }
 });

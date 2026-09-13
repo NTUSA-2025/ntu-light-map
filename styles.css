@@ -113,8 +113,7 @@ textarea:focus-visible {
 }
 
 #dock #btnPanel:not(.active),
-#dock #btnAdmin:not(.hidden),
-#dock #btnLogout:not(:disabled) { display: inline-flex; }
+#dock #btnAdmin:not(.hidden) { display: inline-flex; }
 
 #dock #btnPanel.active { display: none; }
 
@@ -144,8 +143,7 @@ textarea:focus-visible {
   transform: none;
 }
 
-#dock #btnAdmin .dock-tip,
-#dock #btnLogout .dock-tip { display: none; }
+#dock #btnAdmin .dock-tip { display: none; }
 
 #panel {
   position: fixed;
@@ -239,6 +237,40 @@ textarea:focus-visible {
 }
 
 .panel-body.hidden { display: none; }
+
+.panel-footer {
+  margin-top: auto;
+  padding: 20px 0 0;
+  border-top: 1px solid var(--line);
+}
+
+.panel-logout {
+  display: inline-flex;
+  min-height: 34px;
+  align-items: center;
+  gap: 8px;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: var(--ink-dim);
+  cursor: pointer;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  transition: color 0.2s;
+}
+
+.panel-logout:hover { color: var(--cyan); }
+
+.panel-logout:disabled {
+  display: none;
+  cursor: not-allowed;
+}
+
+.panel-logout svg {
+  width: 15px;
+  height: 15px;
+}
 
 .panel-insights,
 .block,
@@ -932,7 +964,7 @@ details[open] .layer-group-chevron {
 
 #inc-dialog {
   position: absolute;
-  bottom: 28px;
+  bottom: 82px;
   left: 30px;
   z-index: 11000;
   display: none;
@@ -977,7 +1009,7 @@ details[open] .layer-group-chevron {
   display: flex;
   flex-direction: column;
   gap: 10px;
-  max-height: calc(100dvh - 120px);
+  max-height: calc(100dvh - 174px);
   padding: 15px 16px 17px;
   overflow-y: auto;
 }
@@ -1066,6 +1098,11 @@ details[open] .layer-group-chevron {
     bottom: 20px;
   }
 
+  #map-legend.reporting {
+    top: 84px;
+    bottom: auto;
+  }
+
   #inc-fab {
     bottom: 20px;
     left: 18px;
@@ -1073,10 +1110,10 @@ details[open] .layer-group-chevron {
 
   #inc-dialog {
     right: 18px;
-    bottom: 20px;
+    bottom: 72px;
     left: 18px;
     width: auto;
-    max-height: calc(100dvh - 40px);
+    max-height: calc(100dvh - 104px);
   }
 
   .admin-screen-head { padding: 18px 18px 14px; }

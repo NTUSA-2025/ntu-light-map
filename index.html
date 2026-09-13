@@ -67,14 +67,6 @@
       <span class="dock-tip">設定</span>
     </button>
 
-    <button class="dock-btn" id="btnLogout" type="button" aria-label="登出" disabled>
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-        <polyline points="16 17 21 12 16 7"/>
-        <line x1="21" y1="12" x2="9" y2="12"/>
-      </svg>
-      <span class="dock-tip">登出</span>
-    </button>
   </nav>
 
   <aside id="panel" class="closed" aria-label="圖層">
@@ -160,6 +152,16 @@
             </div>
           </div>
         </details>
+      </div>
+      <div class="panel-footer">
+        <button class="panel-logout" id="btnLogout" type="button" aria-label="登出" disabled>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span>登出</span>
+        </button>
       </div>
     </div>
   </aside>

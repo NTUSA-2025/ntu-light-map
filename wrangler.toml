@@ -5,7 +5,7 @@ pages_build_output_dir = "."
 [[d1_databases]]
 binding = "DB"
 database_name = "ntu-light-map"
-database_id = "94ce1432-f3e9-4f60-9cd3-01c3879e130b"
+database_id = "58630670-ab98-4d16-890c-adc9f260045d"
 migrations_dir = "migrations"
 
 [vars]

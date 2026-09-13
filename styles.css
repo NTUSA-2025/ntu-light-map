@@ -18,6 +18,7 @@
   --success: #8ee0bd;
   --font: 'DM Sans', 'Noto Sans TC', ui-sans-serif, system-ui, sans-serif;
   --mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --ui-radius: 4px;
   color-scheme: dark;
 }
 
@@ -955,7 +956,7 @@ details[open] .layer-group-chevron {
   padding: 10px 12px 10px 14px;
   border: 1px solid rgba(240, 153, 123, 0.42);
   border-left: 3px solid var(--orange);
-  border-radius: 14px;
+  border-radius: var(--ui-radius);
   background: linear-gradient(135deg, rgba(29, 18, 18, 0.94), rgba(7, 10, 13, 0.92));
   color: var(--ink-dim);
   font-family: var(--mono);
@@ -1007,7 +1008,7 @@ details[open] .layer-group-chevron {
   min-height: 32px;
   padding: 0 10px;
   border: 1px solid rgba(240, 153, 123, 0.38);
-  border-radius: 8px;
+  border-radius: var(--ui-radius);
   background: rgba(240, 153, 123, 0.08);
   color: var(--orange);
   cursor: pointer;
@@ -1036,7 +1037,7 @@ details[open] .layer-group-chevron {
   padding: 0 15px 0 12px;
   border: 1px solid rgba(156, 231, 216, 0.55);
   border-left: 3px solid var(--cyan);
-  border-radius: 4px;
+  border-radius: var(--ui-radius);
   background: linear-gradient(135deg, rgba(7, 17, 18, 0.92), rgba(7, 10, 13, 0.84));
   color: var(--ink);
   font-size: 0.6875rem;
@@ -1083,7 +1084,7 @@ details[open] .layer-group-chevron {
   overflow: hidden;
   border: 1px solid rgba(156, 231, 216, 0.3);
   border-left: 3px solid var(--cyan);
-  border-radius: 18px;
+  border-radius: var(--ui-radius);
   background: linear-gradient(150deg, rgba(13, 23, 28, 0.97), rgba(7, 10, 13, 0.96) 58%);
   color: var(--ink);
   box-shadow: 0 24px 72px rgba(0, 0, 0, 0.4), 0 0 32px rgba(156, 231, 216, 0.06);
@@ -1136,7 +1137,7 @@ details[open] .layer-group-chevron {
   flex-shrink: 0;
   place-items: center;
   border: 1px solid transparent;
-  border-radius: 10px;
+  border-radius: var(--ui-radius);
   color: var(--ink-dim);
   font-size: 1.125rem;
   line-height: 1;
@@ -1164,7 +1165,7 @@ details[open] .layer-group-chevron {
   padding: 10px 12px;
   border: 1px solid var(--line);
   border-left: 2px solid var(--cyan);
-  border-radius: 10px;
+  border-radius: var(--ui-radius);
   background: rgba(156, 231, 216, 0.045);
   color: var(--ink-dim);
   font-family: var(--mono);
@@ -1220,7 +1221,7 @@ details[open] .layer-group-chevron {
   min-height: 46px;
   padding: 10px 12px;
   border: 1px solid var(--line);
-  border-radius: 10px;
+  border-radius: var(--ui-radius);
   outline: none;
   background: rgba(255, 255, 255, 0.035);
   color: var(--ink);
@@ -1327,7 +1328,7 @@ details[open] .layer-group-chevron {
   gap: 10px;
   padding: 11px;
   border: 1px solid rgba(156, 231, 216, 0.24);
-  border-radius: 12px;
+  border-radius: var(--ui-radius);
   background: linear-gradient(135deg, rgba(156, 231, 216, 0.08), rgba(255, 255, 255, 0.02));
 }
 
@@ -1337,7 +1338,7 @@ details[open] .layer-group-chevron {
   height: 34px;
   place-items: center;
   border: 1px solid rgba(156, 231, 216, 0.32);
-  border-radius: 10px;
+  border-radius: var(--ui-radius);
   background: rgba(156, 231, 216, 0.1);
   color: var(--cyan);
 }
@@ -1392,7 +1393,7 @@ details[open] .layer-group-chevron {
   gap: 9px;
   padding: 11px;
   border: 1px solid var(--line);
-  border-radius: 12px;
+  border-radius: var(--ui-radius);
   background: linear-gradient(135deg, rgba(255, 255, 255, 0.04), rgba(255, 255, 255, 0.015));
   color: var(--ink-dim);
   cursor: pointer;

@@ -19,327 +19,697 @@
   ></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400;500&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=DM+Mono:wght@400;500&family=Noto+Sans+TC:wght@400;500;600;700&display=swap');
 
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
     :root {
-      --coral:       #D85A30;
-      --coral-light: #F0997B;
-      --coral-dim:   rgba(216,90,48,0.15);
-      --bg-shell:    #08101e;
-      --bg-panel:    #0c1628;
-      --bg-card:     rgba(255,255,255,0.04);
-      --border:      rgba(255,255,255,0.07);
-      --text-hi:     rgba(255,255,255,0.88);
-      --text-mid:    rgba(255,255,255,0.50);
-      --text-lo:     rgba(255,255,255,0.28);
-      --dock-w:      52px;
-      --panel-w:     240px;
+      --ink: #e7e8e5;
+      --ink-dim: #a4aaa7;
+      --ink-faint: #68716e;
+      --night: #070a0d;
+      --night-soft: rgba(7, 10, 13, 0.82);
+      --line: rgba(216, 226, 221, 0.18);
+      --line-strong: rgba(216, 226, 221, 0.38);
+      --cyan: #9ce7d8;
+      --orange: #f0997b;
+      --green: #7bcfa1;
+      --violet: #b79af5;
+      --danger: #f4a5a5;
+      --success: #8ee0bd;
+      --font: 'DM Sans', 'Noto Sans TC', ui-sans-serif, system-ui, sans-serif;
+      --mono: 'DM Mono', ui-monospace, SFMono-Regular, Menlo, monospace;
+      color-scheme: dark;
     }
 
-    html, body {
+    html,
+    body {
+      width: 100%;
       height: 100%;
-      background: var(--bg-shell);
-      font-family: 'DM Sans', ui-sans-serif, system-ui, sans-serif;
+      min-height: 100%;
       overflow: hidden;
+      background: #000;
+      color: var(--ink);
+      font-family: var(--font);
+    }
+
+    button,
+    input,
+    select,
+    textarea { font: inherit; }
+
+    button:focus-visible,
+    input:focus-visible,
+    select:focus-visible,
+    textarea:focus-visible {
+      outline: 1px solid var(--cyan);
+      outline-offset: 4px;
     }
 
     #shell {
-      display: flex;
+      position: relative;
       width: 100vw;
       height: 100vh;
+      min-height: 100dvh;
+      overflow: hidden;
+      background: var(--night);
+    }
+
+    #map-wrap {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      overflow: hidden;
+      background: #05080a;
+    }
+
+    #map {
+      width: 100%;
+      height: 100%;
+    }
+
+    #map-wrap::before {
+      position: absolute;
+      inset: 0;
+      z-index: 500;
+      background:
+        linear-gradient(90deg, rgba(3, 6, 8, 0.18), transparent 26%, transparent 72%, rgba(3, 6, 8, 0.22)),
+        linear-gradient(0deg, rgba(3, 6, 8, 0.22), transparent 28%, transparent 72%, rgba(3, 6, 8, 0.18));
+      content: '';
+      pointer-events: none;
     }
 
     #dock {
-      width: var(--dock-w);
-      background: var(--bg-panel);
-      border-right: 0.5px solid var(--border);
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 14px 0;
-      gap: 2px;
-      flex-shrink: 0;
-      z-index: 500;
-    }
-
-    .dock-logo {
-      width: 30px;
-      height: 30px;
-      border-radius: 9px;
-      overflow: hidden;
-      margin-bottom: 14px;
-    }
-    .dock-logo img {
-      width: 100%;
-      height: 100%;
-      display: block;
-    }
-
-    .dock-btn {
-      position: relative;
-      width: 36px;
-      height: 36px;
-      border-radius: 10px;
+      position: fixed;
+      top: 27px;
+      right: 30px;
+      z-index: 10002;
       display: flex;
       align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      color: var(--text-mid);
-      font-size: 17px;
-      border: none;
+    }
+
+    #dock .dock-logo,
+    #dock .dock-div,
+    #dock .dock-spacer,
+    #dock #btnReport,
+    #dock button[aria-label="設定"] { display: none; }
+
+    #dock .dock-btn {
+      display: none;
+      min-height: 28px;
+      align-items: center;
+      gap: 9px;
+      padding: 0 0 7px;
+      border: 0;
+      border-bottom: 1px solid var(--cyan);
+      border-radius: 0;
       background: transparent;
-      transition: background 0.15s, color 0.15s;
+      color: var(--ink);
+      cursor: pointer;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.13em;
+      text-transform: uppercase;
+      transition: color 0.2s, border-color 0.2s;
     }
-    .dock-btn:hover { background: rgba(255,255,255,0.06); color: var(--text-hi); }
-    .dock-btn.active { background: var(--coral-dim); color: var(--coral-light); }
-    .dock-btn:disabled {
-      cursor: not-allowed;
-      color: var(--text-lo);
-      opacity: 0.45;
-    }
-    .dock-btn:disabled:hover { background: transparent; color: var(--text-lo); }
-    .dock-btn.hidden { display: none; }
 
-    .dock-tip {
-      position: absolute;
-      left: calc(100% + 10px);
-      top: 50%;
-      transform: translateY(-50%);
-      background: #1a2640;
-      color: var(--text-hi);
-      font-size: 11px;
-      padding: 4px 9px;
-      border-radius: 6px;
+    #dock #btnPanel:not(.active),
+    #dock #btnAdmin:not(.hidden),
+    #dock #btnLogout:not(:disabled) { display: inline-flex; }
+
+    #dock #btnPanel.active { display: none; }
+
+    #dock .dock-btn:hover {
+      border-color: var(--ink);
+      color: var(--cyan);
+    }
+
+    #dock .dock-btn.active { color: var(--cyan); }
+
+    #dock .dock-btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    #dock .dock-tip {
+      position: static;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      color: currentColor;
+      font-size: inherit;
+      line-height: 1;
       white-space: nowrap;
       pointer-events: none;
-      opacity: 0;
-      transition: opacity 0.15s;
-      border: 0.5px solid rgba(255,255,255,0.1);
-      z-index: 9999;
+      opacity: 1;
+      transform: none;
     }
-    .dock-btn:hover .dock-tip { opacity: 1; }
 
-    .dock-div {
-      width: 22px;
-      height: 0.5px;
-      background: var(--border);
-      margin: 6px 0;
-    }
-    .dock-spacer { flex: 1; }
+    #dock #btnAdmin .dock-tip,
+    #dock #btnLogout .dock-tip { display: none; }
 
     #panel {
-      width: var(--panel-w);
-      background: var(--bg-panel);
-      border-right: 0.5px solid var(--border);
+      position: fixed;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      z-index: 10000;
       display: flex;
+      width: min(360px, 32vw);
+      min-width: 300px;
+      max-height: none;
       flex-direction: column;
-      flex-shrink: 0;
       overflow: hidden;
-      transition: width 0.25s cubic-bezier(.4,0,.2,1);
-      z-index: 400;
+      border: 0;
+      border-left: 1px solid var(--line);
+      border-radius: 0;
+      background: linear-gradient(90deg, rgba(7, 10, 13, 0.72), rgba(7, 10, 13, 0.94) 16%);
+      box-shadow: -28px 0 60px rgba(0, 0, 0, 0.24);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
+      transition: transform 0.25s ease, opacity 0.25s ease;
     }
-    #panel.closed { width: 0; }
+
+    #panel.closed {
+      opacity: 0;
+      pointer-events: none;
+      transform: translateX(calc(100% + 24px));
+    }
 
     .panel-head {
-      padding: 18px 16px 14px;
-      border-bottom: 0.5px solid var(--border);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
       flex-shrink: 0;
+      padding: 29px 28px 21px;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
     }
+
+    .panel-head-copy { min-width: 0; }
+
     .panel-head-title {
-      color: var(--text-hi);
+      overflow: hidden;
+      color: var(--ink);
       font-size: 1rem;
-      font-weight: 500;
-      margin-bottom: 6px;
+      font-weight: 600;
+      letter-spacing: 0.015em;
+      line-height: 1.3;
+      text-overflow: ellipsis;
       white-space: nowrap;
     }
-    .panel-head-sub {
-      color: var(--text-lo);
-      font-size: 0.75rem;
-      font-family: 'DM Mono', monospace;
-      white-space: nowrap;
+
+    #panel .panel-head-title::before { display: none; }
+
+
+    .panel-close,
+    .admin-close,
+    .dlg-close {
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--ink-dim);
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
     }
+
+    .panel-close {
+      min-width: 40px;
+      min-height: 26px;
+      padding: 0 0 6px;
+      border-bottom: 1px solid var(--line-strong);
+      font-family: var(--mono);
+      font-size: 0.5625rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    .panel-close:hover,
+    .admin-close:hover,
+    .dlg-close:hover { color: var(--cyan); }
 
     .panel-body {
-      padding: 14px;
-      overflow-y: auto;
+      display: flex;
+      min-height: 0;
+      flex-direction: column;
+      gap: 0;
+      padding: 0 28px 34px;
       overflow-x: hidden;
-      flex: 1;
+      overflow-y: auto;
+    }
+
+    .panel-body.hidden { display: none; }
+
+    .panel-insights,
+    .block,
+    .layer-group {
+      overflow: visible;
+      border: 0;
+      border-top: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .panel-insights-title,
+    .layer-group-title {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 48px;
+      padding: 0;
+      color: var(--ink);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.07em;
+      cursor: pointer;
+      list-style: none;
+      user-select: none;
+    }
+
+    .panel-insights-title::-webkit-details-marker,
+    .layer-group-title::-webkit-details-marker { display: none; }
+
+    .panel-insights-chevron,
+    .layer-group-chevron {
+      color: var(--ink-faint);
+      font-size: 0.875rem;
+      line-height: 1;
+      transition: transform 0.2s ease, color 0.2s;
+    }
+
+    details[open] .panel-insights-chevron,
+    details[open] .layer-group-chevron {
+      color: var(--cyan);
+      transform: rotate(180deg);
+    }
+
+    .panel-insights-content {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      gap: 18px;
+      padding: 0 0 19px;
     }
-    .panel-body.hidden { display: none; }
-    .panel-body::-webkit-scrollbar { width: 3px; }
-    .panel-body::-webkit-scrollbar-track { background: transparent; }
-    .panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
 
-    .stat-grid { display: grid; grid-template-columns: 1fr; gap: 6px; }
-    .stat-card {
-      background: var(--bg-card);
-      border: 0.5px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 16px;
+    .panel-body::-webkit-scrollbar,
+    .admin-screen-body::-webkit-scrollbar { width: 4px; }
+
+    .panel-body::-webkit-scrollbar-track,
+    .admin-screen-body::-webkit-scrollbar-track { background: transparent; }
+
+    .panel-body::-webkit-scrollbar-thumb,
+    .admin-screen-body::-webkit-scrollbar-thumb {
+      border-radius: 0;
+      background: var(--line);
     }
-    .stat-label { color: var(--text-lo); font-size: 0.8125rem; margin-bottom: 8px; white-space: nowrap; }
+
+    .stat-grid { display: grid; gap: 0; }
+
+    .stat-card {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      padding: 0 0 15px;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
+    }
+
+    .stat-label,
+    .block-label {
+      margin: 0;
+      color: var(--ink-faint);
+      font-size: 0.5625rem;
+      font-weight: 600;
+      letter-spacing: 0.14em;
+      line-height: 1.3;
+      text-transform: uppercase;
+    }
+
     .stat-val {
-      color: var(--text-hi);
-      font-size: 1.75rem;
-      font-weight: 500;
-      font-family: 'DM Mono', monospace;
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 1.7rem;
+      font-weight: 400;
       line-height: 1;
     }
-    .stat-unit { font-size: 0.875rem; color: var(--text-mid); font-weight: 400; margin-left: 4px; }
 
-    .block {
-      background: var(--bg-card);
-      border: 0.5px solid var(--border);
-      border-radius: 10px;
-      padding: 14px 16px;
+    .stat-unit {
+      margin-left: 5px;
+      color: var(--cyan);
+      font-family: var(--font);
+      font-size: 0.6875rem;
+      font-weight: 600;
     }
-    .block-label {
-      color: var(--text-lo);
-      font-size: 0.8125rem;
-      margin-bottom: 14px;
+
+    .panel-insights-content > .block {
+      border-top: 0;
+    }
+
+    .block { padding: 18px 0; }
+
+    .bar-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin-top: 13px;
+    }
+
+    .bar-row:first-of-type { margin-top: 15px; }
+
+    .bar-name {
+      width: 55px;
+      flex-shrink: 0;
+      color: var(--ink-dim);
+      font-size: 0.6875rem;
+      white-space: nowrap;
+    }
+
+    .bar-track {
+      height: 2px;
+      flex: 1;
+      overflow: hidden;
+      background: rgba(216, 226, 221, 0.13);
+    }
+
+    .bar-fill {
+      height: 100%;
+      transition: width 0.35s ease;
+    }
+
+    .bar-num {
+      width: 20px;
+      color: var(--ink-faint);
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      text-align: right;
+    }
+
+    .layer-block {
+      padding: 0;
+      border-top: 0;
+    }
+
+
+    .layer-group-title {
+      min-height: 45px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .layer-group-content {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+      padding: 0;
+    }
+
+    .layer-item {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 43px;
+      padding: 0;
+      border-bottom: 1px solid rgba(216, 226, 221, 0.1);
+      border-radius: 0;
+      transition: color 0.15s ease;
+    }
+
+    .layer-item:hover { background: transparent; }
+    .layer-item:hover .layer-name { color: var(--cyan); }
+
+    .layer-left {
+      display: flex;
+      min-width: 0;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .layer-dot,
+    .map-legend-swatch {
+      width: 9px;
+      height: 9px;
+      flex-shrink: 0;
+      border: 0;
+      border-radius: 0;
+    }
+
+    .layer-name {
+      overflow: hidden;
+      color: var(--ink-dim);
+      font-size: 0.75rem;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+      transition: color 0.15s;
+    }
+
+    .tog {
+      position: relative;
+      width: 16px;
+      height: 16px;
+      flex-shrink: 0;
+      border: 1px solid var(--line-strong);
+      border-radius: 0;
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s, border-color 0.2s;
+    }
+
+    .tog::after {
+      position: absolute;
+      top: 2px;
+      left: 5px;
+      width: 4px;
+      height: 8px;
+      border-right: 1px solid var(--night);
+      border-bottom: 1px solid var(--night);
+      content: '';
+      transform: rotate(45deg);
+    }
+
+    .tog:hover { border-color: var(--cyan); }
+    .tog.off { border-color: var(--line-strong); background: transparent; }
+    .tog.off::after { display: none; }
+    .tog:not(.off) { border-color: var(--cyan); background: var(--cyan); }
+
+    #map-legend {
+      position: absolute;
+      right: 29px;
+      bottom: 28px;
+      z-index: 1000;
+      width: 150px;
+      padding: 0 0 0 14px;
+      border: 0;
+      border-left: 1px solid var(--line-strong);
+      border-radius: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 0.6875rem;
+      line-height: 1.35;
+      box-shadow: none;
+      backdrop-filter: none;
+      -webkit-backdrop-filter: none;
+    }
+
+    #map-legend.hidden { display: none; }
+
+    .map-legend-title {
+      display: flex;
+      align-items: baseline;
+      gap: 7px;
+      margin-bottom: 11px;
+      color: var(--ink);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
       text-transform: uppercase;
-      letter-spacing: 0.5px;
     }
 
-    .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-    .bar-row:last-child { margin-bottom: 0; }
-    .bar-name { color: var(--text-mid); font-size: 0.8125rem; width: 44px; flex-shrink: 0; text-align: right; white-space: nowrap; }
-    .bar-track { flex: 1; height: 7px; background: rgba(255,255,255,0.06); border-radius: 4px; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 3px; transition: width 0.4s ease; }
-    .bar-num { color: var(--text-lo); font-size: 0.8125rem; font-family: 'DM Mono', monospace; width: 24px; text-align: right; }
+    .map-legend-unit {
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--cyan);
+      font-family: var(--mono);
+      font-size: 0.5625rem;
+      font-weight: 400;
+      letter-spacing: 0;
+    }
 
-    .lrow { display: flex; align-items: center; gap: 10px; margin-bottom: 9px; }
-    .lrow:last-child { margin-bottom: 0; }
-    .lswatch { width: 32px; height: 9px; border-radius: 3px; flex-shrink: 0; }
-    .ltxt { color: var(--text-mid); font-size: 0.8125rem; font-family: 'DM Mono', monospace; }
+    .map-legend-row {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      margin: 7px 0;
+      color: var(--ink-dim);
+      font-family: var(--mono);
+      font-size: 0.625rem;
+    }
 
-    .layer-item { display: flex; align-items: center; justify-content: space-between; padding: 8px 0; }
-    .layer-left { display: flex; align-items: center; gap: 10px; }
-    .layer-dot { width: 10px; height: 10px; border-radius: 3px; flex-shrink: 0; }
-    .layer-name { color: var(--text-mid); font-size: 0.875rem; white-space: nowrap; }
+    .map-legend-swatch {
+      width: 20px;
+      height: 5px;
+    }
 
     .admin-status {
-      color: var(--text-lo);
-      font-size: 0.75rem;
-      font-family: 'DM Mono', monospace;
       min-width: 0;
+      color: var(--ink-faint);
+      font-family: var(--mono);
+      font-size: 0.6875rem;
     }
-    .admin-list { display: flex; flex-direction: column; gap: 8px; }
+
+    .admin-list {
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
     .admin-form {
       display: flex;
       flex-direction: column;
       gap: 8px;
       margin-top: 10px;
     }
-    .admin-input {
-      background: rgba(0,0,0,0.35);
-      border: 0.5px solid rgba(255,255,255,0.14);
-      color: var(--text-hi);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 12px;
-      font-family: 'DM Sans', sans-serif;
-      outline: none;
+
+    .admin-input,
+    .dlg-field select,
+    .dlg-field textarea,
+    .dlg-field input {
       width: 100%;
+      border: 0;
+      border-bottom: 1px solid var(--line-strong);
+      border-radius: 0;
+      outline: none;
+      background: transparent;
+      color: var(--ink);
+      font-family: var(--font);
+      font-size: 0.8125rem;
     }
-    .admin-input:focus { border-color: rgba(216,90,48,0.5); }
+
+    .admin-input {
+      min-height: 38px;
+      padding: 8px 0;
+    }
+
+    .admin-input:focus,
+    .dlg-field input:focus,
+    .dlg-field select:focus,
+    .dlg-field textarea:focus {
+      border-color: var(--cyan);
+    }
+
     .admin-item {
-      background: var(--bg-card);
-      border: 0.5px solid var(--border);
-      border-radius: 10px;
-      padding: 10px;
       display: flex;
       flex-direction: column;
-      gap: 8px;
+      gap: 7px;
+      padding: 14px 0;
+      border: 0;
+      border-bottom: 1px solid var(--line);
+      border-radius: 0;
+      background: transparent;
     }
+
     .admin-item.hidden-incident {
-      background: rgba(216,90,48,0.08);
-      border-color: rgba(216,90,48,0.22);
-      opacity: 0.82;
+      border-color: rgba(244, 165, 165, 0.32);
+      background: transparent;
+      opacity: 0.84;
     }
+
     .admin-item-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 8px;
     }
+
     .admin-item-title {
-      color: var(--text-hi);
-      font-size: 0.8125rem;
-      font-weight: 500;
       min-width: 0;
+      overflow: hidden;
+      color: var(--ink);
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
+
     .admin-badge {
-      border-radius: 999px;
-      padding: 2px 7px;
-      background: rgba(255,255,255,0.07);
-      color: var(--text-mid);
-      font-size: 0.6875rem;
-      font-family: 'DM Mono', monospace;
       flex-shrink: 0;
+      padding: 0;
+      border: 0;
+      border-radius: 0;
+      background: transparent;
+      color: var(--ink-faint);
+      font-family: var(--mono);
+      font-size: 0.5625rem;
     }
-    .admin-badge.public { color: #7bcfa1; }
-    .admin-badge.hidden { color: var(--coral-light); }
-    .admin-badge.admin-role { color: #9ac7f5; }
+
+    .admin-badge.public { color: var(--success); }
+    .admin-badge.hidden { color: var(--danger); }
+    .admin-badge.admin-role { color: var(--cyan); }
+
     .admin-desc {
-      color: var(--text-mid);
-      font-size: 0.8125rem;
-      line-height: 1.45;
       overflow-wrap: anywhere;
-    }
-    .admin-meta {
-      color: var(--text-lo);
-      font-size: 0.6875rem;
-      font-family: 'DM Mono', monospace;
+      color: var(--ink-dim);
+      font-size: 0.75rem;
       line-height: 1.45;
     }
+
+    .admin-meta {
+      color: var(--ink-faint);
+      font-family: var(--mono);
+      font-size: 0.5625rem;
+      line-height: 1.45;
+    }
+
     .admin-actions {
       display: flex;
-      gap: 7px;
       justify-content: flex-end;
+      gap: 10px;
     }
+
     .admin-screen {
       position: absolute;
       inset: 0;
-      z-index: 1200;
+      z-index: 12000;
       display: flex;
       flex-direction: column;
-      background: var(--bg-shell);
       overflow: hidden;
+      background: #080b0e;
     }
+
     .admin-screen.hidden { display: none; }
+
     .admin-screen-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
       gap: 16px;
-      padding: 18px 24px 14px;
-      background: var(--bg-panel);
-      border-bottom: 0.5px solid var(--border);
       flex-shrink: 0;
+      padding: 24px 28px 18px;
+      border-bottom: 1px solid var(--line);
+      background: transparent;
     }
+
+    .admin-screen-head .panel-head-title { font-size: 1rem; }
+
+    .admin-screen-head .panel-head-sub {
+      display: block;
+      margin-top: 7px;
+      color: var(--ink-faint);
+      font-family: var(--mono);
+      font-size: 0.5625rem;
+      letter-spacing: 0.14em;
+    }
+
     .admin-close {
-      width: 34px;
-      height: 34px;
       display: inline-flex;
+      width: 32px;
+      height: 32px;
       align-items: center;
       justify-content: center;
-      background: rgba(255,255,255,0.06);
-      border: 0.5px solid var(--border);
-      border-radius: 8px;
-      color: var(--text-mid);
-      cursor: pointer;
-      flex-shrink: 0;
     }
-    .admin-close:hover {
-      color: var(--text-hi);
-      background: rgba(255,255,255,0.1);
-    }
+
     .admin-status-log {
       position: absolute;
       width: 1px;
@@ -351,308 +721,404 @@
       white-space: nowrap;
       border: 0;
     }
+
     .admin-screen-body {
-      flex: 1;
       display: grid;
+      flex: 1;
+      min-height: 0;
       grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
-      gap: 18px;
-      padding: 18px 24px 24px;
+      gap: 40px;
+      padding: 24px 28px 32px;
       overflow-y: auto;
     }
-    .admin-screen-body::-webkit-scrollbar { width: 3px; }
-    .admin-screen-body::-webkit-scrollbar-track { background: transparent; }
-    .admin-screen-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+
     .admin-section {
       display: flex;
-      flex-direction: column;
-      gap: 12px;
       min-width: 0;
-      padding-top: 2px;
+      flex-direction: column;
+      gap: 10px;
     }
+
     .admin-section-head {
       display: flex;
       align-items: center;
       justify-content: space-between;
-      gap: 12px;
-      min-height: 42px;
-      padding-bottom: 10px;
-      border-bottom: 0.5px solid var(--border);
+      min-height: 40px;
+      padding-bottom: 12px;
+      border-bottom: 1px solid var(--line);
     }
+
     .admin-section-title {
-      color: var(--text-hi);
-      font-size: 0.875rem;
-      font-weight: 500;
-      line-height: 1.2;
+      color: var(--ink);
+      font-size: 0.8125rem;
+      font-weight: 600;
     }
+
     .admin-section-sub {
-      color: var(--text-lo);
-      font-size: 0.6875rem;
-      font-family: 'DM Mono', monospace;
-      margin-top: 4px;
+      margin-top: 5px;
+      color: var(--ink-faint);
+      font-family: var(--mono);
+      font-size: 0.5625rem;
+      letter-spacing: 0.1em;
     }
+
     .admin-main .admin-list {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
-      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 0 24px;
     }
-    .btn-danger {
-      background: rgba(216,90,48,0.16);
-      border: 0.5px solid rgba(216,90,48,0.36);
-      color: var(--coral-light);
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 12px;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-    }
-    .btn-danger:disabled {
-      opacity: 0.45;
-      cursor: not-allowed;
-    }
+
+    .btn-pri,
+    .btn-sec,
+    .btn-danger,
     .btn-restore {
-      background: rgba(123,207,161,0.14);
-      border: 0.5px solid rgba(123,207,161,0.36);
-      color: #7bcfa1;
-      border-radius: 8px;
-      padding: 6px 10px;
-      font-size: 12px;
+      min-height: 35px;
+      padding: 7px 12px;
+      border-radius: 2px;
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
       cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
+      transition: background 0.2s, border-color 0.2s, color 0.2s, opacity 0.2s;
     }
+
+    .btn-pri {
+      border: 1px solid var(--cyan);
+      background: var(--cyan);
+      color: #071112;
+    }
+
+    .btn-pri:not(:disabled):hover { background: var(--ink); }
+
+    .btn-sec {
+      border: 1px solid var(--line-strong);
+      background: transparent;
+      color: var(--ink-dim);
+    }
+
+    .btn-sec:hover {
+      border-color: var(--cyan);
+      color: var(--cyan);
+    }
+
+    .btn-danger {
+      border: 1px solid rgba(244, 165, 165, 0.38);
+      background: transparent;
+      color: var(--danger);
+    }
+
+    .btn-restore {
+      border: 1px solid rgba(142, 224, 189, 0.38);
+      background: transparent;
+      color: var(--success);
+    }
+
+    .btn-pri:disabled,
+    .btn-danger:disabled,
     .btn-restore:disabled {
-      opacity: 0.45;
       cursor: not-allowed;
+      opacity: 0.45;
     }
 
-    .tog {
-      width: 34px;
-      height: 18px;
-      border-radius: 999px;
-      background: var(--coral);
-      position: relative;
-      cursor: pointer;
-      flex-shrink: 0;
-      transition: background 0.2s;
-      border: none;
+    .leaflet-container {
+      background: #05080a;
+      font-family: var(--font);
     }
-    .tog::after {
-      content: '';
-      position: absolute;
-      width: 14px;
-      height: 14px;
-      border-radius: 50%;
-      background: #fff;
-      top: 2px;
-      right: 2px;
-      transition: right 0.2s, left 0.2s;
-    }
-    .tog.off { background: rgba(255,255,255,0.12); }
-    .tog.off::after { right: auto; left: 2px; }
 
-    #map-wrap { flex: 1; position: relative; overflow: hidden; z-index: 1; }
-    #map { width: 100%; height: 100%; }
+    .leaflet-tile-pane {
+      filter: invert(0.9) hue-rotate(180deg) saturate(0.46) brightness(0.69) contrast(1.1);
+    }
 
     .leaflet-control { box-shadow: none !important; }
-    .leaflet-bar { background: transparent !important; border: none !important; }
+    .leaflet-bar { border: 0 !important; background: transparent !important; }
+
     .leaflet-bar a {
-      background: rgba(12,22,40,0.88) !important;
-      color: var(--text-hi) !important;
-      border: 0.5px solid var(--border) !important;
-      width: 28px !important;
-      height: 28px !important;
-      line-height: 28px !important;
-      font-size: 16px !important;
+      width: 34px !important;
+      height: 34px !important;
+      border: 0 !important;
+      border-bottom: 1px solid var(--line) !important;
+      border-radius: 0 !important;
+      background: rgba(7, 10, 13, 0.7) !important;
+      color: var(--ink) !important;
+      font-size: 18px !important;
+      line-height: 32px !important;
     }
-    .leaflet-bar a:hover { background: rgba(20,36,60,0.95) !important; }
-    .leaflet-control-zoom { margin: 14px !important; }
+
+    .leaflet-bar a:hover {
+      background: rgba(7, 10, 13, 0.9) !important;
+      color: var(--cyan) !important;
+    }
+
+    .leaflet-control-zoom { margin: 72px 28px 28px !important; }
+
+    .leaflet-control-attribution {
+      padding: 3px 7px !important;
+      border: 0;
+      border-radius: 0;
+      background: rgba(7, 10, 13, 0.62) !important;
+      color: var(--ink-faint) !important;
+      font-size: 9px !important;
+      backdrop-filter: blur(8px);
+    }
+
+    .leaflet-control-attribution a { color: var(--ink-dim) !important; }
 
     #topbar {
       position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      height: 40px;
+      top: 27px;
+      left: 30px;
+      z-index: 1000;
       display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 14px;
-      background: rgba(8,16,30,0.65);
-      border-bottom: 0.5px solid var(--border);
-      z-index: 300;
+      width: min(320px, calc(100vw - 60px));
+      flex-direction: column;
+      gap: 8px;
+      padding-left: 15px;
+      border-left: 2px solid var(--cyan);
       pointer-events: none;
     }
+
+
     .topbar-title {
-      color: var(--text-hi);
-      font-size: 12px;
-      font-weight: 500;
-      display: flex;
-      align-items: center;
-      gap: 8px;
+      display: block;
+      color: var(--ink);
+      font-size: 1.2rem;
+      font-weight: 600;
+      letter-spacing: 0.015em;
+      line-height: 1.15;
     }
-    .topbar-dot {
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      background: var(--coral);
-    }
-    .topbar-meta {
-      color: var(--text-lo);
-      font-size: 10px;
-      font-family: 'DM Mono', monospace;
-    }
+
+    .topbar-dot { display: none; }
+
 
     #hex-tooltip {
       position: absolute;
-      top: 50px;
+      top: 27px;
       left: 50%;
-      transform: translateX(-50%);
-      background: rgba(12,22,40,0.92);
-      border: 0.5px solid var(--border);
-      border-radius: 8px;
-      padding: 6px 14px;
-      color: var(--text-hi);
-      font-size: 11px;
-      font-family: 'DM Mono', monospace;
-      z-index: 400;
+      z-index: 1001;
+      padding: 7px 10px;
+      border: 0;
+      border-bottom: 1px solid var(--cyan);
+      border-radius: 0;
+      background: rgba(7, 10, 13, 0.84);
+      color: var(--ink);
+      font-family: var(--mono);
+      font-size: 0.625rem;
+      white-space: nowrap;
       pointer-events: none;
       opacity: 0;
-      transition: opacity 0.2s;
-      white-space: nowrap;
+      transform: translateX(-50%) translateY(-4px);
+      transition: opacity 0.2s, transform 0.2s;
+      backdrop-filter: blur(8px);
     }
-    #hex-tooltip.show { opacity: 1; }
+
+    #hex-tooltip.show {
+      opacity: 1;
+      transform: translateX(-50%) translateY(0);
+    }
 
     #inc-fab {
       position: absolute;
-      bottom: 16px;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--coral);
-      color: #fff;
-      border: none;
-      border-radius: 999px;
-      padding: 9px 18px;
-      font-size: 12px;
-      font-weight: 500;
-      font-family: 'DM Sans', sans-serif;
-      cursor: pointer;
-      z-index: 400;
-      display: flex;
+      bottom: 28px;
+      left: 30px;
+      z-index: 1000;
+      display: inline-flex;
+      min-height: 34px;
       align-items: center;
-      gap: 7px;
-      white-space: nowrap;
-      transition: background 0.15s;
+      gap: 8px;
+      padding: 0 0 8px;
+      border: 0;
+      border-bottom: 1px solid var(--cyan);
+      border-radius: 0;
+      background: transparent;
+      color: var(--ink);
+      font-size: 0.6875rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      cursor: pointer;
+      transition: color 0.2s, border-color 0.2s;
     }
-    #inc-fab:hover { background: #c04e26; }
-    #inc-fab svg { width: 14px; height: 14px; stroke: #fff; stroke-width: 2; fill: none; }
+
+    #inc-fab:hover {
+      border-color: var(--ink);
+      color: var(--cyan);
+    }
+
+    #inc-fab svg {
+      width: 14px;
+      height: 14px;
+      fill: none;
+      stroke: currentColor;
+      stroke-width: 1.6;
+    }
 
     #inc-dialog {
       position: absolute;
-      bottom: 62px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: min(320px, 90vw);
-      background: rgba(10,18,32,0.96);
-      border: 0.5px solid rgba(255,255,255,0.12);
-      border-radius: 14px;
-      z-index: 500;
-      overflow: hidden;
+      bottom: 28px;
+      left: 30px;
+      z-index: 11000;
       display: none;
+      width: min(360px, calc(100vw - 60px));
+      overflow: hidden;
+      border: 0;
+      border-top: 1px solid var(--line-strong);
+      border-left: 2px solid var(--cyan);
+      border-radius: 0;
+      background: rgba(7, 10, 13, 0.94);
+      color: var(--ink);
+      box-shadow: 18px 18px 50px rgba(0, 0, 0, 0.28);
+      backdrop-filter: blur(18px);
+      -webkit-backdrop-filter: blur(18px);
     }
+
     #inc-dialog.show { display: block; }
 
     .dlg-head {
-      padding: 11px 14px;
-      border-bottom: 0.5px solid var(--border);
       display: flex;
       align-items: center;
       justify-content: space-between;
-    }
-    .dlg-head-title { color: var(--text-hi); font-size: 12px; font-weight: 500; }
-    .dlg-close {
-      background: rgba(255,255,255,0.07);
-      border: 0.5px solid var(--border);
-      color: var(--text-mid);
-      border-radius: 7px;
-      width: 26px;
-      height: 26px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      cursor: pointer;
-      font-size: 15px;
+      gap: 12px;
+      padding: 15px 16px 13px;
+      border-bottom: 1px solid var(--line);
     }
 
-    .dlg-body { padding: 12px; display: flex; flex-direction: column; gap: 9px; }
+    .dlg-head-title {
+      color: var(--ink);
+      font-size: 0.8125rem;
+      font-weight: 600;
+    }
+
+    .dlg-close {
+      width: 24px;
+      height: 24px;
+      font-size: 1.125rem;
+      line-height: 1;
+    }
+
+    .dlg-body {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+      max-height: calc(100dvh - 120px);
+      padding: 15px 16px 17px;
+      overflow-y: auto;
+    }
 
     .dlg-status {
-      font-size: 11px;
-      color: var(--text-mid);
-      padding: 6px 9px;
-      background: var(--bg-card);
-      border: 0.5px solid var(--border);
-      border-radius: 7px;
-      font-family: 'DM Mono', monospace;
+      min-height: 18px;
+      padding: 4px 0 8px;
+      color: var(--ink-dim);
+      font-family: var(--mono);
+      font-size: 0.6875rem;
+      line-height: 1.45;
     }
-    .dlg-status.ok { color: #7bcfa1; }
-    .dlg-status.err { color: var(--coral-light); }
 
-    .dlg-field { display: flex; flex-direction: column; gap: 5px; }
-    .dlg-field label { color: var(--text-lo); font-size: 10px; text-transform: uppercase; letter-spacing: 0.4px; }
+    .dlg-status.ok { color: var(--success); }
+    .dlg-status.err { color: var(--danger); }
+
+    .dlg-field {
+      display: flex;
+      flex-direction: column;
+      gap: 7px;
+      color: var(--ink-faint);
+      font-size: 0.625rem;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+    }
+
     .dlg-field select,
     .dlg-field textarea,
     .dlg-field input {
-      background: rgba(0,0,0,0.35);
-      border: 0.5px solid rgba(255,255,255,0.14);
-      color: var(--text-hi);
-      border-radius: 8px;
-      padding: 8px 10px;
-      font-size: 12px;
-      font-family: 'DM Sans', sans-serif;
-      outline: none;
-      width: 100%;
+      min-height: 40px;
+      padding: 8px 0;
     }
-    .dlg-field select option { background: #0c1628; }
-    .dlg-field textarea { min-height: 72px; resize: vertical; }
-    .dlg-field input:focus,
-    .dlg-field select:focus,
-    .dlg-field textarea:focus { border-color: rgba(216,90,48,0.5); }
 
-    .dlg-actions { display: flex; gap: 7px; justify-content: flex-end; }
-    .btn-sec {
-      background: rgba(255,255,255,0.06);
-      border: 0.5px solid var(--border);
-      color: var(--text-mid);
-      border-radius: 8px;
-      padding: 7px 12px;
-      font-size: 12px;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-    }
-    .btn-pri {
-      background: var(--coral);
-      border: none;
-      color: #fff;
-      border-radius: 8px;
-      padding: 7px 14px;
-      font-size: 12px;
-      font-weight: 500;
-      cursor: pointer;
-      font-family: 'DM Sans', sans-serif;
-    }
-    .btn-pri:disabled { opacity: 0.45; cursor: not-allowed; }
-    .btn-pri:not(:disabled):hover { background: #c04e26; }
+    .dlg-field select option { background: #080b0e; }
+    .dlg-field textarea { min-height: 80px; resize: vertical; }
 
-    .inc-section { display: flex; flex-direction: column; gap: 9px; }
+    .dlg-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+      margin-top: 3px;
+    }
+
+    .inc-section {
+      display: flex;
+      flex-direction: column;
+      gap: 9px;
+    }
+
     .inc-section.hidden { display: none; }
 
-    @media (max-width: 860px) {
-      .admin-screen-head {
-        align-items: flex-start;
-        flex-direction: column;
-      }
+    @media (max-width: 960px) {
+      .admin-screen-head { padding-inline: 22px; }
       .admin-screen-body {
         grid-template-columns: 1fr;
-        padding: 14px;
+        gap: 20px;
+        padding: 20px 22px 26px;
+      }
+    }
+
+    @media (max-width: 760px) {
+      #dock {
+        top: 20px;
+        right: 18px;
+      }
+
+      #panel {
+        width: min(290px, 82vw);
+        min-width: 0;
+      }
+
+      .panel-head { padding: 23px 21px 17px; }
+      .panel-body { padding-inline: 21px; }
+
+      #topbar {
+        top: 20px;
+        left: 18px;
+        width: min(240px, calc(100vw - 36px));
+      }
+
+      .topbar-title { font-size: 1rem; }
+      .leaflet-control-zoom { margin: 64px 18px 18px !important; }
+
+      #map-legend {
+        right: 18px;
+        bottom: 20px;
+      }
+
+      #inc-fab {
+        bottom: 20px;
+        left: 18px;
+      }
+
+      #inc-dialog {
+        right: 18px;
+        bottom: 20px;
+        left: 18px;
+        width: auto;
+        max-height: calc(100dvh - 40px);
+      }
+
+      .admin-screen-head { padding: 18px 18px 14px; }
+      .admin-screen-body { padding: 18px 18px 22px; }
+    }
+
+    @media (max-width: 420px) {
+      #panel { width: min(276px, 82vw); }
+      #map-legend { width: 138px; }
+      .admin-main .admin-list { grid-template-columns: 1fr; }
+      .dlg-actions { flex-direction: column-reverse; }
+      .dlg-actions > button { width: 100%; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        scroll-behavior: auto !important;
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
       }
     }
   </style>
@@ -664,16 +1130,16 @@
       <img src="logo.png" alt="" />
     </div>
 
-    <button class="dock-btn active" id="btnPanel" aria-label="數據面板">
+    <button class="dock-btn" id="btnPanel" type="button" aria-label="圖層" aria-pressed="false">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="10" rx="1"/><rect x="14" y="17" width="7" height="4" rx="1"/>
       </svg>
-      <span class="dock-tip">數據面板</span>
+      <span class="dock-tip">圖層</span>
     </button>
 
     <div class="dock-div"></div>
 
-    <button class="dock-btn" id="btnReport" aria-label="回報事件">
+    <button class="dock-btn" id="btnReport" type="button" aria-label="回報事件" aria-pressed="false">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
         <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
@@ -684,7 +1150,7 @@
     <div class="dock-spacer"></div>
     <div class="dock-div"></div>
 
-    <button class="dock-btn hidden" id="btnAdmin" aria-label="後台管理">
+    <button class="dock-btn hidden" id="btnAdmin" type="button" aria-label="後台管理" aria-pressed="false">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
         <path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/>
         <path d="M2 6h4"/>
@@ -696,7 +1162,7 @@
       <span class="dock-tip">後台管理</span>
     </button>
 
-    <button class="dock-btn" aria-label="設定">
+    <button class="dock-btn" type="button" aria-label="設定" aria-pressed="false">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <circle cx="12" cy="12" r="3"/>
         <path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/>
@@ -704,7 +1170,7 @@
       <span class="dock-tip">設定</span>
     </button>
 
-    <button class="dock-btn" id="btnLogout" aria-label="登出" disabled>
+    <button class="dock-btn" id="btnLogout" type="button" aria-label="登出" disabled>
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
         <polyline points="16 17 21 12 16 7"/>
@@ -714,87 +1180,111 @@
     </button>
   </nav>
 
-  <aside id="panel" aria-label="數據面板">
+  <aside id="panel" class="closed" aria-label="圖層">
     <div class="panel-head">
-      <div class="panel-head-title" id="panel-title">台大校園夜間亮度地圖</div>
-      <div class="panel-head-sub" id="panel-sub">NTU Nighttime Light Map</div>
+      <div class="panel-head-copy">
+        <div class="panel-head-title" id="panel-title">圖層</div>
+      </div>
+      <button class="panel-close" id="btn-panel-close" type="button" aria-label="收合圖層面板">收合</button>
     </div>
     <div class="panel-body" id="dashboard-panel">
-      <div class="stat-grid">
-        <div class="stat-card">
-          <div class="stat-label">回報事件</div>
-          <div class="stat-val" id="stat-incident-count">0<span class="stat-unit">件</span></div>
-        </div>
-      </div>
+      <details class="panel-insights">
+        <summary class="panel-insights-title">
+          <span>資料摘要</span>
+          <span class="panel-insights-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="panel-insights-content">
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-label">回報事件</div>
+              <div class="stat-val" id="stat-incident-count">0<span class="stat-unit">件</span></div>
+            </div>
+          </div>
 
-      <div class="block">
-        <div class="block-label">事件類型分佈</div>
-        <div class="bar-row">
-          <span class="bar-name">夜間事故</span>
-          <div class="bar-track"><div class="bar-fill" id="bar-accident" style="width:0%;background:#F0997B;"></div></div>
-          <span class="bar-num" id="bar-accident-num">0</span>
+          <div class="block">
+            <div class="block-label">事件類型分佈</div>
+            <div class="bar-row">
+              <span class="bar-name">夜間事故</span>
+              <div class="bar-track"><div class="bar-fill" id="bar-accident" style="width:0%;background:#F0997B;"></div></div>
+              <span class="bar-num" id="bar-accident-num">0</span>
+            </div>
+            <div class="bar-row">
+              <span class="bar-name">夜間騷擾</span>
+              <div class="bar-track"><div class="bar-fill" id="bar-harassment" style="width:0%;background:#ef718d;"></div></div>
+              <span class="bar-num" id="bar-harassment-num">0</span>
+            </div>
+          </div>
         </div>
-        <div class="bar-row">
-          <span class="bar-name">夜間騷擾</span>
-          <div class="bar-track"><div class="bar-fill" id="bar-harassment" style="width:0%;background:#ef718d;"></div></div>
-          <span class="bar-num" id="bar-harassment-num">0</span>
-        </div>
-      </div>
+      </details>
 
-      <div class="block">
-        <div class="block-label">亮度圖例（lux）</div>
-        <div class="lrow"><span class="lswatch" style="background:#0b1020;"></span><span class="ltxt">0 - 1</span></div>
-        <div class="lrow"><span class="lswatch" style="background:#1f2a5a;"></span><span class="ltxt">1 - 12</span></div>
-        <div class="lrow"><span class="lswatch" style="background:#2f6f9f;"></span><span class="ltxt">12 - 29</span></div>
-        <div class="lrow"><span class="lswatch" style="background:#6fd0c2;"></span><span class="ltxt">29 - 54</span></div>
-        <div class="lrow"><span class="lswatch" style="background:#f3f6ff;"></span><span class="ltxt">54 +</span></div>
-      </div>
 
-      <div class="block">
-        <div class="block-label">圖層</div>
-        <div class="layer-item">
-          <div class="layer-left">
-            <span class="layer-dot" style="background:#f3f6ff;"></span>
-            <span class="layer-name">實測亮度</span>
+      <div class="block layer-block">
+        <details class="layer-group" open>
+          <summary class="layer-group-title">
+            <span>亮度圖層</span>
+            <span class="layer-group-chevron" aria-hidden="true">⌄</span>
+          </summary>
+          <div class="layer-group-content">
+            <div class="layer-item">
+              <div class="layer-left">
+                <span class="layer-dot" style="background:#f3f6ff;"></span>
+                <span class="layer-name">實測亮度</span>
+              </div>
+              <button class="tog" id="tog-brightness" type="button" aria-label="切換實測亮度圖層" aria-pressed="true"></button>
+            </div>
+            <div class="layer-item">
+              <div class="layer-left">
+                <span class="layer-dot" style="background:#D85A30;"></span>
+                <span class="layer-name">安全事件</span>
+              </div>
+              <button class="tog" id="tog-incident" type="button" aria-label="切換安全事件圖層" aria-pressed="true"></button>
+            </div>
           </div>
-          <button class="tog" id="tog-brightness" aria-label="切換實測亮度圖層"></button>
-        </div>
-        <div class="layer-item">
-          <div class="layer-left">
-            <span class="layer-dot" style="background:#7bcfa1;"></span>
-            <span class="layer-name">道路安全框線</span>
+        </details>
+        <details class="layer-group" open>
+          <summary class="layer-group-title">
+            <span>邊界</span>
+            <span class="layer-group-chevron" aria-hidden="true">⌄</span>
+          </summary>
+          <div class="layer-group-content">
+            <div class="layer-item">
+              <div class="layer-left">
+                <span class="layer-dot" style="background:#7bcfa1;"></span>
+                <span class="layer-name">道路安全框線</span>
+              </div>
+              <button class="tog" id="tog-safety" type="button" aria-label="切換道路安全圖層" aria-pressed="true"></button>
+            </div>
+            <div class="layer-item">
+              <div class="layer-left">
+                <span class="layer-dot" style="background:#b79af5;"></span>
+                <span class="layer-name">光害控制區</span>
+              </div>
+              <button class="tog" id="tog-protect" type="button" aria-label="切換光害控制區圖層" aria-pressed="true"></button>
+            </div>
           </div>
-          <button class="tog" id="tog-safety" aria-label="切換道路安全圖層"></button>
-        </div>
-        <div class="layer-item">
-          <div class="layer-left">
-            <span class="layer-dot" style="background:#D85A30;"></span>
-            <span class="layer-name">安全事件</span>
-          </div>
-          <button class="tog" id="tog-incident" aria-label="切換安全事件圖層"></button>
-        </div>
-        <div class="layer-item">
-          <div class="layer-left">
-            <span class="layer-dot" style="background:#b79af5;"></span>
-            <span class="layer-name">光害控制區</span>
-          </div>
-          <button class="tog" id="tog-protect" aria-label="切換光害控制區圖層"></button>
-        </div>
+        </details>
       </div>
     </div>
   </aside>
 
   <div id="map-wrap">
-    <div id="topbar" aria-hidden="true">
-      <div class="topbar-title">
-        <span class="topbar-dot"></span>
-        台大夜間亮度地圖
-      </div>
-      <div class="topbar-meta">NTU Campus</div>
+    <div id="topbar" role="banner" aria-label="地圖標題">
+      <div class="topbar-title">台大夜間亮度地圖</div>
     </div>
 
     <div id="hex-tooltip" role="status" aria-live="polite"></div>
     <div id="map"></div>
+    <aside id="map-legend" aria-label="亮度圖例">
+      <div class="map-legend-title">
+        <span>亮度</span>
+        <span class="map-legend-unit">lux</span>
+      </div>
+      <div class="map-legend-row"><span class="map-legend-swatch" style="background:#0b1020;"></span><span>0 - 1</span></div>
+      <div class="map-legend-row"><span class="map-legend-swatch" style="background:#1f2a5a;"></span><span>1 - 12</span></div>
+      <div class="map-legend-row"><span class="map-legend-swatch" style="background:#2f6f9f;"></span><span>12 - 29</span></div>
+      <div class="map-legend-row"><span class="map-legend-swatch" style="background:#6fd0c2;"></span><span>29 - 54</span></div>
+      <div class="map-legend-row"><span class="map-legend-swatch" style="background:#f3f6ff;"></span><span>54 +</span></div>
+    </aside>
 
     <section class="admin-screen hidden" id="admin-panel" aria-label="事件後台">
       <header class="admin-screen-head">
@@ -822,7 +1312,7 @@
             <div class="block-label">新增管理員</div>
             <div class="admin-form">
               <input class="admin-input" id="admin-email" type="email" placeholder="name@ntu.edu.tw" autocomplete="off"/>
-              <button class="btn-pri" id="btn-admin-add">新增管理員</button>
+              <button class="btn-pri" id="btn-admin-add" type="button">新增管理員</button>
             </div>
           </div>
           <div class="admin-list" id="admin-users-list"></div>
@@ -839,7 +1329,7 @@
       </div>
     </section>
 
-    <button id="inc-fab" aria-label="回報安全事件">
+    <button id="inc-fab" type="button" aria-label="回報安全事件">
       <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       回報安全事件
     </button>
@@ -847,7 +1337,7 @@
     <div id="inc-dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
       <div class="dlg-head">
         <span class="dlg-head-title" id="dlg-title">新增安全事件</span>
-        <button class="dlg-close" id="dlg-close" aria-label="關閉">×</button>
+        <button class="dlg-close" id="dlg-close" type="button" aria-label="關閉">×</button>
       </div>
       <div class="dlg-body">
         <div class="inc-section" id="auth-section">
@@ -857,14 +1347,14 @@
             <input id="auth-email" type="email" placeholder="name@ntu.edu.tw" autocomplete="email"/>
           </div>
           <div class="dlg-actions">
-            <button class="btn-pri" id="btn-request-code">寄送驗證碼</button>
+            <button class="btn-pri" id="btn-request-code" type="button">寄送驗證碼</button>
           </div>
           <div class="dlg-field">
             <label for="auth-code">驗證碼</label>
             <input id="auth-code" inputmode="numeric" maxlength="6" placeholder="6 位數字" autocomplete="one-time-code"/>
           </div>
           <div class="dlg-actions">
-            <button class="btn-pri" id="btn-verify-code">驗證</button>
+            <button class="btn-pri" id="btn-verify-code" type="button">驗證</button>
           </div>
         </div>
 
@@ -882,8 +1372,8 @@
             <textarea id="inc-desc" maxlength="300" required placeholder="請描述事件情況..."></textarea>
           </div>
           <div class="dlg-actions">
-            <button class="btn-sec" id="btn-cancel">取消</button>
-            <button class="btn-pri" id="btn-submit" disabled>送出</button>
+            <button class="btn-sec" id="btn-cancel" type="button">取消</button>
+            <button class="btn-pri" id="btn-submit" type="button" disabled>送出</button>
           </div>
         </div>
       </div>
@@ -892,7 +1382,7 @@
 </div>
 
 <script>
-const map = L.map('map', { zoomControl: true }).setView([25.0173, 121.5398], 16);
+const map = L.map('map', { zoomControl: false }).setView([25.0173, 121.5398], 16);
 
 map.createPane('brightnessPane'); map.getPane('brightnessPane').style.zIndex = 350;
 map.createPane('safetyPane');     map.getPane('safetyPane').style.zIndex = 300;
@@ -902,10 +1392,9 @@ map.createPane('incidentPane');   map.getPane('incidentPane').style.zIndex = 400
 const ASSET_BASE = location.pathname.startsWith('/ntu_light_map/') ? '/ntu_light_map' : '';
 const assetUrl = path => `${ASSET_BASE}${path}`;
 
-L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-  attribution: '&copy; OSM contributors &copy; CARTO',
-  subdomains: 'abcd',
-  maxZoom: 20
+L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+  maxZoom: 19
 }).addTo(map);
 
 const panel = document.getElementById('panel');
@@ -914,7 +1403,6 @@ const btnReport = document.getElementById('btnReport');
 const btnLogout = document.getElementById('btnLogout');
 const btnAdmin = document.getElementById('btnAdmin');
 const panelTitle = document.getElementById('panel-title');
-const panelSub = document.getElementById('panel-sub');
 const dashboardPanel = document.getElementById('dashboard-panel');
 const adminPanel = document.getElementById('admin-panel');
 const adminStatus = document.getElementById('admin-status');
@@ -923,6 +1411,12 @@ const adminIncidentsList = document.getElementById('admin-incidents-list');
 const adminEmail = document.getElementById('admin-email');
 const btnAdminAdd = document.getElementById('btn-admin-add');
 const btnAdminClose = document.getElementById('btn-admin-close');
+const btnPanelClose = document.getElementById('btn-panel-close');
+
+function syncPanelButtonState(open) {
+  btnPanel.classList.toggle('active', open);
+  btnPanel.setAttribute('aria-pressed', String(open));
+}
 
 btnPanel.addEventListener('click', () => {
   if (!adminPanel.classList.contains('hidden')) {
@@ -936,7 +1430,12 @@ btnPanel.addEventListener('click', () => {
   }
 
   const closed = panel.classList.toggle('closed');
-  btnPanel.classList.toggle('active', !closed);
+  syncPanelButtonState(!closed);
+  window.setTimeout(() => map.invalidateSize(), 280);
+});
+btnPanelClose.addEventListener('click', () => {
+  panel.classList.add('closed');
+  syncPanelButtonState(false);
   window.setTimeout(() => map.invalidateSize(), 280);
 });
 
@@ -946,6 +1445,7 @@ function makeToggle(id, layerKey) {
   const btn = document.getElementById(id);
   btn.addEventListener('click', () => {
     btn.classList.toggle('off');
+    btn.setAttribute('aria-pressed', String(!btn.classList.contains('off')));
     const layer = layerMap[layerKey];
     if (!layer) return;
     if (btn.classList.contains('off')) map.removeLayer(layer);
@@ -991,9 +1491,12 @@ const incDesc = document.getElementById('inc-desc');
 const btnSubmit = document.getElementById('btn-submit');
 const btnCancel = document.getElementById('btn-cancel');
 const hexTooltip = document.getElementById('hex-tooltip');
+const mapLegend = document.getElementById('map-legend');
 
 btnReport.addEventListener('click', () => {
-  btnReport.classList.toggle('active');
+  const active = !btnReport.classList.contains('active');
+  btnReport.classList.toggle('active', active);
+  btnReport.setAttribute('aria-pressed', String(active));
   beginIncidentFlow();
 });
 
@@ -1036,10 +1539,10 @@ function showDashboardPanel() {
   panel.classList.remove('closed');
   dashboardPanel.classList.remove('hidden');
   adminPanel.classList.add('hidden');
-  btnPanel.classList.add('active');
+  syncPanelButtonState(true);
   btnAdmin.classList.remove('active');
-  panelTitle.textContent = '台大校園夜間亮度地圖';
-  panelSub.textContent = 'NTU Nighttime Light Map';
+  btnAdmin.setAttribute('aria-pressed', 'false');
+  panelTitle.textContent = '圖層';
   window.setTimeout(() => map.invalidateSize(), 280);
 }
 
@@ -1055,10 +1558,10 @@ async function showAdminPanel() {
   panel.classList.remove('closed');
   dashboardPanel.classList.remove('hidden');
   adminPanel.classList.remove('hidden');
-  btnPanel.classList.add('active');
+  syncPanelButtonState(true);
   btnAdmin.classList.add('active');
-  panelTitle.textContent = '台大校園夜間亮度地圖';
-  panelSub.textContent = 'NTU Nighttime Light Map';
+  btnAdmin.setAttribute('aria-pressed', 'true');
+  panelTitle.textContent = '圖層';
   window.setTimeout(() => map.invalidateSize(), 280);
 
   if (allAdminIncidents.length === 0 && allAdminUsers.length === 0) {
@@ -1080,7 +1583,9 @@ function showReport() {
 
 function closeDialog() {
   incDialog.classList.remove('show');
+  mapLegend.classList.remove('hidden');
   btnReport.classList.remove('active');
+  btnReport.setAttribute('aria-pressed', 'false');
   authSec.classList.remove('hidden');
   reportSec.classList.add('hidden');
   selectedHex = null;
@@ -1403,6 +1908,11 @@ async function refreshAuthSession() {
 
 async function beginIncidentFlow() {
   if (!adminPanel.classList.contains('hidden')) showDashboardPanel();
+  if (window.matchMedia('(max-width: 760px)').matches) {
+    panel.classList.add('closed');
+    syncPanelButtonState(false);
+    window.setTimeout(() => map.invalidateSize(), 280);
+  }
 
   if (incDialog.classList.contains('show')) {
     closeDialog();
@@ -1410,7 +1920,9 @@ async function beginIncidentFlow() {
   }
   if (!authSession) await refreshAuthSession();
   incDialog.classList.add('show');
+  mapLegend.classList.add('hidden');
   btnReport.classList.add('active');
+  btnReport.setAttribute('aria-pressed', 'true');
   if (authSession?.authenticated) showReport();
   else showAuth();
 }
@@ -1439,7 +1951,9 @@ btnLogout.addEventListener('click', async () => {
     setAuthSession(previousSession);
     if (!incDialog.classList.contains('show')) {
       incDialog.classList.add('show');
+      mapLegend.classList.add('hidden');
       btnReport.classList.add('active');
+      btnReport.setAttribute('aria-pressed', 'true');
     }
     showReport();
     setStatus(reportStatus, '登出失敗，請稍後再試', 'err');

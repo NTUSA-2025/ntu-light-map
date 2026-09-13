@@ -151,16 +151,26 @@ export async function loadMapLayers(onSelectReportHex, hexTooltip) {
   state.reportHexLayer = L.geoJSON(geoReport, {
     pane: 'incidentPane',
     style: {
-      color: '#cbd5e1',
-      weight: 0.55,
-      opacity: 0.28,
-      fillColor: '#cbd5e1',
-      fillOpacity: 0.01
+      color: '#f1f6f4',
+      weight: 0.8,
+      opacity: 0.42,
+      fillColor: '#9ce7d8',
+      fillOpacity: 0.035
     },
     onEachFeature: (feature, layer) => {
       layer.on('click', () => onSelectReportHex(feature, layer));
-      layer.on('mouseover', () => layer.setStyle({ opacity: 0.7, fillOpacity: 0.08, weight: 1 }));
-      layer.on('mouseout', () => layer.setStyle({ opacity: 0.28, fillOpacity: 0.01, weight: 0.55 }));
+      layer.on('mouseover', () => layer.setStyle({
+        color: '#f0997b',
+        opacity: 0.95,
+        fillOpacity: 0.13,
+        weight: 1.35
+      }));
+      layer.on('mouseout', () => layer.setStyle({
+        color: '#f1f6f4',
+        opacity: 0.42,
+        fillOpacity: 0.035,
+        weight: 0.8
+      }));
     }
   });
 

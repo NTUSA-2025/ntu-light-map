@@ -5,7 +5,29 @@ import { escapeHtml } from './utils.js';
 
 const L = window.L;
 
-export const map = L.map('map', { zoomControl: false }).setView([25.0173, 121.5398], 16);
+const CAMPUS_CENTER = [25.0168654, 121.53955895];
+const CAMPUS_BOUNDS = [
+  [25.0115824, 121.5329385],
+  [25.0221484, 121.5461794]
+];
+
+export const map = L.map('map', {
+  zoomControl: false,
+  minZoom: 14,
+  maxBounds: L.latLngBounds(CAMPUS_BOUNDS),
+  maxBoundsViscosity: 0.85
+}).setView(CAMPUS_CENTER, 15);
+
+function waitForMapLayout() {
+  return new Promise(resolve => {
+    requestAnimationFrame(() => requestAnimationFrame(resolve));
+  });
+}
+
+function fitCampusBounds(bounds) {
+  map.invalidateSize();
+  map.fitBounds(bounds, { padding: [20, 20], maxZoom: 16 });
+}
 
 map.createPane('brightnessPane'); map.getPane('brightnessPane').style.zIndex = 350;
 map.createPane('safetyPane');     map.getPane('safetyPane').style.zIndex = 300;
@@ -39,12 +61,21 @@ async function loadJSON(url) {
 }
 
 export async function loadCampusBoundary() {
-  const response = await fetch(assetUrl('/data/ntu_area.geojson'));
-  const geo = await response.json();
-  const ntuLine = L.geoJSON(geo, {
-    style: { color: '#eef2f7', weight: 1.05, opacity: 0.9 }
-  }).addTo(map);
-  map.fitBounds(ntuLine.getBounds());
+  try {
+    const response = await fetch(assetUrl('/data/ntu_area.geojson'));
+    if (!response.ok) throw new Error(`boundary_http_${response.status}`);
+    const geo = await response.json();
+    const ntuLine = L.geoJSON(geo, {
+      style: { color: '#eef2f7', weight: 1.05, opacity: 0.9 }
+    }).addTo(map);
+    await waitForMapLayout();
+    fitCampusBounds(ntuLine.getBounds());
+  } catch (error) {
+    console.error('campus_boundary_load_failed', error);
+    await waitForMapLayout();
+    map.invalidateSize();
+    map.setView(CAMPUS_CENTER, 15);
+  }
 }
 
 export async function loadMapLayers(onSelectReportHex, hexTooltip) {

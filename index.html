@@ -74,7 +74,17 @@
       <div class="panel-head-copy">
         <div class="panel-head-title" id="panel-title">圖層</div>
       </div>
-      <button class="panel-close" id="btn-panel-close" type="button" aria-label="收合圖層面板">收合</button>
+      <div class="panel-head-actions">
+        <button class="panel-logout" id="btnLogout" type="button" aria-label="登出" disabled>
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+            <polyline points="16 17 21 12 16 7"/>
+            <line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          <span>登出</span>
+        </button>
+        <button class="panel-close" id="btn-panel-close" type="button" aria-label="收合圖層面板">收合</button>
+      </div>
     </div>
     <div class="panel-body" id="dashboard-panel">
       <details class="panel-insights">
@@ -153,16 +163,6 @@
           </div>
         </details>
       </div>
-      <div class="panel-footer">
-        <button class="panel-logout" id="btnLogout" type="button" aria-label="登出" disabled>
-          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-            <polyline points="16 17 21 12 16 7"/>
-            <line x1="21" y1="12" x2="9" y2="12"/>
-          </svg>
-          <span>登出</span>
-        </button>
-      </div>
     </div>
   </aside>
 
@@ -172,6 +172,10 @@
     </div>
 
     <div id="hex-tooltip" role="status" aria-live="polite"></div>
+    <div id="report-hint" role="status" aria-live="polite">
+      <strong>回報模式</strong>
+      <span>請點選地圖上的區域</span>
+    </div>
     <div id="map"></div>
     <aside id="map-legend" aria-label="亮度圖例">
       <div class="map-legend-title">
@@ -235,7 +239,7 @@
 
     <div id="inc-dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
       <div class="dlg-head">
-        <span class="dlg-head-title" id="dlg-title">新增安全事件</span>
+        <span class="dlg-head-title" id="dlg-title">回報安全事件</span>
         <button class="dlg-close" id="dlg-close" type="button" aria-label="關閉">×</button>
       </div>
       <div class="dlg-body">

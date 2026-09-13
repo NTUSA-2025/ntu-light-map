@@ -30,5 +30,5 @@ export const dom = {
   btnSubmit: document.getElementById('btn-submit'),
   btnCancel: document.getElementById('btn-cancel'),
   hexTooltip: document.getElementById('hex-tooltip'),
-  mapLegend: document.getElementById('map-legend')
+  reportHint: document.getElementById('report-hint'),
 };

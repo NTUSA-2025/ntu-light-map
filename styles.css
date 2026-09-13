@@ -49,6 +49,7 @@ textarea:focus-visible {
   position: relative;
   width: 100vw;
   height: 100vh;
+  height: 100dvh;
   min-height: 100dvh;
   overflow: hidden;
   background: var(--night);
@@ -175,13 +176,19 @@ textarea:focus-visible {
 
 .panel-head {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 18px;
   flex-shrink: 0;
   padding: 29px 28px 21px;
   border-bottom: 1px solid var(--line);
   background: transparent;
+}
+.panel-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-shrink: 0;
 }
 
 .panel-head-copy { min-width: 0; }
@@ -216,10 +223,10 @@ textarea:focus-visible {
   min-height: 26px;
   padding: 0 0 6px;
   border-bottom: 1px solid var(--line-strong);
-  font-family: var(--mono);
-  font-size: 0.5625rem;
-  letter-spacing: 0.12em;
-  text-transform: uppercase;
+  font-family: var(--font);
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
 }
 
 .panel-close:hover,
@@ -238,19 +245,15 @@ textarea:focus-visible {
 
 .panel-body.hidden { display: none; }
 
-.panel-footer {
-  margin-top: auto;
-  padding: 20px 0 0;
-  border-top: 1px solid var(--line);
-}
 
 .panel-logout {
   display: inline-flex;
-  min-height: 34px;
+  min-height: 26px;
   align-items: center;
   gap: 8px;
-  padding: 0;
+  padding: 0 0 6px;
   border: 0;
+  border-bottom: 1px solid var(--line-strong);
   background: transparent;
   color: var(--ink-dim);
   cursor: pointer;
@@ -506,23 +509,21 @@ details[open] .layer-group-chevron {
 #map-legend {
   position: absolute;
   right: 29px;
-  bottom: 28px;
+  bottom: calc(28px + env(safe-area-inset-bottom));
   z-index: 1000;
   width: 150px;
-  padding: 0 0 0 14px;
-  border: 0;
-  border-left: 1px solid var(--line-strong);
-  border-radius: 0;
-  background: transparent;
+  padding: 10px 12px 10px 13px;
+  border: 1px solid var(--line);
+  border-left: 2px solid var(--cyan);
+  border-radius: 2px;
+  background: rgba(7, 10, 13, 0.76);
   color: var(--ink);
   font-size: 0.6875rem;
   line-height: 1.35;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
+  box-shadow: 12px 12px 32px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
 }
-
-#map-legend.hidden { display: none; }
 
 .map-legend-title {
   display: flex;
@@ -927,9 +928,40 @@ details[open] .layer-group-chevron {
   transform: translateX(-50%) translateY(0);
 }
 
+#report-hint {
+  position: absolute;
+  top: 78px;
+  left: 50%;
+  z-index: 1001;
+  display: none;
+  align-items: baseline;
+  gap: 10px;
+  padding: 9px 12px;
+  border-left: 2px solid var(--orange);
+  background: rgba(7, 10, 13, 0.84);
+  color: var(--ink-dim);
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  line-height: 1.4;
+  pointer-events: none;
+  transform: translateX(-50%);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+
+#report-hint.show { display: flex; }
+
+#report-hint strong {
+  color: var(--orange);
+  font-size: 0.5625rem;
+  letter-spacing: 0.1em;
+}
+
+
+
 #inc-fab {
   position: absolute;
-  bottom: 28px;
+  bottom: calc(28px + env(safe-area-inset-bottom));
   left: 30px;
   z-index: 1000;
   display: inline-flex;
@@ -947,6 +979,11 @@ details[open] .layer-group-chevron {
   letter-spacing: 0.08em;
   cursor: pointer;
   transition: color 0.2s, border-color 0.2s;
+}
+
+#inc-fab.active {
+  border-color: var(--orange);
+  color: var(--orange);
 }
 
 #inc-fab:hover {
@@ -1095,26 +1132,31 @@ details[open] .layer-group-chevron {
 
   #map-legend {
     right: 18px;
-    bottom: 20px;
-  }
-
-  #map-legend.reporting {
-    top: 84px;
-    bottom: auto;
+    bottom: calc(20px + env(safe-area-inset-bottom));
   }
 
   #inc-fab {
-    bottom: 20px;
+    bottom: calc(20px + env(safe-area-inset-bottom));
     left: 18px;
   }
 
   #inc-dialog {
     right: 18px;
-    bottom: 72px;
+    bottom: calc(184px + env(safe-area-inset-bottom));
     left: 18px;
     width: auto;
-    max-height: calc(100dvh - 104px);
+    max-height: calc(100dvh - 184px);
   }
+  #inc-dialog.pick-mode { display: none; }
+  #report-hint {
+    top: 78px;
+    right: 18px;
+    left: 18px;
+    justify-content: center;
+    transform: none;
+  }
+
+  .dlg-body { max-height: calc(100dvh - 238px); }
 
   .admin-screen-head { padding: 18px 18px 14px; }
   .admin-screen-body { padding: 18px 18px 22px; }
@@ -1122,10 +1164,10 @@ details[open] .layer-group-chevron {
 
 @media (max-width: 420px) {
   #panel { width: min(276px, 82vw); }
-  #map-legend { width: 138px; }
+  #map-legend { width: 150px; }
   .admin-main .admin-list { grid-template-columns: 1fr; }
-  .dlg-actions { flex-direction: column-reverse; }
-  .dlg-actions > button { width: 100%; }
+  .dlg-actions { flex-direction: row; }
+  .dlg-actions > button { width: auto; flex: 1; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -36,7 +36,7 @@ const {
   btnSubmit,
   btnCancel,
   hexTooltip,
-  mapLegend
+  reportHint,
 } = dom;
 
 makeToggle('tog-brightness', 'brightness');
@@ -149,6 +149,7 @@ async function showAdminPanel() {
 function showAuth() {
   authSec.classList.remove('hidden');
   reportSec.classList.add('hidden');
+  setReportPickMode(false);
   if (state.reportHexLayer && map.hasLayer(state.reportHexLayer)) map.removeLayer(state.reportHexLayer);
 }
 
@@ -158,14 +159,20 @@ function showReport() {
   if (state.reportHexLayer && !map.hasLayer(state.reportHexLayer)) state.reportHexLayer.addTo(map);
 }
 
+function setReportPickMode(active) {
+  const picking = active && window.matchMedia('(max-width: 760px)').matches;
+  incDialog.classList.toggle('pick-mode', picking);
+  reportHint.classList.toggle('show', picking);
+}
+
 function closeDialog() {
   incDialog.classList.remove('show');
-  mapLegend.classList.remove('hidden');
-  mapLegend.classList.remove('reporting');
+  incFab.classList.remove('active');
   btnReport.classList.remove('active');
   btnReport.setAttribute('aria-pressed', 'false');
   authSec.classList.remove('hidden');
   reportSec.classList.add('hidden');
+  setReportPickMode(false);
   state.selectedHex = null;
   incDesc.value = '';
   authCode.value = '';
@@ -207,6 +214,7 @@ function selectReportHex(feature, layer) {
       fillOpacity: 0.35
     }
   }).addTo(map);
+  setReportPickMode(false);
 
   setStatus(reportStatus, `已選回報區 ${id}`, 'ok');
   updateSubmitState();
@@ -331,10 +339,14 @@ async function beginIncidentFlow() {
   }
   if (!state.authSession) await refreshAuthSession();
   incDialog.classList.add('show');
-  mapLegend.classList.add('reporting');
+  incFab.classList.add('active');
   btnReport.setAttribute('aria-pressed', 'true');
-  if (state.authSession?.authenticated) showReport();
-  else showAuth();
+  if (state.authSession?.authenticated) {
+    showReport();
+    setReportPickMode(true);
+  } else {
+    showAuth();
+  }
 }
 
 incFab.addEventListener('click', beginIncidentFlow);
@@ -361,10 +373,10 @@ btnLogout.addEventListener('click', async () => {
     setAuthSession(previousSession);
     if (!incDialog.classList.contains('show')) {
       incDialog.classList.add('show');
-      mapLegend.classList.add('reporting');
       btnReport.setAttribute('aria-pressed', 'true');
     }
     showReport();
+    setReportPickMode(true);
     setStatus(reportStatus, '登出失敗，請稍後再試', 'err');
   }
 });
@@ -434,6 +446,7 @@ btnVerifyCode.addEventListener('click', async () => {
     setAuthSession(await response.json());
     setStatus(authStatus, '驗證完成', 'ok');
     showReport();
+    setReportPickMode(true);
     setStatus(reportStatus, '請在地圖上點選回報區');
   } catch {
     setStatus(authStatus, '驗證失敗', 'err');
@@ -593,6 +606,7 @@ btnSubmit.addEventListener('click', async () => {
   }
 });
 
+refreshAuthSession();
 loadCampusBoundary();
 loadMapLayers(selectReportHex, hexTooltip).then(() => loadIncidents()).then(() => {
   if (window.location.hash === '#new-incident') {

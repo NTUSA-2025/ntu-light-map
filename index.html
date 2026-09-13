@@ -222,15 +222,6 @@
 
     #panel .panel-head-title::before { display: none; }
 
-    .panel-head-sub {
-      display: block;
-      margin-top: 8px;
-      color: var(--ink-faint);
-      font-family: var(--mono);
-      font-size: 0.5625rem;
-      letter-spacing: 0.14em;
-      line-height: 1;
-    }
 
     .panel-close,
     .admin-close,
@@ -420,10 +411,6 @@
       border-top: 0;
     }
 
-    .layer-block > .block-label {
-      display: block;
-      padding: 23px 0 10px;
-    }
 
     .layer-group-title {
       min-height: 45px;
@@ -890,14 +877,6 @@
       pointer-events: none;
     }
 
-    .topbar-kicker {
-      color: var(--cyan);
-      font-family: var(--mono);
-      font-size: 0.5625rem;
-      letter-spacing: 0.16em;
-      line-height: 1;
-      text-transform: uppercase;
-    }
 
     .topbar-title {
       display: block;
@@ -910,13 +889,6 @@
 
     .topbar-dot { display: none; }
 
-    .topbar-meta {
-      display: block;
-      color: var(--ink-faint);
-      font-family: var(--mono);
-      font-size: 0.5625rem;
-      letter-spacing: 0.08em;
-    }
 
     #hex-tooltip {
       position: absolute;
@@ -1158,7 +1130,7 @@
       <img src="logo.png" alt="" />
     </div>
 
-    <button class="dock-btn" id="btnPanel" type="button" aria-label="圖層與樣式" aria-pressed="false">
+    <button class="dock-btn" id="btnPanel" type="button" aria-label="圖層" aria-pressed="false">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
         <rect x="3" y="3" width="7" height="18" rx="1"/><rect x="14" y="3" width="7" height="10" rx="1"/><rect x="14" y="17" width="7" height="4" rx="1"/>
       </svg>
@@ -1208,11 +1180,10 @@
     </button>
   </nav>
 
-  <aside id="panel" class="closed" aria-label="圖層與樣式">
+  <aside id="panel" class="closed" aria-label="圖層">
     <div class="panel-head">
       <div class="panel-head-copy">
-        <div class="panel-head-title" id="panel-title">圖層與樣式</div>
-        <div class="panel-head-sub" id="panel-sub">LAYERS &amp; STYLE</div>
+        <div class="panel-head-title" id="panel-title">圖層</div>
       </div>
       <button class="panel-close" id="btn-panel-close" type="button" aria-label="收合圖層面板">收合</button>
     </div>
@@ -1248,7 +1219,6 @@
 
 
       <div class="block layer-block">
-        <div class="block-label">圖層</div>
         <details class="layer-group" open>
           <summary class="layer-group-title">
             <span>亮度圖層</span>
@@ -1299,9 +1269,7 @@
 
   <div id="map-wrap">
     <div id="topbar" role="banner" aria-label="地圖標題">
-      <div class="topbar-kicker">NTU / NIGHT FIELD</div>
       <div class="topbar-title">台大夜間亮度地圖</div>
-      <div class="topbar-meta">實測亮度 · 校園安全 · 夜間視圖</div>
     </div>
 
     <div id="hex-tooltip" role="status" aria-live="polite"></div>
@@ -1435,7 +1403,6 @@ const btnReport = document.getElementById('btnReport');
 const btnLogout = document.getElementById('btnLogout');
 const btnAdmin = document.getElementById('btnAdmin');
 const panelTitle = document.getElementById('panel-title');
-const panelSub = document.getElementById('panel-sub');
 const dashboardPanel = document.getElementById('dashboard-panel');
 const adminPanel = document.getElementById('admin-panel');
 const adminStatus = document.getElementById('admin-status');
@@ -1575,8 +1542,7 @@ function showDashboardPanel() {
   syncPanelButtonState(true);
   btnAdmin.classList.remove('active');
   btnAdmin.setAttribute('aria-pressed', 'false');
-  panelTitle.textContent = '圖層與樣式';
-  panelSub.textContent = 'LAYERS & STYLE';
+  panelTitle.textContent = '圖層';
   window.setTimeout(() => map.invalidateSize(), 280);
 }
 
@@ -1595,8 +1561,7 @@ async function showAdminPanel() {
   syncPanelButtonState(true);
   btnAdmin.classList.add('active');
   btnAdmin.setAttribute('aria-pressed', 'true');
-  panelTitle.textContent = '圖層與樣式';
-  panelSub.textContent = 'LAYERS & STYLE';
+  panelTitle.textContent = '圖層';
   window.setTimeout(() => map.invalidateSize(), 280);
 
   if (allAdminIncidents.length === 0 && allAdminUsers.length === 0) {

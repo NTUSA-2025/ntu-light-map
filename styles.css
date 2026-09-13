@@ -1161,28 +1161,45 @@ details[open] .layer-group-chevron {
 }
 
 .dlg-status {
+  display: flex;
   min-height: 18px;
-  padding: 10px 12px;
-  border: 1px solid var(--line);
-  border-left: 2px solid var(--cyan);
-  border-radius: var(--ui-radius);
-  background: rgba(156, 231, 216, 0.045);
+  align-items: flex-start;
+  gap: 8px;
+  padding: 2px 0;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
   color: var(--ink-dim);
   font-family: var(--mono);
   font-size: 0.6875rem;
   line-height: 1.45;
 }
 
+.dlg-status::before {
+  width: 4px;
+  height: 4px;
+  flex: 0 0 4px;
+  margin-top: 0.55em;
+  background: var(--cyan);
+  content: '';
+}
+
 .dlg-status.ok {
-  border-left-color: var(--success);
-  background: rgba(123, 207, 161, 0.07);
+  background: transparent;
   color: var(--success);
 }
 
+.dlg-status.ok::before {
+  background: var(--success);
+}
+
 .dlg-status.err {
-  border-left-color: var(--danger);
-  background: rgba(244, 165, 165, 0.07);
+  background: transparent;
   color: var(--danger);
+}
+
+.dlg-status.err::before {
+  background: var(--danger);
 }
 
 .dlg-field {

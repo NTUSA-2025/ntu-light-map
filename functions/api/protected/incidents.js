@@ -36,36 +36,55 @@ export async function onRequestPost({ request, env }) {
   const reporterHash = await hashValue(email, salt);
   const ipHash = await hashValue(clientIp(request), salt);
 
-  const recent = await env.DB.prepare(
-    `SELECT COUNT(*) AS count
-     FROM incidents
-     WHERE created_at >= datetime('now', '-10 minutes')
-       AND (reporter_email_hash = ? OR ip_hash = ?)`,
-  ).bind(reporterHash, ipHash).first();
+  try {
+    const recent = await env.DB.prepare(
+      `SELECT COUNT(*) AS count
+       FROM incidents
+       WHERE created_at >= datetime('now', '-10 minutes')
+         AND (reporter_email_hash = ? OR ip_hash = ?)`,
+    ).bind(reporterHash, ipHash).first();
 
-  if (Number(recent?.count || 0) >= RATE_LIMIT_COUNT) {
-    return json({ error: "rate_limited" }, { status: 429 });
-  }
+    if (Number(recent?.count || 0) >= RATE_LIMIT_COUNT) {
+      return json({ error: "rate_limited" }, { status: 429 });
+    }
 
-  const incident = validated.incident;
-  const result = await env.DB.prepare(
-    `INSERT INTO incidents
-      (report_hex_id, lat, lng, type, description, status, reporter_email_hash, ip_hash)
-     VALUES (?, ?, ?, ?, ?, 'public', ?, ?)
-     RETURNING id, report_hex_id, lat, lng, type, description, created_at`,
-  )
-    .bind(
-      incident.report_hex_id,
-      incident.lat,
-      incident.lng,
-      incident.type,
-      incident.description,
-      reporterHash,
-      ipHash,
+    const incident = validated.incident;
+    const insertResult = await env.DB.prepare(
+      `INSERT INTO incidents
+        (report_hex_id, lat, lng, type, description, status, reporter_email_hash, ip_hash)
+       VALUES (?, ?, ?, ?, ?, 'public', ?, ?)`,
     )
-    .first();
+      .bind(
+        incident.report_hex_id,
+        incident.lat,
+        incident.lng,
+        incident.type,
+        incident.description,
+        reporterHash,
+        ipHash,
+      )
+      .run();
 
-  return json({ incident: publicIncident(result) }, { status: 201 });
+    const insertedId = Number(insertResult.meta?.last_row_id);
+    if (!Number.isInteger(insertedId) || insertedId < 1) {
+      throw new Error("incident_insert_missing_id");
+    }
+
+    const result = await env.DB.prepare(
+      `SELECT id, report_hex_id, lat, lng, type, description, created_at
+       FROM incidents
+       WHERE id = ?`,
+    ).bind(insertedId).first();
+
+    if (!result) {
+      throw new Error("incident_insert_missing_row");
+    }
+
+    return json({ incident: publicIncident(result) }, { status: 201 });
+  } catch (error) {
+    console.error("incident_create_failed", { message: error?.message });
+    return json({ error: "incident_create_failed" }, { status: 500 });
+  }
 }
 
 export function onRequestGet() {

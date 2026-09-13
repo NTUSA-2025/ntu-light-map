@@ -31,12 +31,23 @@ const {
   authCode,
   btnRequestCode,
   btnVerifyCode,
+  authStepEmail,
+  authStepCode,
+  authCodeField,
+  authVerifyActions,
   incType,
+  incTypeOptions,
   incDesc,
+  incDescCount,
+  reportLocationValue,
+  reportStepLocation,
+  reportStepDetails,
+  btnReselect,
   btnSubmit,
   btnCancel,
   hexTooltip,
   reportHint,
+  btnPickCancel,
 } = dom;
 
 makeToggle('tog-brightness', 'brightness');
@@ -146,9 +157,55 @@ async function showAdminPanel() {
   }
 }
 
+function setAuthStep(step) {
+  const emailComplete = step === 'code' || step === 'complete';
+  const codeVisible = step !== 'email';
+  authStepEmail.classList.toggle('is-active', step === 'email');
+  authStepEmail.classList.toggle('is-complete', emailComplete);
+  authStepCode.classList.toggle('is-active', step === 'code');
+  authStepCode.classList.toggle('is-complete', step === 'complete');
+  authCodeField.hidden = !codeVisible;
+  authVerifyActions.hidden = !codeVisible;
+}
+
+function setReportStep(step) {
+  const details = step === 'details';
+  reportStepLocation.classList.toggle('is-active', !details);
+  reportStepLocation.classList.toggle('is-complete', details);
+  reportStepDetails.classList.toggle('is-active', details);
+}
+
+function updateDescriptionCount() {
+  incDescCount.textContent = `${incDesc.value.length} / ${incDesc.maxLength}`;
+}
+
+function clearSelectedReportHex() {
+  state.selectedHex = null;
+  if (state.selectedHexLayer) {
+    state.selectedHexLayer.remove();
+    state.selectedHexLayer = null;
+  }
+  reportLocationValue.textContent = '尚未選擇';
+  btnReselect.disabled = true;
+  setReportStep('location');
+}
+
+function setIncidentType(type) {
+  const selectedType = type === 'harassment' ? 'harassment' : 'accident';
+  incType.value = selectedType;
+  incTypeOptions.forEach(option => {
+    const selected = option.dataset.incidentType === selectedType;
+    option.classList.toggle('is-selected', selected);
+    option.setAttribute('aria-checked', String(selected));
+    option.tabIndex = selected ? 0 : -1;
+  });
+}
+
 function showAuth() {
   authSec.classList.remove('hidden');
   reportSec.classList.add('hidden');
+  setAuthStep('email');
+  clearSelectedReportHex();
   setReportPickMode(false);
   if (state.reportHexLayer && map.hasLayer(state.reportHexLayer)) map.removeLayer(state.reportHexLayer);
 }
@@ -156,13 +213,15 @@ function showAuth() {
 function showReport() {
   authSec.classList.add('hidden');
   reportSec.classList.remove('hidden');
+  setReportStep(state.selectedHex ? 'details' : 'location');
   if (state.reportHexLayer && !map.hasLayer(state.reportHexLayer)) state.reportHexLayer.addTo(map);
 }
 
 function setReportPickMode(active) {
-  const picking = active && window.matchMedia('(max-width: 760px)').matches;
+  const picking = Boolean(active && window.matchMedia('(max-width: 760px)').matches);
   incDialog.classList.toggle('pick-mode', picking);
   reportHint.classList.toggle('show', picking);
+  map.getContainer().classList.toggle('report-picking', picking);
 }
 
 function closeDialog() {
@@ -173,15 +232,13 @@ function closeDialog() {
   authSec.classList.remove('hidden');
   reportSec.classList.add('hidden');
   setReportPickMode(false);
-  state.selectedHex = null;
+  clearSelectedReportHex();
   incDesc.value = '';
   authCode.value = '';
+  updateDescriptionCount();
+  setAuthStep('email');
   btnSubmit.disabled = true;
   setStatus(reportStatus, '請在地圖上點選回報區');
-  if (state.selectedHexLayer) {
-    state.selectedHexLayer.remove();
-    state.selectedHexLayer = null;
-  }
   if (state.reportHexLayer && map.hasLayer(state.reportHexLayer)) map.removeLayer(state.reportHexLayer);
 }
 
@@ -206,6 +263,7 @@ function selectReportHex(feature, layer) {
   state.selectedHexLayer = L.geoJSON(feature, {
     pane: 'incidentPane',
     interactive: false,
+    className: 'selected-report-cell',
     style: {
       color: '#F0997B',
       weight: 2.5,
@@ -215,6 +273,9 @@ function selectReportHex(feature, layer) {
     }
   }).addTo(map);
   setReportPickMode(false);
+  reportLocationValue.textContent = `Hex ${id}`;
+  btnReselect.disabled = false;
+  setReportStep('details');
 
   setStatus(reportStatus, `已選回報區 ${id}`, 'ok');
   updateSubmitState();
@@ -351,8 +412,42 @@ async function beginIncidentFlow() {
 
 incFab.addEventListener('click', beginIncidentFlow);
 dlgClose.addEventListener('click', closeDialog);
+btnPickCancel.addEventListener('click', closeDialog);
 btnCancel.addEventListener('click', closeDialog);
-incDesc.addEventListener('input', updateSubmitState);
+btnReselect.addEventListener('click', () => {
+  if (!state.authSession?.authenticated) return;
+  clearSelectedReportHex();
+  setStatus(reportStatus, '請重新選擇回報區');
+  setReportPickMode(true);
+});
+incDesc.addEventListener('input', () => {
+  updateDescriptionCount();
+  updateSubmitState();
+});
+incTypeOptions.forEach((option, index) => {
+  option.addEventListener('click', () => setIncidentType(option.dataset.incidentType));
+  option.addEventListener('keydown', event => {
+    const direction = event.key === 'ArrowRight' || event.key === 'ArrowDown'
+      ? 1
+      : event.key === 'ArrowLeft' || event.key === 'ArrowUp'
+        ? -1
+        : 0;
+    if (!direction) return;
+    event.preventDefault();
+    const nextIndex = (index + direction + incTypeOptions.length) % incTypeOptions.length;
+    const nextOption = incTypeOptions[nextIndex];
+    setIncidentType(nextOption.dataset.incidentType);
+    nextOption.focus();
+  });
+});
+authEmail.addEventListener('keydown', event => {
+  if (event.key === 'Enter') btnRequestCode.click();
+});
+authCode.addEventListener('keydown', event => {
+  if (event.key === 'Enter') btnVerifyCode.click();
+});
+setIncidentType(incType.value);
+updateDescriptionCount();
 
 btnLogout.addEventListener('click', async () => {
   if (btnLogout.disabled) return;
@@ -408,6 +503,7 @@ btnRequestCode.addEventListener('click', async () => {
     }
 
     setStatus(authStatus, '驗證碼已寄出，請檢查信箱', 'ok');
+    setAuthStep('code');
     authCode.focus();
   } catch {
     setStatus(authStatus, '寄送失敗', 'err');
@@ -444,6 +540,7 @@ btnVerifyCode.addEventListener('click', async () => {
     }
 
     setAuthSession(await response.json());
+    setAuthStep('complete');
     setStatus(authStatus, '驗證完成', 'ok');
     showReport();
     setReportPickMode(true);

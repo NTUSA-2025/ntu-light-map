@@ -173,8 +173,12 @@
 
     <div id="hex-tooltip" role="status" aria-live="polite"></div>
     <div id="report-hint" role="status" aria-live="polite">
-      <strong>回報模式</strong>
-      <span>請點選地圖上的區域</span>
+      <div class="report-hint-copy">
+        <span class="report-hint-kicker">01 / 02</span>
+        <strong>選擇回報位置</strong>
+        <span>點選地圖上的六角區域</span>
+      </div>
+      <button class="report-hint-cancel" id="btn-pick-cancel" type="button">取消</button>
     </div>
     <div id="map"></div>
     <aside id="map-legend" aria-label="亮度圖例">
@@ -239,11 +243,25 @@
 
     <div id="inc-dialog" role="dialog" aria-modal="true" aria-labelledby="dlg-title">
       <div class="dlg-head">
-        <span class="dlg-head-title" id="dlg-title">回報安全事件</span>
+        <div class="dlg-head-copy">
+          <span class="dlg-head-kicker">SAFETY REPORT</span>
+          <span class="dlg-head-title" id="dlg-title">回報安全事件</span>
+        </div>
         <button class="dlg-close" id="dlg-close" type="button" aria-label="關閉">×</button>
       </div>
       <div class="dlg-body">
         <div class="inc-section" id="auth-section">
+          <div class="report-progress auth-progress" aria-label="驗證步驟">
+            <div class="report-step is-active" id="auth-step-email">
+              <span>01</span>
+              <strong>NTU Email</strong>
+            </div>
+            <span class="report-step-line" aria-hidden="true"></span>
+            <div class="report-step" id="auth-step-code">
+              <span>02</span>
+              <strong>驗證碼</strong>
+            </div>
+          </div>
           <div class="dlg-status" id="auth-status">請使用 NTU email 驗證後回報</div>
           <div class="dlg-field">
             <label for="auth-email">NTU Email</label>
@@ -252,31 +270,74 @@
           <div class="dlg-actions">
             <button class="btn-pri" id="btn-request-code" type="button">寄送驗證碼</button>
           </div>
-          <div class="dlg-field">
+          <div class="dlg-field" id="auth-code-field" hidden>
             <label for="auth-code">驗證碼</label>
             <input id="auth-code" inputmode="numeric" maxlength="6" placeholder="6 位數字" autocomplete="one-time-code"/>
           </div>
-          <div class="dlg-actions">
+          <div class="dlg-actions auth-verify-actions" id="auth-verify-actions" hidden>
             <button class="btn-pri" id="btn-verify-code" type="button">驗證</button>
           </div>
         </div>
 
         <div class="inc-section hidden" id="report-section">
+          <div class="report-progress" aria-label="回報步驟">
+            <div class="report-step is-active" id="report-step-location">
+              <span>01</span>
+              <strong>位置</strong>
+            </div>
+            <span class="report-step-line" aria-hidden="true"></span>
+            <div class="report-step" id="report-step-details">
+              <span>02</span>
+              <strong>內容</strong>
+            </div>
+          </div>
+          <div class="report-location-card">
+            <div class="report-location-icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7">
+                <path d="M20 10c0 5-8 11-8 11S4 15 4 10a8 8 0 1 1 16 0Z"/>
+                <circle cx="12" cy="10" r="2.5"/>
+              </svg>
+            </div>
+            <div class="report-location-copy">
+              <span class="report-location-label">回報位置</span>
+              <strong id="report-location-value">尚未選擇</strong>
+            </div>
+            <button class="btn-sec report-reselect" id="btn-reselect" type="button" disabled>重新選擇</button>
+          </div>
           <div class="dlg-status" id="report-status">請在地圖上點選回報區</div>
           <div class="dlg-field">
-            <label for="inc-type">事件類型</label>
-            <select id="inc-type" required>
+            <span class="dlg-field-label">事件類型</span>
+            <div class="incident-type-options" role="radiogroup" aria-label="事件類型">
+              <button class="incident-type-option is-selected" type="button" role="radio" data-incident-type="accident" aria-checked="true" tabindex="0">
+                <span class="incident-type-mark accident" aria-hidden="true"></span>
+                <span class="incident-type-copy">
+                  <strong>夜間事故</strong>
+                  <small>跌倒、碰撞或其他事故</small>
+                </span>
+              </button>
+              <button class="incident-type-option" type="button" role="radio" data-incident-type="harassment" aria-checked="false" tabindex="-1">
+                <span class="incident-type-mark harassment" aria-hidden="true"></span>
+                <span class="incident-type-copy">
+                  <strong>夜間騷擾</strong>
+                  <small>讓你感到不安的情況</small>
+                </span>
+              </button>
+            </div>
+            <select id="inc-type" class="incident-type-native visually-hidden" tabindex="-1" aria-hidden="true" required>
               <option value="accident">夜間事故</option>
               <option value="harassment">夜間騷擾</option>
             </select>
           </div>
-          <div class="dlg-field">
-            <label for="inc-desc">描述</label>
-            <textarea id="inc-desc" maxlength="300" required placeholder="請描述事件情況..."></textarea>
+          <div class="dlg-field dlg-description-field">
+            <label for="inc-desc">
+              <span>描述</span>
+              <span class="dlg-field-meta" id="inc-desc-count">0 / 300</span>
+            </label>
+            <textarea id="inc-desc" maxlength="300" required placeholder="請描述事件情況、時間與附近地標..."></textarea>
           </div>
           <div class="dlg-actions">
             <button class="btn-sec" id="btn-cancel" type="button">取消</button>
-            <button class="btn-pri" id="btn-submit" type="button" disabled>送出</button>
+            <button class="btn-pri" id="btn-submit" type="button" disabled>送出回報</button>
           </div>
         </div>
       </div>

@@ -1036,7 +1036,7 @@ details[open] .layer-group-chevron {
   padding: 0 15px 0 12px;
   border: 1px solid rgba(156, 231, 216, 0.55);
   border-left: 3px solid var(--cyan);
-  border-radius: 999px;
+  border-radius: 4px;
   background: linear-gradient(135deg, rgba(7, 17, 18, 0.92), rgba(7, 10, 13, 0.84));
   color: var(--ink);
   font-size: 0.6875rem;

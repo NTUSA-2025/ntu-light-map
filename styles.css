@@ -376,12 +376,13 @@ details[open] .layer-group-chevron {
 }
 .panel-reports {
   overflow: visible;
-  padding: 0 14px;
-  border: 1px solid var(--line);
-  border-left: 3px solid var(--cyan);
-  border-radius: var(--ui-radius);
-  background: rgba(7, 10, 13, 0.28);
+  padding: 0;
+  border: 0;
+  border-top: 1px solid var(--line);
+  border-radius: 0;
+  background: transparent;
 }
+
 
 .panel-reports-title {
   display: flex;
@@ -432,9 +433,12 @@ details[open] .panel-reports-chevron {
 }
 
 .report-list {
-  overflow: visible;
-  padding-right: 0;
+  max-height: min(42vh, 320px);
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+  padding-right: 8px;
 }
+
 
 .report-list-item {
   padding: 12px 0;
@@ -556,14 +560,14 @@ details[open] .panel-reports-chevron {
 .bar-row {
   display: flex;
   align-items: center;
-  gap: 9px;
+  gap: 14px;
   margin-top: 13px;
 }
 
 .bar-row:first-of-type { margin-top: 15px; }
 
 .bar-name {
-  width: 55px;
+  width: 72px;
   flex-shrink: 0;
   color: var(--ink-dim);
   font-size: 0.6875rem;

@@ -34,10 +34,21 @@ map.createPane('safetyPane');     map.getPane('safetyPane').style.zIndex = 300;
 map.createPane('protectPane');    map.getPane('protectPane').style.zIndex = 250;
 map.createPane('incidentPane');   map.getPane('incidentPane').style.zIndex = 400;
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-  attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-  maxZoom: 19
-}).addTo(map);
+const VECTOR_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
+const VECTOR_ATTRIBUTION = '&copy; <a href="https://openfreemap.org/">OpenFreeMap</a> · <a href="https://www.openmaptiles.org/">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
+
+async function loadVectorBasemap() {
+  const style = await loadJSON(VECTOR_STYLE_URL);
+  style.layers = style.layers.filter(layer => layer.type !== 'symbol' && layer.id !== 'natural_earth');
+  L.maplibreGL({
+    style,
+    attribution: VECTOR_ATTRIBUTION
+  }).addTo(map);
+}
+
+loadVectorBasemap().catch(error => {
+  console.error('vector_basemap_load_failed', error);
+});
 
 export const layerMap = {};
 export const incidentHexLayer = L.layerGroup().addTo(map);

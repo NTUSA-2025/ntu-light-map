@@ -284,12 +284,13 @@ textarea:focus-visible {
   display: flex;
   min-height: 0;
   flex-direction: column;
-  gap: 0;
+  gap: 16px;
   padding: 0 28px 34px;
   overflow-x: hidden;
   overflow-y: auto;
   scrollbar-gutter: stable;
 }
+
 
 
 .panel-body.hidden { display: none; }
@@ -375,10 +376,11 @@ details[open] .layer-group-chevron {
 }
 .panel-reports {
   overflow: visible;
-  border: 0;
-  border-top: 1px solid var(--line);
-  border-radius: 0;
-  background: transparent;
+  padding: 0 14px;
+  border: 1px solid var(--line);
+  border-left: 3px solid var(--cyan);
+  border-radius: var(--ui-radius);
+  background: rgba(7, 10, 13, 0.28);
 }
 
 .panel-reports-title {

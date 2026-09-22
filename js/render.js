@@ -20,6 +20,29 @@ export function updateStatsPanel() {
     `${Math.round(harassmentCount / maxCount * 100)}%`;
   document.getElementById('bar-harassment-num').textContent = harassmentCount;
 }
+export function renderReportList() {
+  dom.reportListMeta.textContent = `${state.allIncidents.length} 件`;
+
+  if (state.allIncidents.length === 0) {
+    dom.reportList.innerHTML = '<div class="report-list-empty">目前沒有公開回報</div>';
+    return;
+  }
+
+  dom.reportList.innerHTML = state.allIncidents.map(incident => `
+    <article class="report-list-item">
+      <div class="report-list-item-head">
+        <span class="report-list-type">
+          <span class="report-list-dot" style="background:${escapeHtml(incidentColor(incident.type))};"></span>
+          ${escapeHtml(incidentLabel(incident.type))}
+        </span>
+        <time class="report-list-time">${escapeHtml(incident.created_at || '-')}</time>
+      </div>
+      <p class="report-list-description">${escapeHtml(incident.description || '沒有描述')}</p>
+      <div class="report-list-meta">回報區 ${escapeHtml(incident.report_hex_id ?? '-')}</div>
+    </article>
+  `).join('');
+}
+
 
 export function renderAdminIncidentList() {
   if (state.allAdminIncidents.length === 0) {
@@ -116,4 +139,5 @@ export function renderIncidents() {
   });
 
   updateStatsPanel();
+  renderReportList();
 }

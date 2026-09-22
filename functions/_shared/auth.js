@@ -3,8 +3,19 @@ import { clientIp, hashSalt, hashValue, requireHashSalt } from "./incidents.js";
 const SESSION_COOKIE = "ntu_light_map_session";
 const SESSION_DAYS = 30;
 
+const ALLOWED_EMAIL_DOMAINS = new Set([
+  "ntu.edu.tw",
+  "ntusa.ntu.edu.tw",
+]);
+
 export function isAllowedNtuEmail(email) {
-  return typeof email === "string" && email.toLowerCase().endsWith("@ntu.edu.tw");
+  if (typeof email !== "string") return false;
+  const normalized = email.trim().toLowerCase();
+  const parts = normalized.split("@");
+  if (parts.length !== 2 || !parts[0] || !parts[1]) return false;
+
+  const domain = parts[1];
+  return ALLOWED_EMAIL_DOMAINS.has(domain) || domain.endsWith(".ntusa.ntu.edu.tw");
 }
 
 export async function isAdminEmail(email, env) {

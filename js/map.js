@@ -161,17 +161,14 @@ export async function loadMapLayers(onSelectReportHex, hexTooltip) {
   const safeColor = score => score === 1 ? '#7bcfa1' : score === 2 ? '#e6c07a' : score === 3 ? '#e08a8a' : '#8aa2d6';
   const safetyLayer = L.geoJSON(geoSafety, {
     pane: 'safetyPane',
+    interactive: false,
     style: feature => ({
       color: safeColor(Number(feature.properties?.safe_worst)),
       weight: 1.05,
       opacity: 0.9,
       fillOpacity: 0,
       fill: false
-    }),
-    onEachFeature: (feature, layer) => {
-      const id = feature.properties?.id ?? '-';
-      layer.bindPopup(`<div style="font:12px/1.5 system-ui;"><b>Hex ${escapeHtml(String(id))}</b><br>safe_worst: ${feature.properties?.safe_worst}<br>safe_mean: ${feature.properties?.safe_mean != null ? Number(feature.properties.safe_mean).toFixed(2) : 'N/A'}</div>`);
-    }
+    })
   }).addTo(map);
   layerMap.safety = safetyLayer;
 

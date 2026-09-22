@@ -10,6 +10,9 @@ export const dom = {
   adminStatus: document.getElementById('admin-status'),
   adminUsersList: document.getElementById('admin-users-list'),
   adminIncidentsList: document.getElementById('admin-incidents-list'),
+  reportList: document.getElementById('report-list'),
+  reportListMeta: document.getElementById('report-list-meta'),
+
   adminEmail: document.getElementById('admin-email'),
   btnAdminAdd: document.getElementById('btn-admin-add'),
   btnAdminClose: document.getElementById('btn-admin-close'),
@@ -40,6 +43,9 @@ export const dom = {
   btnSubmit: document.getElementById('btn-submit'),
   btnCancel: document.getElementById('btn-cancel'),
   hexTooltip: document.getElementById('hex-tooltip'),
+  mapInfoToggle: document.getElementById('map-info-toggle'),
+  mapInfo: document.getElementById('map-info'),
+  mapInfoClose: document.getElementById('map-info-close'),
   reportHint: document.getElementById('report-hint'),
   btnPickCancel: document.getElementById('btn-pick-cancel'),
 };

@@ -115,6 +115,19 @@
           </div>
         </div>
       </details>
+      <details class="panel-reports">
+        <summary class="panel-reports-title">
+          <span class="panel-reports-summary-copy">
+            <span>回報內容</span>
+            <span class="panel-reports-meta" id="report-list-meta">0 件</span>
+          </span>
+          <span class="panel-reports-chevron" aria-hidden="true">⌄</span>
+        </summary>
+        <div class="panel-reports-content">
+          <div class="report-list" id="report-list"></div>
+        </div>
+      </details>
+
 
 
       <div class="block layer-block">
@@ -181,17 +194,42 @@
       <button class="report-hint-cancel" id="btn-pick-cancel" type="button">取消</button>
     </div>
     <div id="map"></div>
-    <aside id="map-legend" aria-label="亮度圖例">
-      <div class="map-legend-title">
-        <span>亮度</span>
-        <span class="map-legend-unit">lux</span>
-      </div>
-      <div class="map-legend-row"><span class="map-legend-swatch" style="background:#0b1020;"></span><span>0 - 1</span></div>
-      <div class="map-legend-row"><span class="map-legend-swatch" style="background:#1f2a5a;"></span><span>1 - 12</span></div>
-      <div class="map-legend-row"><span class="map-legend-swatch" style="background:#2f6f9f;"></span><span>12 - 29</span></div>
-      <div class="map-legend-row"><span class="map-legend-swatch" style="background:#6fd0c2;"></span><span>29 - 54</span></div>
-      <div class="map-legend-row"><span class="map-legend-swatch" style="background:#f3f6ff;"></span><span>54 +</span></div>
-    </aside>
+    <div id="map-tools" aria-label="地圖資訊">
+      <aside id="map-legend" aria-label="亮度與事件圖例">
+        <div class="map-legend-title">
+          <span>亮度</span>
+          <span class="map-legend-unit">lux</span>
+        </div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#0b1020;"></span><span>0 - 1</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#1f2a5a;"></span><span>1 - 12</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#2f6f9f;"></span><span>12 - 29</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#6fd0c2;"></span><span>29 - 54</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#f3f6ff;"></span><span>54 +</span></div>
+        <div class="map-legend-section">安全事件</div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#F0997B;"></span><span>夜間事故</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#ef718d;"></span><span>夜間騷擾</span></div>
+      </aside>
+      <button id="map-info-toggle" type="button" aria-label="開啟地圖說明" aria-controls="map-info" aria-expanded="false">
+        <span aria-hidden="true">i</span>
+      </button>
+      <section id="map-info" role="dialog" aria-labelledby="map-info-title" aria-describedby="map-info-content" hidden>
+        <div class="map-info-head">
+          <div>
+            <div class="map-info-kicker">QUICK GUIDE</div>
+            <h2 class="map-info-title" id="map-info-title">地圖說明</h2>
+          </div>
+          <button id="map-info-close" type="button" aria-label="關閉地圖說明">×</button>
+        </div>
+        <div class="map-info-body" id="map-info-content">
+          <p><strong>亮度</strong> 色階單位是 lux，顏色越亮代表亮度數值越高。</p>
+          <p><strong>資料狀態</strong> 部分區域可能是推估值，尚未量測的區域不代表亮度為零。</p>
+          <p><strong>回報安全事件</strong> 按下左下角按鈕，驗證 NTU Email 後選擇地圖上的六角區域。</p>
+          <p><strong>事件顏色</strong> 橘色代表夜間事故，紅色代表夜間騷擾。</p>
+          <p><strong>圖層</strong> 右上角圖層按鈕可以切換亮度、安全事件與邊界資訊。</p>
+        </div>
+      </section>
+    </div>
+
 
     <section class="admin-screen hidden" id="admin-panel" aria-label="事件後台">
       <header class="admin-screen-head">

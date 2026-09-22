@@ -48,7 +48,11 @@ const {
   hexTooltip,
   reportHint,
   btnPickCancel,
+  mapInfoToggle,
+  mapInfo,
+  mapInfoClose,
 } = dom;
+
 function syncVisualViewport() {
   const viewport = window.visualViewport;
   if (!viewport) return;
@@ -142,6 +146,21 @@ function setStatus(el, message, state = '') {
   el.textContent = message;
   el.className = `dlg-status ${state}`.trim();
 }
+function setMapInfoOpen(open) {
+  mapInfo.hidden = !open;
+  mapInfoToggle.setAttribute('aria-expanded', String(open));
+  mapInfoToggle.setAttribute('aria-label', open ? '關閉地圖說明' : '開啟地圖說明');
+  mapInfoToggle.classList.toggle('active', open);
+}
+
+mapInfoToggle.addEventListener('click', () => {
+  setMapInfoOpen(mapInfo.hidden);
+});
+mapInfoClose.addEventListener('click', () => setMapInfoOpen(false));
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && !mapInfo.hidden) setMapInfoOpen(false);
+});
+
 
 function setAuthSession(session) {
   state.authSession = session?.authenticated ? session : null;
@@ -262,6 +281,8 @@ function setReportPickMode(active) {
 function closeDialog() {
   incDialog.classList.remove('show');
   document.documentElement.classList.remove('keyboard-open');
+  document.documentElement.classList.remove('report-dialog-open');
+
   incFab.classList.remove('active');
   btnReport.classList.remove('active');
   btnReport.setAttribute('aria-pressed', 'false');
@@ -361,10 +382,21 @@ async function loadAdminData() {
   }
 }
 
+function isAllowedNtuEmail(email) {
+  const normalized = String(email || '').trim().toLowerCase();
+  const parts = normalized.split('@');
+  if (parts.length !== 2 || !parts[0] || !parts[1]) return false;
+
+  const domain = parts[1];
+  return domain === 'ntu.edu.tw'
+    || domain === 'ntusa.ntu.edu.tw'
+    || domain.endsWith('.ntusa.ntu.edu.tw');
+}
+
 async function createAdminUser() {
   const email = adminEmail.value.trim().toLowerCase();
-  if (!email.endsWith('@ntu.edu.tw')) {
-    setAdminStatus('請輸入 @ntu.edu.tw email');
+  if (!isAllowedNtuEmail(email)) {
+    setAdminStatus('請輸入有效的 NTU 或 NTUSA Email');
     return;
   }
 
@@ -436,6 +468,8 @@ async function beginIncidentFlow() {
   }
   if (!state.authSession) await refreshAuthSession();
   incDialog.classList.add('show');
+  setMapInfoOpen(false);
+  document.documentElement.classList.add('report-dialog-open');
   incFab.classList.add('active');
   btnReport.setAttribute('aria-pressed', 'true');
   if (state.authSession?.authenticated) {
@@ -514,10 +548,11 @@ btnLogout.addEventListener('click', async () => {
 
 btnRequestCode.addEventListener('click', async () => {
   const email = authEmail.value.trim().toLowerCase();
-  if (!email.endsWith('@ntu.edu.tw')) {
-    setStatus(authStatus, '請輸入 @ntu.edu.tw email', 'err');
+  if (!isAllowedNtuEmail(email)) {
+    setStatus(authStatus, '請輸入有效的 NTU 或 NTUSA Email', 'err');
     return;
   }
+
 
   btnRequestCode.disabled = true;
   setStatus(authStatus, '寄送中');
@@ -551,8 +586,8 @@ btnRequestCode.addEventListener('click', async () => {
 btnVerifyCode.addEventListener('click', async () => {
   const email = authEmail.value.trim().toLowerCase();
   const code = authCode.value.trim();
-  if (!email.endsWith('@ntu.edu.tw') || !/^\d{6}$/.test(code)) {
-    setStatus(authStatus, '請輸入 NTU email 與 6 位數驗證碼', 'err');
+  if (!isAllowedNtuEmail(email) || !/^\d{6}$/.test(code)) {
+    setStatus(authStatus, '請輸入 NTU 或 NTUSA Email 與 6 位數驗證碼', 'err');
     return;
   }
 

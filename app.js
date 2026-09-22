@@ -68,6 +68,8 @@ function syncVisualViewport() {
 }
 
 const keyboardFields = [authEmail, authCode, incDesc, adminEmail];
+let incidentFlowPending = false;
+
 
 if (window.visualViewport) {
   syncVisualViewport();
@@ -455,28 +457,38 @@ async function refreshAuthSession() {
 }
 
 async function beginIncidentFlow() {
-  if (!adminPanel.classList.contains('hidden')) showDashboardPanel();
-  if (window.matchMedia('(max-width: 760px)').matches) {
-    panel.classList.add('closed');
-    syncPanelButtonState(false);
-    window.setTimeout(() => map.invalidateSize(), 280);
-  }
+  if (incidentFlowPending) return;
+  incidentFlowPending = true;
 
-  if (incDialog.classList.contains('show')) {
-    closeDialog();
-    return;
-  }
-  if (!state.authSession) await refreshAuthSession();
-  incDialog.classList.add('show');
-  setMapInfoOpen(false);
-  document.documentElement.classList.add('report-dialog-open');
-  incFab.classList.add('active');
-  btnReport.setAttribute('aria-pressed', 'true');
-  if (state.authSession?.authenticated) {
-    showReport();
-    setReportPickMode(true);
-  } else {
-    showAuth();
+  try {
+    if (!adminPanel.classList.contains('hidden')) showDashboardPanel();
+
+    const isMobile = window.matchMedia('(max-width: 760px)').matches;
+    document.documentElement.classList.add('report-dialog-open');
+
+    if (isMobile) {
+      panel.classList.add('closed');
+      syncPanelButtonState(false);
+      window.setTimeout(() => map.invalidateSize(), 280);
+    }
+
+    if (incDialog.classList.contains('show')) {
+      closeDialog();
+      return;
+    }
+    if (!state.authSession) await refreshAuthSession();
+    incDialog.classList.add('show');
+    setMapInfoOpen(false);
+    incFab.classList.add('active');
+    btnReport.setAttribute('aria-pressed', 'true');
+    if (state.authSession?.authenticated) {
+      showReport();
+      setReportPickMode(true);
+    } else {
+      showAuth();
+    }
+  } finally {
+    incidentFlowPending = false;
   }
 }
 

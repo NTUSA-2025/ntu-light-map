@@ -1779,7 +1779,8 @@ html.report-dialog-open #map-info {
 
 
 @media (min-width: 761px) {
-  #dock .dock-btn { font-size: 0.8125rem; }
+  #dock .dock-btn { font-size: 0.875rem; }
+
 
   #panel {
     top: 72px;
@@ -1802,12 +1803,12 @@ html.report-dialog-open #map-info {
   #panel .layer-group-title,
   #panel .panel-reports-title {
     min-height: 56px;
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
 
   #panel .stat-label,
   #panel .block-label {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
   }
 
   #panel .stat-val {
@@ -1816,12 +1817,13 @@ html.report-dialog-open #map-info {
 
   #panel .bar-name,
   #panel .layer-name {
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
 
   #panel .bar-num {
-    font-size: 0.75rem;
+    font-size: 0.8125rem;
   }
+
 
   #panel .layer-item {
     min-height: 50px;
@@ -1837,7 +1839,7 @@ html.report-dialog-open #map-info {
   }
 
   #panel .panel-reports-meta {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
   }
 
   #panel .panel-reports-content {
@@ -1846,12 +1848,13 @@ html.report-dialog-open #map-info {
 
   #panel .report-list-type,
   #panel .report-list-description {
-    font-size: 0.875rem;
+    font-size: 1rem;
   }
+
 
   #panel .report-list-time,
   #panel .report-list-meta {
-    font-size: 0.6875rem;
+    font-size: 0.75rem;
   }
 
   #panel .layer-block {
@@ -1865,12 +1868,12 @@ html.report-dialog-open #map-info {
   #map-legend {
     width: 170px;
     padding: 14px 15px 14px 16px;
-    font-size: 0.8125rem;
+    font-size: 0.875rem;
   }
 
-  .map-legend-title { font-size: 0.8125rem; }
-  .map-legend-row { font-size: 0.75rem; }
-  .map-legend-section { font-size: 0.6875rem; }
+  .map-legend-title { font-size: 0.875rem; }
+  .map-legend-row { font-size: 0.8125rem; }
+  .map-legend-section { font-size: 0.75rem; }
 
   .topbar-title { font-size: 1.3rem; }
   #inc-fab { font-size: 0.75rem; }
@@ -1921,6 +1924,13 @@ html.report-dialog-open #map-info {
     min-height: 44px;
     padding-inline: 12px;
   }
+  html.report-dialog-open #topbar,
+  html.report-dialog-open #dock,
+  html.report-dialog-open #inc-fab {
+    opacity: 0;
+    pointer-events: none;
+  }
+
 
   #panel {
     top: auto;
@@ -2004,6 +2014,7 @@ html.report-dialog-open #map-info {
 
 
   #inc-fab {
+    z-index: 10001;
     bottom: calc(20px + env(safe-area-inset-bottom));
     left: 18px;
     min-height: 48px;

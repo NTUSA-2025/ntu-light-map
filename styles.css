@@ -282,6 +282,7 @@ textarea:focus-visible {
 
 .panel-body {
   display: flex;
+  flex: 1;
   min-height: 0;
   flex-direction: column;
   gap: 16px;
@@ -290,6 +291,7 @@ textarea:focus-visible {
   overflow-y: auto;
   scrollbar-gutter: stable;
 }
+
 
 
 
@@ -1980,6 +1982,7 @@ html.report-dialog-open #map-info {
     left: 16px;
     width: auto;
     min-width: 0;
+    height: min(68dvh, 520px);
     max-height: min(68dvh, 520px);
     border: 1px solid var(--line);
     border-left: 3px solid var(--cyan);

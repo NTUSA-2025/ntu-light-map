@@ -102,6 +102,8 @@ function syncPanelButtonState(open) {
 }
 
 btnPanel.addEventListener('click', () => {
+  setMapInfoOpen(false);
+
   if (!adminPanel.classList.contains('hidden')) {
     showDashboardPanel();
     return;
@@ -117,6 +119,8 @@ btnPanel.addEventListener('click', () => {
   window.setTimeout(() => map.invalidateSize(), 280);
 });
 btnPanelClose.addEventListener('click', () => {
+  setMapInfoOpen(false);
+
   panel.classList.add('closed');
   syncPanelButtonState(false);
   window.setTimeout(() => map.invalidateSize(), 280);
@@ -149,6 +153,12 @@ function setStatus(el, message, state = '') {
   el.className = `dlg-status ${state}`.trim();
 }
 function setMapInfoOpen(open) {
+  if (open && !panel.classList.contains('closed')) {
+    panel.classList.add('closed');
+    syncPanelButtonState(false);
+    window.setTimeout(() => map.invalidateSize(), 280);
+  }
+
   mapInfo.hidden = !open;
   mapInfoToggle.setAttribute('aria-expanded', String(open));
   mapInfoToggle.setAttribute('aria-label', open ? '關閉地圖說明' : '開啟地圖說明');

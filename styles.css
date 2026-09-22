@@ -731,6 +731,9 @@ details[open] .panel-reports-chevron {
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
 }
+#map-info:not([hidden]) {
+  animation: report-dialog-in 0.38s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
 
 .map-info-head {
   display: flex;
@@ -1800,14 +1803,16 @@ html.report-dialog-open #map-info {
 
 
   #panel {
-    top: 72px;
+    top: 0;
     width: min(390px, 34vw);
   }
+
   #panel .mobile-map-legend { display: none; }
 
   #panel .panel-head {
-    padding: 32px 32px 24px;
+    padding: 78px 32px 24px;
   }
+
 
   #panel .panel-head-title {
     font-size: 1.25rem;

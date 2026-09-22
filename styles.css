@@ -134,21 +134,21 @@ textarea:focus-visible {
 #dock #btnPanel.active { display: none; }
 #dock #map-info-toggle {
   display: inline-flex;
-  width: auto;
-  height: auto;
+  width: 32px;
+  height: 32px;
+  min-height: 32px;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  padding: 0 0 7px;
 }
 
-.dock-info-mark {
-  display: inline-grid;
-  width: 15px;
-  height: 15px;
-  place-items: center;
-  border: 1px solid currentColor;
-  border-radius: 50%;
-  font-family: var(--mono);
-  font-size: 0.625rem;
-  line-height: 1;
+#dock #map-info-toggle:hover,
+#dock #map-info-toggle[aria-expanded="true"] {
+  border-color: var(--ink);
+  color: var(--cyan);
 }
+
 
 
 #dock .dock-btn:hover {
@@ -691,64 +691,8 @@ details[open] .panel-reports-chevron {
   z-index: auto;
 }
 
-#map-info-toggle {
-  display: inline-grid;
-  width: 36px;
-  height: 36px;
-  flex-shrink: 0;
-  place-items: center;
-  border: 1px solid var(--line);
-  border-left: 2px solid var(--cyan);
-  border-radius: 2px;
-  background: rgba(7, 10, 13, 0.76);
-  color: var(--ink);
-  cursor: pointer;
-  font-family: var(--mono);
-  font-size: 0.875rem;
-  font-weight: 500;
-  line-height: 1;
-  box-shadow: 12px 12px 32px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(12px);
-  -webkit-backdrop-filter: blur(12px);
-  transition: border-color 0.2s, color 0.2s, background 0.2s;
-}
+  
 
-#map-info-toggle:hover,
-#map-info-toggle[aria-expanded="true"] {
-  border-color: var(--cyan);
-  background: rgba(7, 17, 18, 0.92);
-  color: var(--cyan);
-}
-#dock #map-info-toggle {
-  display: inline-grid;
-  width: 32px;
-  height: 32px;
-  min-height: 32px;
-  place-items: center;
-  gap: 0;
-  padding: 0 0 7px;
-  border: 0;
-  border-bottom: 1px solid var(--cyan);
-  border-radius: 0;
-  background: transparent;
-  box-shadow: none;
-  backdrop-filter: none;
-  -webkit-backdrop-filter: none;
-}
-
-#dock #map-info-toggle[aria-expanded="true"] {
-  border-color: var(--cyan);
-  background: transparent;
-}
-
-.dock-info-mark {
-  width: 20px;
-  height: 20px;
-  font-family: var(--font);
-  font-size: 0.8125rem;
-  font-weight: 700;
-  letter-spacing: 0;
-}
 
 
 

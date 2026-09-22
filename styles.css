@@ -1782,7 +1782,8 @@ html.report-dialog-open #map-info {
 
 
 @media (min-width: 761px) {
-  #dock .dock-btn { font-size: 0.875rem; }
+  #dock .dock-btn { font-size: 0.9375rem; }
+
 
 
   #panel {
@@ -1879,7 +1880,8 @@ html.report-dialog-open #map-info {
   .map-legend-row { font-size: 0.8125rem; }
   .map-legend-section { font-size: 0.75rem; }
 
-  .topbar-title { font-size: 1.3rem; }
+  .topbar-title { font-size: 1.5rem; }
+
   #inc-fab { font-size: 0.75rem; }
 
   .dlg-head-title { font-size: 1rem; }
@@ -1926,7 +1928,15 @@ html.report-dialog-open #map-info {
 
   #dock .dock-btn {
     min-height: 44px;
+    align-items: flex-start;
+    padding-top: 0;
+    padding-bottom: 7px;
     padding-inline: 12px;
+  }
+
+  #dock #map-info-toggle {
+    align-items: flex-start;
+    padding-top: 0;
   }
   html.report-dialog-open #topbar,
   html.report-dialog-open #dock,

@@ -164,7 +164,7 @@ textarea:focus-visible {
 }
 
 #dock .dock-btn.active {
-  animation: report-breathe 2.8s ease-in-out infinite;
+  animation: report-breathe 0.6s ease-out 1;
 }
 
 #dock .dock-btn:active {

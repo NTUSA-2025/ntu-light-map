@@ -1889,10 +1889,11 @@ html.report-dialog-open #map-info {
 
 @media (max-width: 760px) {
   #dock {
-    top: auto;
+    top: 20px;
     right: 18px;
-    bottom: calc(18px + env(safe-area-inset-bottom));
+    bottom: auto;
   }
+
 
   #dock #btnPanel.active { display: inline-flex; }
 
@@ -1970,9 +1971,9 @@ html.report-dialog-open #map-info {
   }
 
   #dock #map-info {
-    top: auto;
+    top: calc(100% + 10px);
     right: 0;
-    bottom: calc(100% + 10px);
+    bottom: auto;
   }
 
 

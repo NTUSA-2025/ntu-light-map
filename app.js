@@ -473,14 +473,10 @@ async function beginIncidentFlow() {
   try {
     if (!adminPanel.classList.contains('hidden')) showDashboardPanel();
 
-    const isMobile = window.matchMedia('(max-width: 760px)').matches;
     document.documentElement.classList.add('report-dialog-open');
-
-    if (isMobile) {
-      panel.classList.add('closed');
-      syncPanelButtonState(false);
-      window.setTimeout(() => map.invalidateSize(), 280);
-    }
+    panel.classList.add('closed');
+    syncPanelButtonState(false);
+    window.setTimeout(() => map.invalidateSize(), 280);
 
     if (incDialog.classList.contains('show')) {
       closeDialog();

@@ -742,13 +742,14 @@ details[open] .panel-reports-chevron {
 }
 
 .dock-info-mark {
-  width: 17px;
-  height: 17px;
+  width: 20px;
+  height: 20px;
   font-family: var(--font);
-  font-size: 0.75rem;
+  font-size: 0.8125rem;
   font-weight: 700;
   letter-spacing: 0;
 }
+
 
 
 #map-info {
@@ -1961,13 +1962,18 @@ html.report-dialog-open #map-info {
   #map-tools #map-legend { width: 150px; }
 
   #dock #map-info-toggle {
+    display: inline-flex;
     width: 44px;
     height: 44px;
     min-height: 44px;
-    padding: 0;
-    border: 1px solid var(--line);
-    border-radius: 50%;
-    background: rgba(7, 10, 13, 0.76);
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 0 12px 7px;
+    border: 0;
+    border-bottom: 1px solid var(--cyan);
+    border-radius: 0;
+    background: transparent;
   }
 
   #dock #map-info {

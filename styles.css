@@ -1553,6 +1553,8 @@ details[open] .layer-group-chevron {
     border: 1px solid var(--line);
     border-left: 3px solid var(--cyan);
     border-radius: var(--ui-radius);
+    background: linear-gradient(180deg, rgba(13, 23, 28, 0.98), rgba(7, 10, 13, 0.97));
+    box-shadow: 0 -24px 60px rgba(0, 0, 0, 0.42);
   }
 
   #panel.closed {

@@ -127,7 +127,8 @@ textarea:focus-visible {
   font-weight: 600;
   letter-spacing: 0.13em;
   text-transform: uppercase;
-  transition: color 0.2s, border-color 0.2s;
+  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
+
 }
 
 #dock #btnPanel:not(.active),
@@ -153,12 +154,23 @@ textarea:focus-visible {
 
 
 
-#dock .dock-btn:hover {
-  border-color: var(--ink);
+#dock .dock-btn:hover,
+#dock .dock-btn.active {
+  border-color: var(--cyan);
+  background: linear-gradient(135deg, rgba(7, 17, 18, 0.92), rgba(7, 10, 13, 0.84));
   color: var(--cyan);
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.26);
+  transform: translateY(-2px);
 }
 
-#dock .dock-btn.active { color: var(--cyan); }
+#dock .dock-btn.active {
+  animation: report-breathe 2.8s ease-in-out infinite;
+}
+
+#dock .dock-btn:active {
+  transform: translateY(0) scale(0.98);
+}
+
 
 #dock .dock-btn svg {
   width: 15px;
@@ -276,7 +288,9 @@ textarea:focus-visible {
   padding: 0 28px 34px;
   overflow-x: hidden;
   overflow-y: auto;
+  scrollbar-gutter: stable;
 }
+
 
 .panel-body.hidden { display: none; }
 
@@ -413,9 +427,8 @@ details[open] .panel-reports-chevron {
 .panel-reports-content { padding: 0 0 18px; }
 
 .report-list {
-  max-height: min(42vh, 320px);
-  overflow-y: auto;
-  padding-right: 4px;
+  overflow: visible;
+  padding-right: 0;
 }
 
 .report-list-item {

@@ -826,12 +826,16 @@ details[open] .layer-group-chevron .chevron-icon {
   color: var(--ink);
   font-weight: 600;
 }
+html.report-dialog-open #topbar,
+html.report-dialog-open #dock,
 html.report-dialog-open #map-tools,
 html.report-dialog-open #map-info-toggle,
-html.report-dialog-open #map-info {
+html.report-dialog-open #map-info,
+html.report-dialog-open #inc-fab {
   opacity: 0;
   pointer-events: none;
 }
+
 
 
 
@@ -1983,12 +1987,6 @@ html.report-dialog-open #map-info {
   #dock #map-info-toggle {
     align-items: flex-start;
     padding-top: 0;
-  }
-  html.report-dialog-open #topbar,
-  html.report-dialog-open #dock,
-  html.report-dialog-open #inc-fab {
-    opacity: 0;
-    pointer-events: none;
   }
 
 

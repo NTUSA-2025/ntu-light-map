@@ -113,13 +113,15 @@ textarea:focus-visible {
 
 #dock .dock-btn {
   display: none;
+  position: relative;
+
   min-height: 28px;
   align-items: center;
   gap: 9px;
   padding: 0 0 7px;
   border: 0;
-  border-bottom: 1px solid var(--cyan);
   border-radius: 0;
+
   background: transparent;
   color: var(--ink);
   cursor: pointer;
@@ -130,6 +132,22 @@ textarea:focus-visible {
   transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s, box-shadow 0.2s;
 
 }
+#dock .dock-btn::after {
+  position: absolute;
+  right: 0;
+  bottom: 4px;
+  left: 0;
+  height: 1px;
+  background: var(--cyan);
+  content: '';
+  transition: background 0.2s;
+}
+
+#dock .dock-btn:hover::after,
+#dock .dock-btn.active::after {
+  background: var(--ink);
+}
+
 
 #dock #btnPanel:not(.active),
 #dock #btnAdmin:not(.hidden),
@@ -2055,7 +2073,6 @@ html.report-dialog-open #inc-fab {
     gap: 0;
     padding: 0 12px 7px;
     border: 0;
-    border-bottom: 1px solid var(--cyan);
     border-radius: 0;
     background: transparent;
   }

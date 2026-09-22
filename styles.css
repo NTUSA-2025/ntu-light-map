@@ -427,6 +427,9 @@ details[open] .panel-reports-chevron {
 }
 
 .panel-reports-content { padding: 0 0 18px; }
+.panel-reports:not([open]) > .panel-reports-content {
+  display: none;
+}
 
 .report-list {
   overflow: visible;

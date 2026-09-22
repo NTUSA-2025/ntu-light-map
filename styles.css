@@ -285,6 +285,9 @@ textarea:focus-visible {
 }
 
 .panel-close {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   min-width: 40px;
   min-height: 26px;
   padding: 0 0 6px;

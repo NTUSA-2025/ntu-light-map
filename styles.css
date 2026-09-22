@@ -372,10 +372,14 @@ details[open] .layer-group-chevron {
 
 .panel-insights-content {
   display: flex;
+  max-height: min(300px, 36vh);
   flex-direction: column;
   gap: 18px;
-  padding: 0 0 19px;
+  padding: 0 8px 19px 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
 }
+
 .panel-reports {
   overflow: visible;
   padding: 0;
@@ -429,16 +433,21 @@ details[open] .panel-reports-chevron {
   transform: rotate(180deg);
 }
 
-.panel-reports-content { padding: 0 0 18px; }
+.panel-reports-content {
+  max-height: min(360px, 42vh);
+  padding: 0 8px 18px 0;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+
 .panel-reports:not([open]) > .panel-reports-content {
   display: none;
 }
 
 .report-list {
-  max-height: min(42vh, 320px);
-  overflow-y: auto;
-  scrollbar-gutter: stable;
-  padding-right: 8px;
+  max-height: none;
+  overflow: visible;
+  padding-right: 0;
 }
 
 

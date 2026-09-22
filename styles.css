@@ -1985,7 +1985,7 @@ html.report-dialog-open #inc-fab {
   }
 
   #dock #map-info-toggle {
-    align-items: flex-start;
+    align-items: flex-start !important;
     padding-top: 0;
   }
 

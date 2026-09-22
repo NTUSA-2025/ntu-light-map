@@ -589,6 +589,9 @@ details[open] .panel-reports-chevron {
   gap: 0;
   padding: 0;
 }
+.mobile-map-legend { display: none; }
+.mobile-map-legend-content { padding-bottom: 14px; }
+
 
 .layer-item {
   display: flex;
@@ -1982,13 +1985,9 @@ html.report-dialog-open #map-info {
   .topbar-title { font-size: 1rem; }
   .leaflet-control-zoom { margin: 64px 18px 18px !important; }
 
-  #map-tools {
-    right: 18px;
-    bottom: calc(78px + env(safe-area-inset-bottom));
-    max-width: calc(100vw - 36px);
-  }
+  #map-tools { display: none; }
+  .mobile-map-legend { display: block; }
 
-  #map-tools #map-legend { width: 150px; }
 
   #dock #map-info-toggle {
     display: inline-flex;

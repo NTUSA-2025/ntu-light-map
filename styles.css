@@ -2003,9 +2003,10 @@ html.report-dialog-open #inc-fab {
   }
 
   #dock #map-info-toggle {
-    align-items: flex-start !important;
+    align-items: flex-start;
     padding-top: 0;
   }
+
 
 
   #panel {
@@ -2068,7 +2069,7 @@ html.report-dialog-open #inc-fab {
     width: 44px;
     height: 44px;
     min-height: 44px;
-    align-items: center;
+    align-items: flex-start;
     justify-content: center;
     gap: 0;
     padding: 0 12px 7px;

@@ -2006,6 +2006,9 @@ html.report-dialog-open #inc-fab {
     align-items: flex-start;
     padding-top: 0;
   }
+  #dock .dock-btn::after {
+    bottom: 10px;
+  }
 
 
 

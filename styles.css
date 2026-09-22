@@ -132,6 +132,24 @@ textarea:focus-visible {
 #dock #btnAdmin:not(.hidden) { display: inline-flex; }
 
 #dock #btnPanel.active { display: none; }
+#dock #map-info-toggle {
+  display: inline-flex;
+  width: auto;
+  height: auto;
+}
+
+.dock-info-mark {
+  display: inline-grid;
+  width: 15px;
+  height: 15px;
+  place-items: center;
+  border: 1px solid currentColor;
+  border-radius: 50%;
+  font-family: var(--mono);
+  font-size: 0.625rem;
+  line-height: 1;
+}
+
 
 #dock .dock-btn:hover {
   border-color: var(--ink);
@@ -704,8 +722,9 @@ details[open] .panel-reports-chevron {
 
 #map-info {
   position: absolute;
+  top: calc(100% + 10px);
   right: 0;
-  bottom: calc(100% + 10px);
+  bottom: auto;
   z-index: 2;
   width: min(320px, calc(100vw - 32px));
   overflow: hidden;
@@ -782,10 +801,13 @@ details[open] .panel-reports-chevron {
   color: var(--ink);
   font-weight: 600;
 }
-html.report-dialog-open #map-tools {
+html.report-dialog-open #map-tools,
+html.report-dialog-open #map-info-toggle,
+html.report-dialog-open #map-info {
   opacity: 0;
   pointer-events: none;
 }
+
 
 
 
@@ -1906,13 +1928,15 @@ html.report-dialog-open #map-tools {
 
   #map-tools #map-legend { width: 150px; }
 
-  #map-info-toggle {
+  #dock #map-info-toggle {
     width: 44px;
     height: 44px;
   }
 
-  #map-info {
-    width: min(320px, calc(100vw - 36px));
+  #dock #map-info {
+    top: auto;
+    right: 0;
+    bottom: calc(100% + 10px);
   }
 
 

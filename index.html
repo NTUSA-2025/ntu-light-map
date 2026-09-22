@@ -41,6 +41,26 @@
       <span class="dock-tip">圖層</span>
     </button>
 
+    <button class="dock-btn" id="map-info-toggle" type="button" aria-label="開啟地圖說明" aria-controls="map-info" aria-expanded="false">
+      <span class="dock-info-mark" aria-hidden="true">i</span>
+      <span class="dock-tip">說明</span>
+    </button>
+      <section id="map-info" role="dialog" aria-labelledby="map-info-title" aria-describedby="map-info-content" hidden>
+        <div class="map-info-head">
+          <div>
+            <div class="map-info-kicker">QUICK GUIDE</div>
+            <h2 class="map-info-title" id="map-info-title">地圖說明</h2>
+          </div>
+          <button id="map-info-close" type="button" aria-label="關閉地圖說明">×</button>
+        </div>
+        <div class="map-info-body" id="map-info-content">
+          <p><strong>亮度</strong> 色階單位是 lux，顏色越亮代表亮度數值越高。</p>
+          <p><strong>資料狀態</strong> 部分區域可能是推估值，尚未量測的區域不代表亮度為零。</p>
+          <p><strong>回報安全事件</strong> 按下左下角按鈕，驗證 NTU Email 後選擇地圖上的六角區域。</p>
+          <p><strong>事件顏色</strong> 橘色代表夜間事故，紅色代表夜間騷擾。</p>
+          <p><strong>圖層</strong> 右上角圖層按鈕可以切換亮度、安全事件與邊界資訊。</p>
+        </div>
+      </section>
     <div class="dock-div"></div>
 
     <button class="dock-btn" id="btnReport" type="button" aria-label="回報事件" aria-pressed="false">
@@ -216,25 +236,6 @@
         <div class="map-legend-row"><span class="map-legend-swatch" style="background:#F0997B;"></span><span>夜間事故</span></div>
         <div class="map-legend-row"><span class="map-legend-swatch" style="background:#ef718d;"></span><span>夜間騷擾</span></div>
       </aside>
-      <button id="map-info-toggle" type="button" aria-label="開啟地圖說明" aria-controls="map-info" aria-expanded="false">
-        <span aria-hidden="true">i</span>
-      </button>
-      <section id="map-info" role="dialog" aria-labelledby="map-info-title" aria-describedby="map-info-content" hidden>
-        <div class="map-info-head">
-          <div>
-            <div class="map-info-kicker">QUICK GUIDE</div>
-            <h2 class="map-info-title" id="map-info-title">地圖說明</h2>
-          </div>
-          <button id="map-info-close" type="button" aria-label="關閉地圖說明">×</button>
-        </div>
-        <div class="map-info-body" id="map-info-content">
-          <p><strong>亮度</strong> 色階單位是 lux，顏色越亮代表亮度數值越高。</p>
-          <p><strong>資料狀態</strong> 部分區域可能是推估值，尚未量測的區域不代表亮度為零。</p>
-          <p><strong>回報安全事件</strong> 按下左下角按鈕，驗證 NTU Email 後選擇地圖上的六角區域。</p>
-          <p><strong>事件顏色</strong> 橘色代表夜間事故，紅色代表夜間騷擾。</p>
-          <p><strong>圖層</strong> 右上角圖層按鈕可以切換亮度、安全事件與邊界資訊。</p>
-        </div>
-      </section>
     </div>
 
 

@@ -18,6 +18,3 @@ export function incidentColor(type) {
   return incidentTypeMeta[type]?.color || incidentTypeMeta.accident.color;
 }
 
-export function incidentStatusLabel(status) {
-  return status === 'hidden' ? '已封存' : '公開';
-}

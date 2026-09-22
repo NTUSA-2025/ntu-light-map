@@ -1777,26 +1777,98 @@ html.report-dialog-open #map-info {
 
 
 @media (min-width: 761px) {
-  .panel-head-title { font-size: 1.125rem; }
+  #dock .dock-btn { font-size: 0.8125rem; }
 
-  .panel-insights-title,
-  .layer-group-title {
+  #panel {
+    width: min(390px, 34vw);
+  }
+
+  #panel .panel-head {
+    padding: 32px 32px 24px;
+  }
+
+  #panel .panel-head-title {
+    font-size: 1.25rem;
+  }
+
+  #panel .panel-body {
+    padding: 0 32px 40px;
+  }
+
+  #panel .panel-insights-title,
+  #panel .layer-group-title,
+  #panel .panel-reports-title {
+    min-height: 56px;
+    font-size: 0.875rem;
+  }
+
+  #panel .stat-label,
+  #panel .block-label {
     font-size: 0.75rem;
   }
 
-  .stat-label,
-  .block-label {
-    font-size: 0.625rem;
+  #panel .stat-val {
+    font-size: 2rem;
   }
 
-  .bar-name,
-  .layer-name {
+  #panel .bar-name,
+  #panel .layer-name {
+    font-size: 0.875rem;
+  }
+
+  #panel .bar-num {
+    font-size: 0.75rem;
+  }
+
+  #panel .layer-item {
+    min-height: 50px;
+  }
+
+  #panel .panel-insights-content {
+    gap: 24px;
+    padding-bottom: 28px;
+  }
+
+  #panel .panel-reports {
+    margin-top: 18px;
+  }
+
+  #panel .panel-reports-meta {
+    font-size: 0.6875rem;
+  }
+
+  #panel .panel-reports-content {
+    padding-bottom: 24px;
+  }
+
+  #panel .report-list-type,
+  #panel .report-list-description {
+    font-size: 0.875rem;
+  }
+
+  #panel .report-list-time,
+  #panel .report-list-meta {
+    font-size: 0.6875rem;
+  }
+
+  #panel .layer-block {
+    padding-top: 20px;
+  }
+
+  #panel .layer-group + .layer-group {
+    margin-top: 18px;
+  }
+
+  #map-legend {
+    width: 170px;
+    padding: 14px 15px 14px 16px;
     font-size: 0.8125rem;
   }
 
-  .map-legend { font-size: 0.75rem; }
-  .map-legend-title { font-size: 0.75rem; }
-  .map-legend-row { font-size: 0.6875rem; }
+  .map-legend-title { font-size: 0.8125rem; }
+  .map-legend-row { font-size: 0.75rem; }
+  .map-legend-section { font-size: 0.6875rem; }
+
   .topbar-title { font-size: 1.3rem; }
   #inc-fab { font-size: 0.75rem; }
 

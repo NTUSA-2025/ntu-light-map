@@ -2041,6 +2041,12 @@ html.report-dialog-open #inc-fab {
     min-height: 44px;
     padding: 0;
   }
+  .panel-logout {
+    min-height: 44px;
+    padding: 0 10px;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--ui-radius);
+  }
 
   .layer-item { min-height: 48px; }
 

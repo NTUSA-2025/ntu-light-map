@@ -1,4 +1,5 @@
-import { getSessionEmail, isAdminEmail, isAllowedNtuEmail } from "../../_shared/auth.js";
+import { getSessionEmail, isAllowedNtuEmail } from "../../_shared/auth.js";
+
 import { json, serverMisconfigured } from "../../_shared/http.js";
 import { hashSalt } from "../../_shared/incidents.js";
 
@@ -30,5 +31,5 @@ export async function onRequestGet({ request, env }) {
     return Response.redirect(redirectTo, 302);
   }
 
-  return json({ authenticated: true, email, admin: await isAdminEmail(email, env) });
+  return json({ authenticated: true, email });
 }

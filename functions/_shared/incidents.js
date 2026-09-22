@@ -87,9 +87,3 @@ export function publicIncident(row) {
   };
 }
 
-export function adminIncident(row) {
-  return {
-    ...publicIncident(row),
-    status: row.status,
-  };
-}

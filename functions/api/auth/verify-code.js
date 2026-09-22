@@ -1,4 +1,5 @@
-import { createSession, isAdminEmail, isAllowedNtuEmail, sessionCookie } from "../../_shared/auth.js";
+import { createSession, isAllowedNtuEmail, sessionCookie } from "../../_shared/auth.js";
+
 import { badRequest, json, methodNotAllowed, serverMisconfigured } from "../../_shared/http.js";
 import { hashSalt, hashValue } from "../../_shared/incidents.js";
 
@@ -52,7 +53,7 @@ export async function onRequestPost({ request, env }) {
 
   const token = await createSession(env, email);
   return json(
-    { authenticated: true, email, admin: await isAdminEmail(email, env) },
+    { authenticated: true, email },
     { headers: { "set-cookie": sessionCookie(token) } },
   );
 }

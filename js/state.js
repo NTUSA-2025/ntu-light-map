@@ -4,7 +4,5 @@ export const state = {
   selectedHexLayer: null,
   selectedHex: null,
   allIncidents: [],
-  allAdminIncidents: [],
-  allAdminUsers: [],
   reportHexFeatureById: new Map()
 };

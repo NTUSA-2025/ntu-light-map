@@ -1,7 +1,8 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
 import { incidentHexLayer } from './map.js';
-import { escapeHtml, incidentColor, incidentLabel, incidentStatusLabel } from './utils.js';
+import { escapeHtml, incidentColor, incidentLabel } from './utils.js';
+
 
 const L = window.L;
 
@@ -44,52 +45,6 @@ export function renderReportList() {
 }
 
 
-export function renderAdminIncidentList() {
-  if (state.allAdminIncidents.length === 0) {
-    dom.adminIncidentsList.innerHTML = '<div class="admin-status">目前沒有事件</div>';
-    return;
-  }
-
-  dom.adminIncidentsList.innerHTML = state.allAdminIncidents.map(incident => {
-    const isHidden = incident.status === 'hidden';
-    const nextStatus = isHidden ? 'public' : 'hidden';
-    const actionLabel = isHidden ? '恢復' : '封存';
-    const actionClass = isHidden ? 'btn-restore' : 'btn-danger';
-    return `
-      <article class="admin-item ${isHidden ? 'hidden-incident' : ''}" data-incident-id="${escapeHtml(incident.id)}">
-        <div class="admin-item-head">
-          <div class="admin-item-title">${escapeHtml(incidentLabel(incident.type))} · #${escapeHtml(incident.id)}</div>
-          <span class="admin-badge ${escapeHtml(incident.status)}">${incidentStatusLabel(incident.status)}</span>
-        </div>
-        <div class="admin-desc">${escapeHtml(incident.description)}</div>
-        <div class="admin-meta">區域 ${escapeHtml(incident.report_hex_id)} · ${escapeHtml(incident.created_at)}</div>
-        <div class="admin-actions">
-          <button class="${actionClass}" data-incident-status="${nextStatus}">${actionLabel}</button>
-        </div>
-      </article>
-    `;
-  }).join('');
-}
-
-export function renderAdminUserList() {
-  if (state.allAdminUsers.length === 0) {
-    dom.adminUsersList.innerHTML = '<div class="admin-status">目前沒有管理員</div>';
-    return;
-  }
-
-  dom.adminUsersList.innerHTML = state.allAdminUsers.map(user => `
-    <article class="admin-item" data-admin-email="${escapeHtml(user.email)}">
-      <div class="admin-item-head">
-        <div class="admin-item-title">${escapeHtml(user.email)}</div>
-        <span class="admin-badge admin-role">admin</span>
-      </div>
-      <div class="admin-meta">新增者 ${escapeHtml(user.created_by || '-')} · ${escapeHtml(user.created_at)}</div>
-      <div class="admin-actions">
-        <button class="btn-danger" data-delete-admin="${escapeHtml(user.email)}">刪除</button>
-      </div>
-    </article>
-  `).join('');
-}
 
 export function renderIncidents() {
   incidentHexLayer.clearLayers();

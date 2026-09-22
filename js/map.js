@@ -59,6 +59,49 @@ async function loadJSON(url) {
   const response = await fetch(url);
   return response.json();
 }
+function readBrightnessRecord(feature) {
+  const props = feature?.properties ?? {};
+  const brightness = props.brightness && typeof props.brightness === 'object'
+    ? props.brightness
+    : null;
+  const rawValue = brightness?.value
+    ?? (typeof props.brightness === 'number' ? props.brightness : undefined)
+    ?? props.brightness_filled
+    ?? props.brightness_mean;
+  const numericValue = Number(rawValue);
+  const value = Number.isFinite(numericValue) && numericValue >= 0 ? numericValue : null;
+  const source = String(
+    brightness?.source
+      ?? props.brightness_source
+      ?? props._filled_from
+      ?? (value == null ? 'unavailable' : 'unknown'),
+  ).toLowerCase();
+  const status = value == null || source === 'unavailable' || source === 'missing'
+    ? 'unavailable'
+    : source === 'observed' || source === 'measured'
+      ? 'observed'
+      : 'estimated';
+
+  return {
+    id: props.id ?? '-',
+    unit: brightness?.unit ?? props.brightness_unit ?? 'lux',
+    value,
+    status,
+  };
+}
+
+function brightnessStatusLabel(status) {
+  return status === 'observed'
+    ? '實測'
+    : status === 'estimated'
+      ? '推估'
+      : '尚未量測';
+}
+
+function formatBrightness(record) {
+  if (record.value == null) return brightnessStatusLabel(record.status);
+  return `${record.value.toFixed(2)} ${record.unit} · ${brightnessStatusLabel(record.status)}`;
+}
 
 export async function loadCampusBoundary() {
   try {
@@ -80,38 +123,36 @@ export async function loadCampusBoundary() {
 
 export async function loadMapLayers(onSelectReportHex, hexTooltip) {
   const geoBrightness = await loadJSON(assetUrl('/data/merge_sur_zhoushan.geojson'));
-  const rawVals = geoBrightness.features
-    .map(feature => Number(feature.properties?.brightness_filled))
-    .filter(value => Number.isFinite(value) && value >= 0);
-
-  if (!rawVals.length) return;
-
   const ramp = ['#0b1020', '#1f2a5a', '#2f6f9f', '#6fd0c2', '#f3f6ff'];
-  const getColor = value => !Number.isFinite(value)
-    ? '#7b8492'
+  const getColor = ({ value }) => value == null
+    ? '#596575'
     : value <= 1 ? ramp[0]
-    : value <= 12 ? ramp[1]
-    : value <= 29 ? ramp[2]
-    : value <= 54 ? ramp[3]
-    : ramp[4];
+      : value <= 12 ? ramp[1]
+        : value <= 29 ? ramp[2]
+          : value <= 54 ? ramp[3]
+            : ramp[4];
 
   const brightLayer = L.geoJSON(geoBrightness, {
     pane: 'brightnessPane',
-    style: feature => ({
-      color: 'rgba(6,10,18,.55)',
-      weight: 0.25,
-      fillColor: getColor(Number(feature.properties?.brightness_filled)),
-      fillOpacity: 0.9
-    }),
+    style: feature => {
+      const record = readBrightnessRecord(feature);
+      return {
+        color: 'rgba(6,10,18,.55)',
+        weight: 0.25,
+        fillColor: getColor(record),
+        fillOpacity: 0.9
+      };
+    },
     onEachFeature: (feature, layer) => {
-      const value = Number(feature.properties?.brightness_filled);
-      const id = feature.properties?.id ?? '-';
+      const record = readBrightnessRecord(feature);
+      const id = String(record.id);
+      const value = formatBrightness(record);
       layer.on('mouseover', () => {
-        hexTooltip.textContent = `Hex ${id}  ·  ${Number.isFinite(value) ? value.toFixed(2) : 'N/A'} lux`;
+        hexTooltip.textContent = `Hex ${id}  ·  ${value}`;
         hexTooltip.classList.add('show');
       });
       layer.on('mouseout', () => hexTooltip.classList.remove('show'));
-      layer.bindPopup(`<div style="font:12px/1.5 system-ui;min-width:120px;"><b style="font-size:13px">Hex ${escapeHtml(String(id))}</b><br><span style="background:#f1f5fb;padding:3px 6px;border-radius:5px;display:inline-block;margin-top:4px;">${Number.isFinite(value) ? value.toFixed(2) : 'N/A'} lux</span></div>`);
+      layer.bindPopup(`<div style="font:12px/1.5 system-ui;min-width:120px;"><b style="font-size:13px">Hex ${escapeHtml(id)}</b><br><span style="background:#f1f5fb;padding:3px 6px;border-radius:5px;display:inline-block;margin-top:4px;">${escapeHtml(value)}</span></div>`);
     }
   }).addTo(map);
   layerMap.brightness = brightLayer;

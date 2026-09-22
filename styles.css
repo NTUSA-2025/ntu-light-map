@@ -1530,14 +1530,53 @@ details[open] .layer-group-chevron {
 
 @media (max-width: 760px) {
   #dock {
-    top: 20px;
+    top: auto;
     right: 18px;
+    bottom: calc(18px + env(safe-area-inset-bottom));
+  }
+
+  #dock #btnPanel.active { display: inline-flex; }
+
+  #dock .dock-btn {
+    min-height: 44px;
+    padding-inline: 12px;
   }
 
   #panel {
-    width: min(290px, 82vw);
+    top: auto;
+    right: 16px;
+    bottom: calc(76px + env(safe-area-inset-bottom));
+    left: 16px;
+    width: auto;
     min-width: 0;
+    max-height: min(68dvh, 520px);
+    border: 1px solid var(--line);
+    border-left: 3px solid var(--cyan);
+    border-radius: var(--ui-radius);
   }
+
+  #panel.closed {
+    transform: translateY(calc(100% + 24px));
+  }
+
+  .panel-close {
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0;
+  }
+
+  .layer-item { min-height: 48px; }
+
+  .tog {
+    width: 22px;
+    height: 22px;
+  }
+
+  .tog::after {
+    top: 4px;
+    left: 7px;
+  }
+
 
   .panel-head { padding: 23px 21px 17px; }
   .panel-body { padding-inline: 21px; }
@@ -1553,8 +1592,9 @@ details[open] .layer-group-chevron {
 
   #map-legend {
     right: 18px;
-    bottom: calc(20px + env(safe-area-inset-bottom));
+    bottom: calc(78px + env(safe-area-inset-bottom));
   }
+
 
   #inc-fab {
     bottom: calc(20px + env(safe-area-inset-bottom));
@@ -1610,7 +1650,11 @@ details[open] .layer-group-chevron {
 }
 
 @media (max-width: 420px) {
-  #panel { width: min(276px, 82vw); }
+  #panel {
+    right: 8px;
+    left: 8px;
+    width: auto;
+  }
   #map-legend { width: 150px; }
   .admin-main .admin-list { grid-template-columns: 1fr; }
   .dlg-actions { flex-direction: row; }

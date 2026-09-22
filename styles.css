@@ -1519,6 +1519,53 @@ details[open] .layer-group-chevron {
 
 
 
+@media (min-width: 761px) {
+  .panel-head-title { font-size: 1.125rem; }
+
+  .panel-insights-title,
+  .layer-group-title {
+    font-size: 0.75rem;
+  }
+
+  .stat-label,
+  .block-label {
+    font-size: 0.625rem;
+  }
+
+  .bar-name,
+  .layer-name {
+    font-size: 0.8125rem;
+  }
+
+  .map-legend { font-size: 0.75rem; }
+  .map-legend-title { font-size: 0.75rem; }
+  .map-legend-row { font-size: 0.6875rem; }
+  .topbar-title { font-size: 1.3rem; }
+  #inc-fab { font-size: 0.75rem; }
+
+  .dlg-head-title { font-size: 1rem; }
+
+  .dlg-field,
+  .dlg-field label,
+  .dlg-field-label {
+    font-size: 0.6875rem;
+  }
+
+  .dlg-field select,
+  .dlg-field textarea,
+  .dlg-field input {
+    font-size: 0.875rem;
+  }
+
+  .btn-pri,
+  .btn-sec,
+  .btn-danger,
+  .btn-restore {
+    font-size: 0.75rem;
+  }
+}
+
+
 @media (max-width: 960px) {
   .admin-screen-head { padding-inline: 22px; }
   .admin-screen-body {
@@ -1605,12 +1652,20 @@ details[open] .layer-group-chevron {
   }
 
   #inc-dialog {
+    position: fixed;
     right: 18px;
-    bottom: calc(184px + env(safe-area-inset-bottom));
+    bottom: calc(76px + env(safe-area-inset-bottom));
     left: 18px;
     width: auto;
-    max-height: calc(100dvh - 184px);
+    max-height: min(680px, calc(var(--visual-viewport-height, 100dvh) - 92px));
   }
+
+  html.keyboard-open #inc-dialog {
+    top: calc(var(--visual-viewport-offset-top, 0px) + 12px);
+    bottom: auto;
+    max-height: calc(var(--visual-viewport-height, 100dvh) - 24px);
+  }
+
   #inc-dialog.pick-mode { display: none; }
   #inc-dialog.pick-mode .inc-section:not(.hidden) > * {
     animation-play-state: paused;
@@ -1630,8 +1685,21 @@ details[open] .layer-group-chevron {
   }
 
   .dlg-body {
-    max-height: calc(100dvh - 257px);
+    max-height: calc(var(--visual-viewport-height, 100dvh) - 165px);
     padding: 16px;
+    overscroll-behavior: contain;
+    scroll-padding-bottom: 24px;
+  }
+
+  html.keyboard-open .dlg-body {
+    max-height: calc(var(--visual-viewport-height, 100dvh) - 120px);
+  }
+
+  #auth-email,
+  #auth-code,
+  #inc-desc,
+  #admin-email {
+    font-size: 16px;
   }
   .dlg-close { width: 44px; height: 44px; }
   .btn-pri,

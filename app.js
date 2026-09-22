@@ -49,6 +49,41 @@ const {
   reportHint,
   btnPickCancel,
 } = dom;
+function syncVisualViewport() {
+  const viewport = window.visualViewport;
+  if (!viewport) return;
+
+  document.documentElement.style.setProperty(
+    '--visual-viewport-height',
+    `${Math.round(viewport.height)}px`,
+  );
+  document.documentElement.style.setProperty(
+    '--visual-viewport-offset-top',
+    `${Math.round(viewport.offsetTop)}px`,
+  );
+}
+
+const keyboardFields = [authEmail, authCode, incDesc, adminEmail];
+
+if (window.visualViewport) {
+  syncVisualViewport();
+  window.visualViewport.addEventListener('resize', syncVisualViewport);
+  window.visualViewport.addEventListener('scroll', syncVisualViewport);
+}
+
+keyboardFields.forEach(field => {
+  field.addEventListener('focus', () => {
+    document.documentElement.classList.add('keyboard-open');
+    syncVisualViewport();
+  });
+  field.addEventListener('blur', () => {
+    window.setTimeout(() => {
+      if (!keyboardFields.includes(document.activeElement)) {
+        document.documentElement.classList.remove('keyboard-open');
+      }
+    }, 150);
+  });
+});
 
 makeToggle('tog-brightness', 'brightness');
 makeToggle('tog-safety', 'safety');
@@ -226,6 +261,7 @@ function setReportPickMode(active) {
 
 function closeDialog() {
   incDialog.classList.remove('show');
+  document.documentElement.classList.remove('keyboard-open');
   incFab.classList.remove('active');
   btnReport.classList.remove('active');
   btnReport.setAttribute('aria-pressed', 'false');

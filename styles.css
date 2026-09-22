@@ -131,9 +131,9 @@ textarea:focus-visible {
 }
 
 #dock #btnPanel:not(.active),
-#dock #btnAdmin:not(.hidden) { display: inline-flex; }
+#dock #btnAdmin:not(.hidden),
+#dock #btnPanel.active { display: inline-flex; }
 
-#dock #btnPanel.active { display: none; }
 #dock #map-info-toggle {
   display: inline-flex;
   width: 32px;
@@ -1782,6 +1782,7 @@ html.report-dialog-open #map-info {
   #dock .dock-btn { font-size: 0.8125rem; }
 
   #panel {
+    top: 72px;
     width: min(390px, 34vw);
   }
 

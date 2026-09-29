@@ -398,6 +398,17 @@ btnLogout.addEventListener('click', async () => {
   }
 });
 
+function isAllowedNtuEmail(email) {
+  const normalized = String(email || '').trim().toLowerCase();
+  const parts = normalized.split('@');
+  if (parts.length !== 2 || !parts[0] || !parts[1]) return false;
+
+  const domain = parts[1];
+  return domain === 'ntu.edu.tw'
+    || domain === 'ntusa.ntu.edu.tw'
+    || domain.endsWith('.ntusa.ntu.edu.tw');
+}
+
 btnRequestCode.addEventListener('click', async () => {
   const email = authEmail.value.trim().toLowerCase();
   if (!isAllowedNtuEmail(email)) {
@@ -421,7 +432,15 @@ btnRequestCode.addEventListener('click', async () => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      setStatus(authStatus, errorData.message || errorData.error || '寄送失敗', 'err');
+      if (response.status === 429 || errorData.error === 'rate_limited') {
+        setStatus(authStatus, '近期寄送次數已達上限，請 10 分鐘後再試', 'err');
+      } else if (response.status === 502 || errorData.error === 'email_send_failed') {
+        setStatus(authStatus, '驗證碼寄送失敗，請確認信箱正確或稍後再試', 'err');
+      } else if (errorData.detail === 'missing_hash_salt' || errorData.error === 'server_misconfigured') {
+        setStatus(authStatus, '系統伺服器未完成安全性配置，請聯繫管理員', 'err');
+      } else {
+        setStatus(authStatus, errorData.message || errorData.error || '寄送失敗', 'err');
+      }
       return;
     }
 
@@ -458,7 +477,11 @@ btnVerifyCode.addEventListener('click', async () => {
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      setStatus(authStatus, errorData.message || errorData.error || '驗證失敗', 'err');
+      if (errorData.error === 'invalid_code') {
+        setStatus(authStatus, '驗證碼錯誤或已過期，請重新輸入', 'err');
+      } else {
+        setStatus(authStatus, errorData.message || errorData.error || '驗證失敗', 'err');
+      }
       return;
     }
 

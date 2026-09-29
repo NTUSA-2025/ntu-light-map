@@ -29,7 +29,7 @@ export async function onRequestPost({ request, env }) {
   const codeHash = await hashValue(`${email}:${code}`, salt);
   const ipHash = await hashValue(clientIp(request), salt);
 
-  await env.DB.prepare(
+  const insertResult = await env.DB.prepare(
     `INSERT INTO email_verification_codes (email, code_hash, ip_hash, expires_at)
      VALUES (?, ?, ?, datetime('now', '+10 minutes'))`,
   ).bind(email, codeHash, ipHash).run();
@@ -37,6 +37,13 @@ export async function onRequestPost({ request, env }) {
   try {
     await sendVerificationEmail(env, { to: email, code });
   } catch (error) {
+    const insertedId = insertResult?.meta?.last_row_id;
+    if (insertedId) {
+      await env.DB.prepare("DELETE FROM email_verification_codes WHERE id = ?")
+        .bind(insertedId)
+        .run()
+        .catch(() => {});
+    }
     console.error("verification_email_failed", {
       message: error?.message,
       smtp_host: env.SMTP_HOST || "smtp.gmail.com",

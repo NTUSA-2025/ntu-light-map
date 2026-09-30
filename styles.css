@@ -847,10 +847,12 @@ html.report-dialog-open #dock,
 html.report-dialog-open #map-tools,
 html.report-dialog-open #map-info-toggle,
 html.report-dialog-open #map-info,
+html.report-dialog-open #inc-actions-group,
 html.report-dialog-open #inc-fab {
   opacity: 0;
   pointer-events: none;
 }
+
 
 
 
@@ -1119,6 +1121,41 @@ html.report-dialog-open #inc-fab {
   color: var(--ink-dim);
 }
 
+.report-hint-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.report-hint-gps {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 10px;
+  border: 1px solid rgba(156, 231, 216, 0.45);
+  border-radius: var(--ui-radius);
+  background: rgba(156, 231, 216, 0.12);
+  color: var(--cyan);
+  cursor: pointer;
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  transition: background 0.2s, border-color 0.2s, transform 0.2s;
+}
+
+.report-hint-gps:hover:not(:disabled) {
+  border-color: var(--cyan);
+  background: rgba(156, 231, 216, 0.22);
+  transform: translateY(-1px);
+}
+
+.report-hint-gps:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 .report-hint-cancel {
   flex-shrink: 0;
   min-height: 32px;
@@ -1139,6 +1176,59 @@ html.report-dialog-open #inc-fab {
   background: rgba(240, 153, 123, 0.16);
   transform: translateY(-1px);
 }
+
+
+#inc-actions-group {
+  position: absolute;
+  bottom: calc(28px + env(safe-area-inset-bottom));
+  left: 30px;
+  z-index: 10001;
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+
+#inc-actions-group #inc-fab {
+  position: static;
+  bottom: auto;
+  left: auto;
+}
+
+#btn-gps {
+  display: inline-grid;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
+  place-items: center;
+  border: 1px solid rgba(156, 231, 216, 0.5);
+  border-radius: var(--ui-radius);
+  background: linear-gradient(135deg, rgba(7, 17, 18, 0.92), rgba(7, 10, 13, 0.84));
+  color: var(--cyan);
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.26);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.2s;
+}
+
+#btn-gps:hover {
+  border-color: var(--cyan);
+  transform: translateY(-2px);
+}
+
+#btn-gps:active {
+  transform: translateY(0) scale(0.96);
+}
+
+#btn-gps.loading svg {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
 
 
 #inc-fab {
@@ -1871,11 +1961,17 @@ html.report-dialog-open #inc-fab {
   }
 
 
-
-  #inc-fab {
-    z-index: 10001;
+  #inc-actions-group {
     bottom: calc(20px + env(safe-area-inset-bottom));
     left: 18px;
+    gap: 8px;
+  }
+  #inc-fab {
+    min-height: 48px;
+  }
+  #btn-gps {
+    width: 48px;
+    height: 48px;
     min-height: 48px;
   }
 

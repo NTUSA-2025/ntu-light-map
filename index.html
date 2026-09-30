@@ -249,7 +249,19 @@
         <strong>選擇回報位置</strong>
         <span>點選地圖上的六角區域</span>
       </div>
-      <button class="report-hint-cancel" id="btn-pick-cancel" type="button">取消</button>
+      <div class="report-hint-actions">
+        <button class="report-hint-gps" id="btn-pick-gps" type="button">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <circle cx="12" cy="12" r="7"/>
+            <line x1="12" y1="2" x2="12" y2="6"/>
+            <line x1="12" y1="18" x2="12" y2="22"/>
+            <line x1="2" y1="12" x2="6" y2="12"/>
+            <line x1="18" y1="12" x2="22" y2="12"/>
+          </svg>
+          使用目前位置
+        </button>
+        <button class="report-hint-cancel" id="btn-pick-cancel" type="button">取消</button>
+      </div>
     </div>
     <div id="map"></div>
     <div id="map-tools" aria-label="地圖資訊">
@@ -374,10 +386,22 @@
       </div>
     </div>
   </div>
-    <button id="inc-fab" type="button" aria-label="回報安全事件">
-      <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-      回報安全事件
-    </button>
+    <div id="inc-actions-group">
+      <button id="inc-fab" type="button" aria-label="回報安全事件">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        回報安全事件
+      </button>
+      <button id="btn-gps" type="button" aria-label="定位目前位置">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <circle cx="12" cy="12" r="7"/>
+          <circle cx="12" cy="12" r="2" fill="currentColor"/>
+          <line x1="12" y1="2" x2="12" y2="5"/>
+          <line x1="12" y1="19" x2="12" y2="22"/>
+          <line x1="2" y1="12" x2="5" y2="12"/>
+          <line x1="19" y1="12" x2="22" y2="12"/>
+        </svg>
+      </button>
+    </div>
 </div>
 
 <script type="module" src="app.js"></script>

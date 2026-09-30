@@ -2,6 +2,8 @@ import { dom } from './js/dom.js';
 import { state } from './js/state.js';
 import { map, makeToggle, loadCampusBoundary, loadMapLayers } from './js/map.js';
 import { renderIncidents } from './js/render.js';
+import { findReportHexForCoords } from './js/utils.js';
+
 
 
 const L = window.L;
@@ -39,6 +41,8 @@ const {
   hexTooltip,
   reportHint,
   btnPickCancel,
+  btnPickGps,
+  btnGps,
   mapInfoToggle,
   mapInfo,
   mapInfoClose,
@@ -275,6 +279,127 @@ function selectReportHex(feature, layer) {
   setStatus(reportStatus, `已選回報區 ${id}`, 'ok');
   updateSubmitState();
 }
+function updateUserLocationMarker(lat, lng, accuracy) {
+  state.userLocation = { lat, lng, accuracy };
+
+  if (state.userAccuracyCircle) {
+    state.userAccuracyCircle.setLatLng([lat, lng]);
+    state.userAccuracyCircle.setRadius(accuracy || 30);
+  } else {
+    state.userAccuracyCircle = L.circle([lat, lng], {
+      radius: accuracy || 30,
+      color: '#9ce7d8',
+      fillColor: '#9ce7d8',
+      fillOpacity: 0.15,
+      weight: 1,
+      pane: 'incidentPane',
+      interactive: false
+    }).addTo(map);
+  }
+
+  if (state.userLocationMarker) {
+    state.userLocationMarker.setLatLng([lat, lng]);
+  } else {
+    state.userLocationMarker = L.circleMarker([lat, lng], {
+      radius: 7,
+      color: '#ffffff',
+      fillColor: '#2563eb',
+      fillOpacity: 1,
+      weight: 2,
+      pane: 'incidentPane',
+      interactive: false
+    }).addTo(map);
+  }
+}
+
+function requestUserLocation({ pan = true, onFound = null, onError = null } = {}) {
+  if (!navigator.geolocation) {
+    alert('你的瀏覽器不支援 GPS 定位功能');
+    return;
+  }
+
+  if (btnGps) btnGps.classList.add('loading');
+  if (btnPickGps) btnPickGps.disabled = true;
+
+  navigator.geolocation.getCurrentPosition(
+    position => {
+      if (btnGps) btnGps.classList.remove('loading');
+      if (btnPickGps) btnPickGps.disabled = false;
+
+      const lat = position.coords.latitude;
+      const lng = position.coords.longitude;
+      const accuracy = position.coords.accuracy;
+
+      updateUserLocationMarker(lat, lng, accuracy);
+
+      if (pan) {
+        map.flyTo([lat, lng], Math.max(map.getZoom(), 16), { duration: 1 });
+      }
+
+      if (typeof onFound === 'function') {
+        onFound({ lat, lng, accuracy });
+      }
+    },
+    error => {
+      if (btnGps) btnGps.classList.remove('loading');
+      if (btnPickGps) btnPickGps.disabled = false;
+
+      console.warn('geolocation_error', error);
+      let msg = '無法取得目前位置，請確認定位權限';
+      if (error.code === 1) { // PERMISSION_DENIED
+        msg = '定位權限被拒絕，請在瀏覽器設定中允許網站存取位置';
+      } else if (error.code === 2) { // POSITION_UNAVAILABLE
+        msg = '目前無法取得位置訊號，請稍候再試';
+      } else if (error.code === 3) { // TIMEOUT
+        msg = '定位逾時，請至收訊良好處重試';
+      }
+
+      if (typeof onError === 'function') {
+        onError(msg);
+      } else {
+        alert(msg);
+      }
+    },
+    {
+      enableHighAccuracy: true,
+      timeout: 10000,
+      maximumAge: 30000
+    }
+  );
+}
+
+function selectHexByCurrentLocation() {
+  requestUserLocation({
+    pan: true,
+    onFound: ({ lat, lng }) => {
+      const features = Array.from(state.reportHexFeatureById.values());
+      const targetFeature = findReportHexForCoords(lat, lng, features);
+      if (targetFeature) {
+        // Find layer corresponding to this feature
+        let targetLayer = null;
+        if (state.reportHexLayer) {
+          state.reportHexLayer.eachLayer(l => {
+            if (l.feature?.properties?.id === targetFeature.properties.id) {
+              targetLayer = l;
+            }
+          });
+        }
+        if (targetLayer) {
+          selectReportHex(targetFeature, targetLayer);
+        } else {
+          // Synthetic fallback
+          const bounds = L.geoJSON(targetFeature).getBounds();
+          selectReportHex(targetFeature, { getBounds: () => bounds });
+        }
+      } else {
+        alert('目前位置不在台大校園回報區內，請手動點選地圖上的六角格');
+      }
+    },
+    onError: msg => {
+      alert(msg);
+    }
+  });
+}
 
 async function loadIncidents() {
   const response = await fetch('/api/incidents', { headers: { accept: 'application/json' } });
@@ -336,6 +461,12 @@ incFab.addEventListener('click', beginIncidentFlow);
 dlgClose.addEventListener('click', closeDialog);
 btnPickCancel.addEventListener('click', closeDialog);
 btnCancel.addEventListener('click', closeDialog);
+if (btnGps) {
+  btnGps.addEventListener('click', () => requestUserLocation({ pan: true }));
+}
+if (btnPickGps) {
+  btnPickGps.addEventListener('click', selectHexByCurrentLocation);
+}
 btnReselect.addEventListener('click', () => {
   if (!state.authSession?.authenticated) return;
   clearSelectedReportHex();

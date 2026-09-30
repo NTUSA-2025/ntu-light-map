@@ -10,6 +10,9 @@ export const dom = {
 
   btnPanelClose: document.getElementById('btn-panel-close'),
   incFab: document.getElementById('inc-fab'),
+  incActionsGroup: document.getElementById('inc-actions-group'),
+  btnGps: document.getElementById('btn-gps'),
+  btnPickGps: document.getElementById('btn-pick-gps'),
   incDialog: document.getElementById('inc-dialog'),
   dlgClose: document.getElementById('dlg-close'),
   authSec: document.getElementById('auth-section'),

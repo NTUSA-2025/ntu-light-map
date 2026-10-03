@@ -1,6 +1,6 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
-import { incidentHexLayer, incidentHexRenderer, ensureIncidentDefs } from './map.js';
+import { incidentHexLayer, incidentHexRenderer } from './map.js';
 import { escapeHtml, incidentColor, incidentLabel } from './utils.js';
 
 
@@ -99,7 +99,6 @@ export function renderIncidents() {
     `);
     incidentHexLayer.addLayer(layer);
   });
-  ensureIncidentDefs();
 
   updateStatsPanel();
   renderReportList();

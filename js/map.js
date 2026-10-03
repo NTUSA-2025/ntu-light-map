@@ -33,6 +33,24 @@ map.createPane('brightnessPane'); map.getPane('brightnessPane').style.zIndex = 3
 map.createPane('safetyPane');     map.getPane('safetyPane').style.zIndex = 300;
 map.createPane('protectPane');    map.getPane('protectPane').style.zIndex = 250;
 map.createPane('incidentPane');   map.getPane('incidentPane').style.zIndex = 400;
+export function ensureIncidentDefs() {
+  const patternHtml = `
+    <pattern id="incident-mixed-stripes" width="12" height="12" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+      <line x1="0" y1="0" x2="0" y2="12" stroke="#F0997B" stroke-width="6" />
+      <line x1="6" y1="0" x2="6" y2="12" stroke="#ef718d" stroke-width="6" />
+    </pattern>
+  `;
+  document.querySelectorAll('.leaflet-pane svg').forEach(svg => {
+    let defs = svg.querySelector('defs');
+    if (!defs) {
+      defs = document.createElementNS('http://www.w3.org/2000/svg', 'defs');
+      svg.insertBefore(defs, svg.firstChild);
+    }
+    if (!defs.querySelector('#incident-mixed-stripes')) {
+      defs.insertAdjacentHTML('beforeend', patternHtml);
+    }
+  });
+}
 
 const VECTOR_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const VECTOR_ATTRIBUTION = '&copy; <a href="https://openfreemap.org/">OpenFreeMap</a> · <a href="https://www.openmaptiles.org/">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
@@ -51,6 +69,7 @@ loadVectorBasemap().catch(error => {
 });
 
 export const layerMap = {};
+export const incidentHexRenderer = L.svg({ pane: 'incidentPane' });
 export const incidentHexLayer = L.layerGroup().addTo(map);
 layerMap.incident = incidentHexLayer;
 

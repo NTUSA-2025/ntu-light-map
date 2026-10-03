@@ -1,6 +1,6 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
-import { incidentHexLayer } from './map.js';
+import { incidentHexLayer, incidentHexRenderer, ensureIncidentDefs } from './map.js';
 import { escapeHtml, incidentColor, incidentLabel } from './utils.js';
 
 
@@ -62,8 +62,15 @@ export function renderIncidents() {
     const feature = state.reportHexFeatureById.get(reportHexId);
     if (!feature) return;
 
+    const hasAccident = incidents.some(i => i.type === 'accident');
+    const hasHarassment = incidents.some(i => i.type === 'harassment');
+    const isMixed = hasAccident && hasHarassment;
     const latest = incidents[0];
-    const color = incidentColor(latest.type);
+    const strokeColor = isMixed ? '#ef718d' : incidentColor(latest.type);
+    const fillColor = isMixed ? 'url(#incident-mixed-stripes)' : incidentColor(latest.type);
+    const fillOpacity = isMixed ? 0.92 : Math.min(0.62, 0.28 + incidents.length * 0.08);
+    const weight = isMixed ? 2 : 1.4;
+
     const rows = incidents.slice(0, 5).map(incident => `
       <div style="border-top:1px solid rgba(15,23,42,.12); padding-top:5px; margin-top:5px;">
         <b>${escapeHtml(incidentLabel(incident.type))}</b><br/>
@@ -71,15 +78,15 @@ export function renderIncidents() {
         <span style="color:#64748b;">${escapeHtml(incident.created_at)}</span>
       </div>
     `).join('');
-
     const layer = L.geoJSON(feature, {
       pane: 'incidentPane',
+      renderer: incidentHexRenderer,
       style: {
-        color,
-        weight: 1.4,
-        opacity: 0.95,
-        fillColor: color,
-        fillOpacity: Math.min(0.62, 0.28 + incidents.length * 0.08)
+        color: strokeColor,
+        weight,
+        opacity: 1,
+        fillColor,
+        fillOpacity
       }
     });
 
@@ -92,6 +99,7 @@ export function renderIncidents() {
     `);
     incidentHexLayer.addLayer(layer);
   });
+  ensureIncidentDefs();
 
   updateStatsPanel();
   renderReportList();

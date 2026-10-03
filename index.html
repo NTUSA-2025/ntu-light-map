@@ -59,7 +59,7 @@
           <p><strong>亮度</strong> 色階單位是 lux，顏色越亮代表亮度數值越高。</p>
           <p><strong>資料狀態</strong> 部分區域可能是推估值，尚未量測的區域不代表亮度為零。</p>
           <p><strong>回報安全事件</strong> 按下左下角按鈕，驗證 NTU Email 後選擇地圖上的六角區域。</p>
-          <p><strong>事件顏色</strong> 橘色代表夜間事故，紅色代表夜間騷擾。</p>
+          <p><strong>事件顏色</strong> 橘色代表夜間事故，粉紅色代表夜間騷擾，雙色斜紋代表兩者皆有。</p>
           <p><strong>圖層</strong> 右上角圖層按鈕可以切換亮度、安全事件與邊界資訊。</p>
         </div>
       </section>
@@ -231,6 +231,7 @@
             <div class="map-legend-section">安全事件</div>
             <div class="map-legend-row"><span class="map-legend-swatch" style="background:#F0997B;"></span><span>夜間事故</span></div>
             <div class="map-legend-row"><span class="map-legend-swatch" style="background:#ef718d;"></span><span>夜間騷擾</span></div>
+            <div class="map-legend-row"><span class="map-legend-swatch" style="background:repeating-linear-gradient(45deg,#F0997B,#F0997B 3px,#ef718d 3px,#ef718d 6px);"></span><span>複合事件（雙色）</span></div>
           </div>
         </details>
       </div>
@@ -263,6 +264,14 @@
         <button class="report-hint-cancel" id="btn-pick-cancel" type="button">取消</button>
       </div>
     </div>
+    <svg id="svg-defs-container" style="position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;" aria-hidden="true">
+      <defs>
+        <pattern id="incident-mixed-stripes" width="12" height="12" patternTransform="rotate(45 0 0)" patternUnits="userSpaceOnUse">
+          <line x1="0" y1="0" x2="0" y2="12" stroke="#F0997B" stroke-width="6" />
+          <line x1="6" y1="0" x2="6" y2="12" stroke="#ef718d" stroke-width="6" />
+        </pattern>
+      </defs>
+    </svg>
     <div id="map"></div>
     <div id="map-tools" aria-label="地圖資訊">
       <aside id="map-legend" aria-label="亮度與事件圖例">
@@ -278,6 +287,7 @@
         <div class="map-legend-section">安全事件</div>
         <div class="map-legend-row"><span class="map-legend-swatch" style="background:#F0997B;"></span><span>夜間事故</span></div>
         <div class="map-legend-row"><span class="map-legend-swatch" style="background:#ef718d;"></span><span>夜間騷擾</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:repeating-linear-gradient(45deg,#F0997B,#F0997B 3px,#ef718d 3px,#ef718d 6px);"></span><span>複合事件（雙色）</span></div>
       </aside>
     </div>
 

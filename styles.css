@@ -11,7 +11,8 @@
   --line: rgba(216, 226, 221, 0.18);
   --line-strong: rgba(216, 226, 221, 0.38);
   --cyan: #9ce7d8;
-  --orange: #f0997b;
+  --orange: #ff8a5c;
+  --rose: #f43f5e;
   --green: #7bcfa1;
   --violet: #b79af5;
   --danger: #f4a5a5;
@@ -1648,7 +1649,7 @@ html.report-dialog-open #inc-fab {
 }
 
 .incident-type-mark.accident { background: var(--orange); }
-.incident-type-mark.harassment { background: #ef718d; }
+.incident-type-mark.harassment { background: var(--rose); }
 
 .incident-type-copy {
   display: flex;

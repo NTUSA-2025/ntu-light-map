@@ -68,8 +68,8 @@ export function renderIncidents() {
     const latest = incidents[0];
     const strokeColor = isMixed ? '#ef718d' : incidentColor(latest.type);
     const fillColor = isMixed ? 'url(#incident-mixed-stripes)' : incidentColor(latest.type);
-    const fillOpacity = isMixed ? 0.92 : Math.min(0.62, 0.28 + incidents.length * 0.08);
-    const weight = isMixed ? 2 : 1.4;
+    const fillOpacity = Math.min(0.62, 0.28 + incidents.length * 0.08);
+    const weight = isMixed ? 1.8 : 1.4;
 
     const rows = incidents.slice(0, 5).map(incident => `
       <div style="border-top:1px solid rgba(15,23,42,.12); padding-top:5px; margin-top:5px;">

@@ -66,10 +66,10 @@ export function renderIncidents() {
     const hasHarassment = incidents.some(i => i.type === 'harassment');
     const isMixed = hasAccident && hasHarassment;
     const latest = incidents[0];
-    const strokeColor = isMixed ? '#f43f5e' : incidentColor(latest.type);
+    const strokeColor = isMixed ? 'url(#incident-mixed-stripes)' : incidentColor(latest.type);
     const fillColor = isMixed ? 'url(#incident-mixed-stripes)' : incidentColor(latest.type);
     const fillOpacity = Math.min(0.72, 0.42 + incidents.length * 0.08);
-    const weight = isMixed ? 2 : 1.6;
+    const weight = isMixed ? 2.4 : 1.6;
 
     const rows = incidents.slice(0, 5).map(incident => `
       <div style="border-top:1px solid rgba(15,23,42,.12); padding-top:5px; margin-top:5px;">

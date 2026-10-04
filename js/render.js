@@ -62,14 +62,20 @@ export function renderIncidents() {
     const feature = state.reportHexFeatureById.get(reportHexId);
     if (!feature) return;
 
-    const hasAccident = incidents.some(i => i.type === 'accident');
-    const hasHarassment = incidents.some(i => i.type === 'harassment');
+    const accidentIncidents = incidents.filter(i => i.type === 'accident');
+    const harassmentIncidents = incidents.filter(i => i.type === 'harassment');
+    const hasAccident = accidentIncidents.length > 0;
+    const hasHarassment = harassmentIncidents.length > 0;
     const isMixed = hasAccident && hasHarassment;
-    const fillOpacity = Math.min(0.72, 0.42 + incidents.length * 0.08);
+
+    // Dynamic stepped opacity function:
+    // 1 incident: 0.35, 2 incidents: 0.52, 3 incidents: 0.68, 4+ incidents: 0.82
+    const getSteppedOpacity = count => Math.min(0.82, 0.20 + Math.min(count, 5) * 0.15);
 
     let layer;
     if (isMixed) {
-      // Render split upper (harassment pink #f43f5e) and lower (accident orange #ff8a5c)
+      const harassmentOpacity = getSteppedOpacity(harassmentIncidents.length);
+      const accidentOpacity = getSteppedOpacity(accidentIncidents.length);
       layer = L.featureGroup();
       const coords = feature.geometry.type === 'MultiPolygon' 
         ? feature.geometry.coordinates.map(poly => poly[0]) 
@@ -91,7 +97,7 @@ export function renderIncidents() {
             weight: 2,
             opacity: 1,
             fillColor: '#f43f5e',
-            fillOpacity
+            fillOpacity: harassmentOpacity
           }).addTo(layer);
         }
         if (lowerRing.length >= 3) {
@@ -102,22 +108,24 @@ export function renderIncidents() {
             weight: 2,
             opacity: 1,
             fillColor: '#ff8a5c',
-            fillOpacity
+            fillOpacity: accidentOpacity
           }).addTo(layer);
         }
       });
     } else {
       const latest = incidents[0];
       const color = incidentColor(latest.type);
+      const countOpacity = getSteppedOpacity(incidents.length);
+      const isHotspot = incidents.length >= 3;
       layer = L.geoJSON(feature, {
         pane: 'incidentPane',
         renderer: incidentHexRenderer,
         style: {
           color,
-          weight: 1.6,
+          weight: isHotspot ? 2.4 : 1.6,
           opacity: 1,
           fillColor: color,
-          fillOpacity
+          fillOpacity: countOpacity
         }
       });
     }

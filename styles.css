@@ -907,6 +907,16 @@ html.report-dialog-open #inc-fab {
   width: 20px;
   height: 5px;
 }
+.map-legend-note {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px dashed rgba(216, 226, 221, 0.15);
+  color: var(--ink-faint);
+  font-size: 0.5625rem;
+  line-height: 1.35;
+  letter-spacing: 0.02em;
+}
+
 
 
 .dlg-field select,

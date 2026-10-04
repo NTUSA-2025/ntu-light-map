@@ -68,9 +68,9 @@ export function renderIncidents() {
     const hasHarassment = harassmentIncidents.length > 0;
     const isMixed = hasAccident && hasHarassment;
 
-    // Dynamic stepped opacity function:
-    // 1 incident: 0.35, 2 incidents: 0.52, 3 incidents: 0.68, 4+ incidents: 0.82
-    const getSteppedOpacity = count => Math.min(0.82, 0.20 + Math.min(count, 5) * 0.15);
+    // Stepped opacity with higher base clarity:
+    // 1: 0.50, 2: 0.65, 3: 0.80, 4+: 0.92
+    const getSteppedOpacity = count => Math.min(0.92, 0.35 + Math.min(count, 4) * 0.15);
 
     let layer;
     if (isMixed) {
@@ -93,9 +93,7 @@ export function renderIncidents() {
           L.polygon(upperRing.map(pt => [pt[1], pt[0]]), {
             pane: 'incidentPane',
             renderer: incidentHexRenderer,
-            color: '#f43f5e',
-            weight: 2,
-            opacity: 1,
+            stroke: false,
             fillColor: '#f43f5e',
             fillOpacity: harassmentOpacity
           }).addTo(layer);
@@ -104,13 +102,23 @@ export function renderIncidents() {
           L.polygon(lowerRing.map(pt => [pt[1], pt[0]]), {
             pane: 'incidentPane',
             renderer: incidentHexRenderer,
-            color: '#ff8a5c',
-            weight: 2,
-            opacity: 1,
+            stroke: false,
             fillColor: '#ff8a5c',
             fillOpacity: accidentOpacity
           }).addTo(layer);
         }
+
+        // Seamless outer boundary outline without dividing middle line
+        L.geoJSON(feature, {
+          pane: 'incidentPane',
+          renderer: incidentHexRenderer,
+          style: {
+            color: '#f43f5e',
+            weight: 2,
+            opacity: 0.95,
+            fill: false
+          }
+        }).addTo(layer);
       });
     } else {
       const latest = incidents[0];

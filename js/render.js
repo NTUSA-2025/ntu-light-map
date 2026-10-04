@@ -1,7 +1,7 @@
 import { dom } from './dom.js';
 import { state } from './state.js';
 import { incidentHexLayer, incidentHexRenderer } from './map.js';
-import { escapeHtml, incidentColor, incidentLabel } from './utils.js';
+import { escapeHtml, incidentColor, incidentLabel, clipPolygonY } from './utils.js';
 
 
 const L = window.L;
@@ -65,11 +65,62 @@ export function renderIncidents() {
     const hasAccident = incidents.some(i => i.type === 'accident');
     const hasHarassment = incidents.some(i => i.type === 'harassment');
     const isMixed = hasAccident && hasHarassment;
-    const latest = incidents[0];
-    const strokeColor = isMixed ? 'url(#incident-mixed-stripes)' : incidentColor(latest.type);
-    const fillColor = isMixed ? 'url(#incident-mixed-stripes)' : incidentColor(latest.type);
     const fillOpacity = Math.min(0.72, 0.42 + incidents.length * 0.08);
-    const weight = isMixed ? 2.4 : 1.6;
+
+    let layer;
+    if (isMixed) {
+      // Render split upper (harassment pink #f43f5e) and lower (accident orange #ff8a5c)
+      layer = L.featureGroup();
+      const coords = feature.geometry.type === 'MultiPolygon' 
+        ? feature.geometry.coordinates.map(poly => poly[0]) 
+        : [feature.geometry.coordinates[0]];
+
+      coords.forEach(ring => {
+        const lats = ring.map(pt => pt[1]);
+        const minLat = Math.min(...lats), maxLat = Math.max(...lats);
+        const midLat = (minLat + maxLat) / 2;
+        const openRing = ring.slice(0, -1);
+        const upperRing = clipPolygonY(openRing, midLat, true);
+        const lowerRing = clipPolygonY(openRing, midLat, false);
+
+        if (upperRing.length >= 3) {
+          L.polygon(upperRing.map(pt => [pt[1], pt[0]]), {
+            pane: 'incidentPane',
+            renderer: incidentHexRenderer,
+            color: '#f43f5e',
+            weight: 2,
+            opacity: 1,
+            fillColor: '#f43f5e',
+            fillOpacity
+          }).addTo(layer);
+        }
+        if (lowerRing.length >= 3) {
+          L.polygon(lowerRing.map(pt => [pt[1], pt[0]]), {
+            pane: 'incidentPane',
+            renderer: incidentHexRenderer,
+            color: '#ff8a5c',
+            weight: 2,
+            opacity: 1,
+            fillColor: '#ff8a5c',
+            fillOpacity
+          }).addTo(layer);
+        }
+      });
+    } else {
+      const latest = incidents[0];
+      const color = incidentColor(latest.type);
+      layer = L.geoJSON(feature, {
+        pane: 'incidentPane',
+        renderer: incidentHexRenderer,
+        style: {
+          color,
+          weight: 1.6,
+          opacity: 1,
+          fillColor: color,
+          fillOpacity
+        }
+      });
+    }
 
     const rows = incidents.slice(0, 5).map(incident => `
       <div style="border-top:1px solid rgba(15,23,42,.12); padding-top:5px; margin-top:5px;">
@@ -78,17 +129,6 @@ export function renderIncidents() {
         <span style="color:#64748b;">${escapeHtml(incident.created_at)}</span>
       </div>
     `).join('');
-    const layer = L.geoJSON(feature, {
-      pane: 'incidentPane',
-      renderer: incidentHexRenderer,
-      style: {
-        color: strokeColor,
-        weight,
-        opacity: 1,
-        fillColor,
-        fillOpacity
-      }
-    });
 
     layer.bindPopup(`
       <div style="font:12px/1.5 system-ui,sans-serif; min-width:180px;">

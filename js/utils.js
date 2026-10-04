@@ -47,3 +47,28 @@ export function findReportHexForCoords(lat, lng, features) {
   return null;
 }
 
+export function clipPolygonY(polygon, yCut, keepUpper) {
+  const outputList = [];
+  for (let i = 0; i < polygon.length; i++) {
+    const cur = polygon[i];
+    const prev = polygon[(i - 1 + polygon.length) % polygon.length];
+    const curInside = keepUpper ? cur[1] >= yCut : cur[1] <= yCut;
+    const prevInside = keepUpper ? prev[1] >= yCut : prev[1] <= yCut;
+
+    if (curInside) {
+      if (!prevInside) {
+        const t = (yCut - prev[1]) / (cur[1] - prev[1]);
+        const x = prev[0] + t * (cur[0] - prev[0]);
+        outputList.push([x, yCut]);
+      }
+      outputList.push(cur);
+    } else if (prevInside) {
+      const t = (yCut - prev[1]) / (cur[1] - prev[1]);
+      const x = prev[0] + t * (cur[0] - prev[0]);
+      outputList.push([x, yCut]);
+    }
+  }
+  if (outputList.length > 0) outputList.push(outputList[0]);
+  return outputList;
+}
+

@@ -108,17 +108,26 @@ export function renderIncidents() {
           }).addTo(layer);
         }
 
-        // Seamless outer boundary outline without dividing middle line
-        L.geoJSON(feature, {
-          pane: 'incidentPane',
-          renderer: incidentHexRenderer,
-          style: {
-            color: '#f43f5e',
-            weight: 2,
-            opacity: 0.95,
-            fill: false
+        function addPerimeterStrokes(ringPoly, strokeColor) {
+          for (let i = 0; i < ringPoly.length - 1; i++) {
+            const p1 = ringPoly[i];
+            const p2 = ringPoly[i + 1];
+            const isCutEdge = Math.abs(p1[1] - midLat) < 1e-9 && Math.abs(p2[1] - midLat) < 1e-9;
+            if (!isCutEdge) {
+              L.polyline([[p1[1], p1[0]], [p2[1], p2[0]]], {
+                pane: 'incidentPane',
+                renderer: incidentHexRenderer,
+                color: strokeColor,
+                weight: 2,
+                opacity: 1,
+                interactive: false
+              }).addTo(layer);
+            }
           }
-        }).addTo(layer);
+        }
+
+        addPerimeterStrokes(upperRing, '#f43f5e');
+        addPerimeterStrokes(lowerRing, '#ff8a5c');
       });
     } else {
       const latest = incidents[0];

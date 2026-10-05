@@ -266,20 +266,39 @@
       </div>
     </div>
     <div id="map"></div>
-    <div id="incident-filter-bar" class="incident-filter-card" role="region" aria-label="事件過濾與圖例">
-      <div class="incident-filter-header">
-        <div class="incident-filter-title" id="filter-card-title">全部事件</div>
-        <div class="incident-filter-badge">近30天</div>
-      </div>
-      <div class="incident-filter-tabs" role="tablist">
-        <button type="button" class="incident-filter-tab active" data-filter="all">全部</button>
-        <button type="button" class="incident-filter-tab" data-filter="harassment">夜間騷擾</button>
-        <button type="button" class="incident-filter-tab" data-filter="accident">夜間事故</button>
-      </div>
-      <div class="incident-filter-legend" id="incident-filter-legend">
-        <!-- Rendered dynamically according to active tab -->
-      </div>
-      <div class="incident-filter-subnote">顏色越深，通報越多</div>
+    <div id="map-tools" aria-label="地圖資訊">
+      <aside id="map-legend" aria-label="亮度與事件圖例">
+        <div class="map-legend-title">
+          <span>亮度</span>
+          <span class="map-legend-unit">lux</span>
+        </div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#0b1020;"></span><span>0 - 1</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#1f2a5a;"></span><span>1 - 12</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#2f6f9f;"></span><span>12 - 29</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#6fd0c2;"></span><span>29 - 54</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#f3f6ff;"></span><span>54 +</span></div>
+        <div class="map-legend-section">安全事件</div>
+        <div class="map-legend-row">
+          <span class="map-legend-swatch" style="background:#fb923c;"></span>
+          <span>夜間事故</span>
+          <span class="map-legend-subswatches">
+            <span class="subswatch" style="background:#fed7aa;" title="少"></span>
+            <span class="subswatch" style="background:#fb923c;" title="中"></span>
+            <span class="subswatch" style="background:#c2410c;" title="多"></span>
+          </span>
+        </div>
+        <div class="map-legend-row">
+          <span class="map-legend-swatch" style="background:#ff4d6d;"></span>
+          <span>夜間騷擾</span>
+          <span class="map-legend-subswatches">
+            <span class="subswatch" style="background:#ff8da1;" title="少"></span>
+            <span class="subswatch" style="background:#ff4d6d;" title="中"></span>
+            <span class="subswatch" style="background:#a31638;" title="多"></span>
+          </span>
+        </div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:linear-gradient(180deg,#ff4d6d 50%,#fb923c 50%);"></span><span>複合事件（上下雙色）</span></div>
+        <div class="map-legend-note">分層：少 / 中 / 多（顏色越深，通報越多）</div>
+      </aside>
     </div>
 
 

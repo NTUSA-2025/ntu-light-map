@@ -7,6 +7,5 @@ export const state = {
   userLocationMarker: null,
   userAccuracyCircle: null,
   allIncidents: [],
-  incidentFilter: 'all', // 'all' | 'harassment' | 'accident'
   reportHexFeatureById: new Map()
 };

@@ -680,14 +680,6 @@ btnSubmit.addEventListener('click', async () => {
     updateSubmitState();
   }
 });
-document.querySelectorAll('.incident-filter-tab').forEach(tab => {
-  tab.addEventListener('click', () => {
-    const filter = tab.dataset.filter;
-    if (state.incidentFilter === filter) return;
-    state.incidentFilter = filter;
-    renderIncidents();
-  });
-});
 
 refreshAuthSession();
 loadCampusBoundary();

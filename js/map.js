@@ -191,7 +191,7 @@ export async function loadMapLayers(onSelectReportHex, hexTooltip) {
   }).addTo(map);
   layerMap.protect = protectLayer;
 
-  const geoReport = await loadJSON(assetUrl('/data/report_hex_4326.geojson'));
+  const geoReport = await loadJSON(assetUrl('/data/report_hex_cells_4326.geojson'));
   state.reportHexFeatureById.clear();
   geoReport.features.forEach(feature => {
     const id = Number(feature.properties?.id);

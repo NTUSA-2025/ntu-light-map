@@ -46,9 +46,7 @@ export async function onRequestPost({ request, env }) {
     }
     console.error("verification_email_failed", {
       message: error?.message,
-      smtp_host: env.SMTP_HOST || "smtp.gmail.com",
-      smtp_user: env.SMTP_USER || null,
-      has_smtp_pass: Boolean(env.SMTP_PASS),
+      has_resend_api_key: Boolean(env.RESEND_API_KEY),
     });
     return json(
       {

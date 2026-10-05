@@ -1,3 +1,5 @@
 HASH_SALT=local-development-only-change-me
 ALLOW_DEV_AUTH=true
 DEV_EMAIL_CODE=123456
+RESEND_API_KEY=re_your_api_key_here
+RESEND_FROM="台大夜間亮度地圖 <no-reply@ntusa.ntu.edu.tw>"

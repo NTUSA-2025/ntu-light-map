@@ -46,8 +46,82 @@ export function renderReportList() {
 
 
 
+export function updateFilterUI() {
+  const filter = state.incidentFilter || 'all';
+  const titleEl = document.getElementById('filter-card-title');
+  const legendEl = document.getElementById('incident-filter-legend');
+  const tabs = document.querySelectorAll('.incident-filter-tab');
+
+  tabs.forEach(tab => {
+    tab.classList.toggle('active', tab.dataset.filter === filter);
+  });
+
+  if (filter === 'all') {
+    if (titleEl) titleEl.textContent = '全部事件';
+    if (legendEl) {
+      legendEl.innerHTML = `
+        <div class="filter-legend-row">
+          <div class="filter-legend-item">
+            <span class="filter-legend-swatch" style="background:#ff4d6d;"></span>
+            <span>上半：夜間騷擾</span>
+          </div>
+          <div class="filter-legend-item">
+            <span class="filter-legend-swatch" style="background:#fb923c;"></span>
+            <span>下半：夜間事故</span>
+          </div>
+        </div>
+      `;
+    }
+  } else if (filter === 'harassment') {
+    if (titleEl) titleEl.textContent = '只看夜間騷擾';
+    if (legendEl) {
+      legendEl.innerHTML = `
+        <div class="filter-legend-row">
+          <span>夜間騷擾</span>
+          <div class="filter-legend-levels">
+            <span class="filter-legend-level"><span class="filter-legend-swatch swatch-hex" style="background:#ff8da1;"></span>少</span>
+            <span class="filter-legend-level"><span class="filter-legend-swatch swatch-hex" style="background:#ff4d6d;"></span>中</span>
+            <span class="filter-legend-level"><span class="filter-legend-swatch swatch-hex" style="background:#a31638;"></span>多</span>
+          </div>
+        </div>
+      `;
+    }
+  } else if (filter === 'accident') {
+    if (titleEl) titleEl.textContent = '只看夜間事故';
+    if (legendEl) {
+      legendEl.innerHTML = `
+        <div class="filter-legend-row">
+          <span>夜間事故</span>
+          <div class="filter-legend-levels">
+            <span class="filter-legend-level"><span class="filter-legend-swatch swatch-hex" style="background:#fed7aa;"></span>少</span>
+            <span class="filter-legend-level"><span class="filter-legend-swatch swatch-hex" style="background:#fb923c;"></span>中</span>
+            <span class="filter-legend-level"><span class="filter-legend-swatch swatch-hex" style="background:#c2410c;"></span>多</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+}
+
+export function getTierColor(type, count) {
+  if (type === 'harassment') {
+    if (count <= 1) return '#ff8da1'; // 少
+    if (count <= 2) return '#ff4d6d'; // 中
+    return '#a31638';                 // 多
+  }
+  if (type === 'accident') {
+    if (count <= 1) return '#fed7aa'; // 少
+    if (count <= 2) return '#fb923c'; // 中
+    return '#c2410c';                 // 多
+  }
+  return '#94a3b8';
+}
+
 export function renderIncidents() {
   incidentHexLayer.clearLayers();
+  const filter = state.incidentFilter || 'all';
+  updateFilterUI();
+
   const grouped = new Map();
 
   state.allIncidents.forEach(incident => {
@@ -64,22 +138,22 @@ export function renderIncidents() {
 
     const accidentIncidents = incidents.filter(i => i.type === 'accident');
     const harassmentIncidents = incidents.filter(i => i.type === 'harassment');
-    const hasAccident = accidentIncidents.length > 0;
-    const hasHarassment = harassmentIncidents.length > 0;
-    const isMixed = hasAccident && hasHarassment;
 
-    // Stepped opacity with higher base clarity:
-    // 1: 0.50, 2: 0.65, 3: 0.80, 4+: 0.92
-    const getSteppedOpacity = count => Math.min(0.92, 0.35 + Math.min(count, 4) * 0.15);
+    // Filtering logic based on active tab
+    if (filter === 'harassment' && harassmentIncidents.length === 0) return;
+    if (filter === 'accident' && accidentIncidents.length === 0) return;
 
     let layer;
-    if (isMixed) {
-      const harassmentOpacity = getSteppedOpacity(harassmentIncidents.length);
-      const accidentOpacity = getSteppedOpacity(accidentIncidents.length);
+
+    if (filter === 'all' && accidentIncidents.length > 0 && harassmentIncidents.length > 0) {
+      // Mixed hex: Upper half harassment, Lower half accident
       layer = L.featureGroup();
       const coords = feature.geometry.type === 'MultiPolygon' 
         ? feature.geometry.coordinates.map(poly => poly[0]) 
         : [feature.geometry.coordinates[0]];
+
+      const upperColor = getTierColor('harassment', harassmentIncidents.length);
+      const lowerColor = getTierColor('accident', accidentIncidents.length);
 
       coords.forEach(ring => {
         const lats = ring.map(pt => pt[1]);
@@ -94,8 +168,8 @@ export function renderIncidents() {
             pane: 'incidentPane',
             renderer: incidentHexRenderer,
             stroke: false,
-            fillColor: '#f43f5e',
-            fillOpacity: harassmentOpacity
+            fillColor: upperColor,
+            fillOpacity: 0.95
           }).addTo(layer);
         }
         if (lowerRing.length >= 3) {
@@ -103,8 +177,8 @@ export function renderIncidents() {
             pane: 'incidentPane',
             renderer: incidentHexRenderer,
             stroke: false,
-            fillColor: '#ff8a5c',
-            fillOpacity: accidentOpacity
+            fillColor: lowerColor,
+            fillOpacity: 0.95
           }).addTo(layer);
         }
 
@@ -126,23 +200,36 @@ export function renderIncidents() {
           }
         }
 
-        addPerimeterStrokes(upperRing, '#f43f5e');
-        addPerimeterStrokes(lowerRing, '#ff8a5c');
+        addPerimeterStrokes(upperRing, upperColor);
+        addPerimeterStrokes(lowerRing, lowerColor);
       });
     } else {
-      const latest = incidents[0];
-      const color = incidentColor(latest.type);
-      const countOpacity = getSteppedOpacity(incidents.length);
-      const isHotspot = incidents.length >= 3;
+      // Single type mode or single incident on this hex
+      let targetType;
+      let count;
+      if (filter === 'harassment') {
+        targetType = 'harassment';
+        count = harassmentIncidents.length;
+      } else if (filter === 'accident') {
+        targetType = 'accident';
+        count = accidentIncidents.length;
+      } else {
+        // filter === 'all', but only one kind occurred here
+        targetType = harassmentIncidents.length > 0 ? 'harassment' : 'accident';
+        count = targetType === 'harassment' ? harassmentIncidents.length : accidentIncidents.length;
+      }
+
+      const color = getTierColor(targetType, count);
+
       layer = L.geoJSON(feature, {
         pane: 'incidentPane',
         renderer: incidentHexRenderer,
         style: {
           color,
-          weight: isHotspot ? 2.4 : 1.6,
+          weight: 2,
           opacity: 1,
           fillColor: color,
-          fillOpacity: countOpacity
+          fillOpacity: 0.92
         }
       });
     }

@@ -229,10 +229,25 @@
             <div class="map-legend-row"><span class="map-legend-swatch" style="background:#6fd0c2;"></span><span>29 - 54 lux</span></div>
             <div class="map-legend-row"><span class="map-legend-swatch" style="background:#f3f6ff;"></span><span>54 + lux</span></div>
             <div class="map-legend-section">安全事件</div>
-            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#ff8a5c;"></span><span>夜間事故</span></div>
-            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#f43f5e;"></span><span>夜間騷擾</span></div>
-            <div class="map-legend-row"><span class="map-legend-swatch" style="background:linear-gradient(180deg,#f43f5e 50%,#ff8a5c 50%);"></span><span>複合事件（上下雙色）</span></div>
-            <div class="map-legend-note">顏色越深代表回報數量越多</div>
+            <div class="map-legend-row">
+              <span class="map-legend-swatch" style="background:#fb923c;"></span>
+              <span>夜間事故</span>
+              <span class="map-legend-subswatches">
+                <span class="subswatch" style="background:#fed7aa;" title="少"></span>
+                <span class="subswatch" style="background:#fb923c;" title="中"></span>
+                <span class="subswatch" style="background:#c2410c;" title="多"></span>
+              </span>
+            </div>
+            <div class="map-legend-row">
+              <span class="map-legend-swatch" style="background:#ff4d6d;"></span>
+              <span>夜間騷擾</span>
+              <span class="map-legend-subswatches">
+                <span class="subswatch" style="background:#ff8da1;" title="少"></span>
+                <span class="subswatch" style="background:#ff4d6d;" title="中"></span>
+                <span class="subswatch" style="background:#a31638;" title="多"></span>
+              </span>
+            </div>
+            <div class="map-legend-note">分層：少 / 中 / 多（顏色越深，通報越多）</div>
           </div>
         </details>
       </div>
@@ -296,7 +311,6 @@
             <span class="subswatch" style="background:#a31638;" title="多"></span>
           </span>
         </div>
-        <div class="map-legend-row"><span class="map-legend-swatch" style="background:linear-gradient(180deg,#ff4d6d 50%,#fb923c 50%);"></span><span>複合事件（上下雙色）</span></div>
         <div class="map-legend-note">分層：少 / 中 / 多（顏色越深，通報越多）</div>
       </aside>
     </div>

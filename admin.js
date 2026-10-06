@@ -14,8 +14,13 @@ const list = byId('admin-list');
 const filter = byId('admin-status-filter');
 const countLabel = byId('admin-count');
 const deniedEmail = byId('admin-denied-email');
+const whitelistList = byId('admin-whitelist-list');
+const whitelistCount = byId('admin-whitelist-count');
+const whitelistForm = byId('admin-whitelist-form');
+const whitelistEmailInput = byId('admin-whitelist-email');
 
 let incidents = [];
+let whitelistEntries = [];
 let authenticatedEmail = '';
 
 function setStatus(message, kind = '') {
@@ -53,34 +58,40 @@ async function checkAdminAccess() {
   }
 
   authenticatedEmail = session.email;
-  const response = await fetch('/api/admin/incidents', {
-    headers: { accept: 'application/json' }
-  });
-  if (response.status === 403) {
+  const [incidentsResponse, whitelistResponse] = await Promise.all([
+    fetch('/api/admin/incidents', { headers: { accept: 'application/json' } }),
+    fetch('/api/admin/users', { headers: { accept: 'application/json' } })
+  ]);
+  if (incidentsResponse.status === 403 || whitelistResponse.status === 403) {
     showSection(deniedSection);
     deniedEmail.textContent = authenticatedEmail;
     logoutButton.hidden = true;
     setStatus('登入成功，但帳號不在管理白名單中', 'error');
     return;
   }
-  if (response.status === 401) {
+  if (incidentsResponse.status === 401 || whitelistResponse.status === 401) {
     showSection(loginSection);
     logoutButton.hidden = true;
     setStatus('登入狀態已失效，請重新驗證', 'error');
     return;
   }
-  if (!response.ok) {
+  if (!incidentsResponse.ok || !whitelistResponse.ok) {
     showSection(loginSection);
     logoutButton.hidden = false;
     setStatus('無法載入管理資料，請稍後重試', 'error');
     return;
   }
 
-  const data = await readJson(response);
-  incidents = Array.isArray(data.incidents) ? data.incidents : [];
+  const [incidentData, whitelistData] = await Promise.all([
+    readJson(incidentsResponse),
+    readJson(whitelistResponse)
+  ]);
+  incidents = Array.isArray(incidentData.incidents) ? incidentData.incidents : [];
+  whitelistEntries = Array.isArray(whitelistData.users) ? whitelistData.users : [];
   showSection(consoleSection);
   logoutButton.hidden = false;
   setStatus(`已以 ${authenticatedEmail} 登入管理頁`);
+  renderWhitelist();
   renderIncidents();
 }
 
@@ -110,6 +121,57 @@ function makeField(labelText, control) {
   label.append(textElement('span', '', labelText), control);
   return label;
 }
+function whitelistErrorMessage(code) {
+  if (code === 'whitelist_entry_exists') return '這個白名單項目已存在';
+  if (code === 'cannot_remove_last_whitelist_entry') return '至少需要保留一個白名單項目';
+  if (code === 'cannot_remove_current_access') return '請先新增另一個可保留目前管理權限的項目';
+  if (code === 'invalid_whitelist_email') return '只接受有效的 NTU Email 或指定的 NTUSA 萬用網域';
+  return code || '白名單操作失敗';
+}
+
+function renderWhitelist() {
+  whitelistList.replaceChildren();
+  whitelistCount.textContent = `${whitelistEntries.length} 個項目`;
+
+  if (whitelistEntries.length === 0) {
+    whitelistList.append(textElement('p', 'admin-empty', '目前沒有白名單項目'));
+    return;
+  }
+
+  whitelistEntries.forEach(entry => {
+    const row = document.createElement('div');
+    row.className = 'admin-whitelist-row';
+    const details = document.createElement('div');
+    details.append(
+      textElement('strong', 'admin-whitelist-email-entry', entry.email),
+      textElement('small', 'admin-whitelist-meta', `新增者：${entry.created_by || '系統'} · ${entry.created_at || ''}`)
+    );
+    const removeButton = textElement('button', 'admin-danger', '移除');
+    removeButton.type = 'button';
+    removeButton.addEventListener('click', async () => {
+      if (!window.confirm(`確定移除白名單項目 ${entry.email}？`)) return;
+      removeButton.disabled = true;
+      try {
+        const response = await fetch('/api/admin/users', {
+          method: 'DELETE',
+          headers: { 'content-type': 'application/json', accept: 'application/json' },
+          body: JSON.stringify({ email: entry.email })
+        });
+        const data = await readJson(response);
+        if (!response.ok) throw new Error(whitelistErrorMessage(data.error));
+        whitelistEntries = whitelistEntries.filter(item => item.email.toLowerCase() !== entry.email.toLowerCase());
+        renderWhitelist();
+        setStatus(`已移除白名單項目 ${entry.email}`, 'success');
+      } catch (error) {
+        setStatus(error.message, 'error');
+        removeButton.disabled = false;
+      }
+    });
+    row.append(details, removeButton);
+    whitelistList.append(row);
+  });
+}
+
 
 function renderIncidents() {
   list.replaceChildren();
@@ -266,6 +328,34 @@ verifyCodeButton.addEventListener('click', async () => {
     verifyCodeButton.disabled = false;
   }
 });
+whitelistForm.addEventListener('submit', async event => {
+  event.preventDefault();
+  const email = whitelistEmailInput.value.trim().toLowerCase();
+  if (!email) {
+    setStatus('請輸入 Email 或 *@ntusa.ntu.edu.tw', 'error');
+    return;
+  }
+  const submitButton = byId('btn-add-admin');
+  submitButton.disabled = true;
+  try {
+    const response = await fetch('/api/admin/users', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json', accept: 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const data = await readJson(response);
+    if (!response.ok) throw new Error(whitelistErrorMessage(data.error || data.message));
+    whitelistEntries.push(data.user);
+    whitelistEmailInput.value = '';
+    renderWhitelist();
+    setStatus(`已新增白名單項目 ${data.user.email}`, 'success');
+  } catch (error) {
+    setStatus(error.message, 'error');
+  } finally {
+    submitButton.disabled = false;
+  }
+});
+
 
 async function logout() {
   await fetch('/api/auth/logout', { method: 'POST', headers: { accept: 'application/json' } });

@@ -8,19 +8,36 @@ export async function requireAdmin(request, env) {
   }
 
   const normalizedEmail = email.trim().toLowerCase();
-  if (normalizedEmail.endsWith("@ntusa.ntu.edu.tw")) {
-    return { ok: true, email: normalizedEmail };
-  }
-
+  const domain = normalizedEmail.slice(normalizedEmail.lastIndexOf("@") + 1);
   const row = await env.DB.prepare(
-    "SELECT 1 AS allowed FROM admin_users WHERE lower(email) = ? LIMIT 1",
-  ).bind(normalizedEmail).first();
+    `SELECT 1 AS allowed
+     FROM admin_users
+     WHERE lower(email) = ? OR lower(email) = ?
+     LIMIT 1`,
+  ).bind(normalizedEmail, `*@${domain}`).first();
 
   if (!row) {
     return { ok: false, response: json({ error: "admin_forbidden" }, { status: 403 }) };
   }
 
   return { ok: true, email: normalizedEmail };
+}
+export function normalizeAdminWhitelistEntry(value) {
+  if (typeof value !== "string") return null;
+  const email = value.trim().toLowerCase();
+  if (email === "*@ntusa.ntu.edu.tw") return email;
+  if (email.includes("*")) return null;
+  return isAllowedNtuEmail(email) ? email : null;
+}
+
+export function whitelistEntryMatches(entry, email) {
+  const normalizedEntry = String(entry || "").trim().toLowerCase();
+  const normalizedEmail = String(email || "").trim().toLowerCase();
+  if (!normalizedEntry || !normalizedEmail) return false;
+  if (normalizedEntry.startsWith("*@")) {
+    return normalizedEmail.slice(normalizedEmail.lastIndexOf("@") + 1) === normalizedEntry.slice(2);
+  }
+  return normalizedEntry === normalizedEmail;
 }
 
 export function adminIncident(row) {

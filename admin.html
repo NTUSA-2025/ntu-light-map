@@ -41,6 +41,21 @@
     </section>
 
     <section id="admin-console" hidden>
+      <details class="admin-whitelist" open>
+        <summary>
+          <span>管理白名單</span>
+          <span id="admin-whitelist-count">0 個項目</span>
+        </summary>
+        <p>加入已驗證的 NTU Email，或使用 <code>*@ntusa.ntu.edu.tw</code> 開放整個 NTUSA 網域；其他萬用字元網域不接受。</p>
+        <form id="admin-whitelist-form" class="admin-whitelist-form">
+          <label class="admin-field" for="admin-whitelist-email">
+            <span>Email 或萬用字元</span>
+            <input id="admin-whitelist-email" type="text" autocomplete="off" placeholder="name@ntu.edu.tw" />
+          </label>
+          <button id="btn-add-admin" class="admin-primary" type="submit">新增白名單</button>
+        </form>
+        <div id="admin-whitelist-list" class="admin-whitelist-list"></div>
+      </details>
       <div class="admin-toolbar">
         <div>
           <h2>所有回報</h2>

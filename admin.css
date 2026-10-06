@@ -260,3 +260,99 @@ body.admin-page {
   .admin-incident-actions { flex-direction: column; }
   .admin-incident-actions button { width: 100%; }
 }
+.admin-whitelist {
+  margin-bottom: 24px;
+  padding: 18px 22px;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  background: rgba(16, 23, 29, 0.86);
+}
+
+.admin-whitelist > summary {
+  display: flex;
+  min-height: 44px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--ink);
+  cursor: pointer;
+  font-size: 1.0625rem;
+  font-weight: 700;
+  list-style: none;
+}
+
+.admin-whitelist > summary::-webkit-details-marker { display: none; }
+
+.admin-whitelist > summary span:last-child {
+  color: var(--ink-faint);
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
+.admin-whitelist > p {
+  margin: 6px 0 14px;
+  color: var(--ink-dim);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+}
+
+.admin-whitelist > p code {
+  color: var(--cyan);
+  font-size: 0.9em;
+}
+
+.admin-whitelist-form {
+  display: flex;
+  align-items: end;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.admin-whitelist-form .admin-field {
+  flex: 1;
+  margin-top: 0;
+}
+
+.admin-whitelist-form .admin-primary { margin-top: 0; }
+
+.admin-whitelist-list {
+  display: grid;
+  gap: 8px;
+}
+
+.admin-whitelist-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 10px 12px;
+  border: 1px solid rgba(216, 226, 221, 0.1);
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.025);
+}
+
+.admin-whitelist-email-entry {
+  display: block;
+  overflow-wrap: anywhere;
+  color: var(--ink);
+  font-size: 0.9375rem;
+}
+
+.admin-whitelist-meta {
+  display: block;
+  margin-top: 4px;
+  color: var(--ink-faint);
+  font-size: 0.8125rem;
+}
+
+.admin-whitelist-row .admin-danger {
+  min-height: 40px;
+  flex: 0 0 auto;
+  font-size: 0.875rem;
+}
+
+@media (max-width: 700px) {
+  .admin-whitelist { padding: 16px; }
+  .admin-whitelist-form { align-items: stretch; flex-direction: column; }
+  .admin-whitelist-form .admin-primary { width: 100%; }
+}

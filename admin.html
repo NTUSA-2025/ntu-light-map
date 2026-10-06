@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="zh-Hant" class="admin-document">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="color-scheme" content="dark" />
+  <title>回報管理｜台大夜間亮度地圖</title>
+  <link rel="stylesheet" href="styles.css" />
+  <link rel="stylesheet" href="admin.css" />
+</head>
+<body class="admin-page">
+  <header class="admin-header">
+    <a class="admin-back" href="/">← 返回地圖</a>
+    <h1>回報管理</h1>
+    <button id="admin-logout" class="admin-logout" type="button" hidden>登出</button>
+  </header>
+
+  <main class="admin-main">
+    <p id="admin-status" class="admin-status" role="status" aria-live="polite">確認管理員登入狀態…</p>
+
+    <section id="admin-login" class="admin-card" hidden>
+      <h2>管理員登入</h2>
+      <p>使用 NTU／NTUSA Email 驗證。只有加入管理白名單的帳號能查看及管理回報。</p>
+      <label class="admin-field">
+        <span>Email</span>
+        <input id="admin-email" type="email" autocomplete="email" placeholder="name@ntu.edu.tw" />
+      </label>
+      <button id="btn-admin-request-code" class="admin-primary" type="button">寄送驗證碼</button>
+      <label id="admin-code-field" class="admin-field" hidden>
+        <span>驗證碼</span>
+        <input id="admin-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位數字" />
+      </label>
+      <button id="btn-admin-verify-code" class="admin-primary" type="button" hidden>驗證並登入</button>
+    </section>
+
+    <section id="admin-denied" class="admin-card admin-denied" hidden>
+      <h2>此帳號沒有管理權限</h2>
+      <p>登入 Email：<strong id="admin-denied-email"></strong></p>
+      <p>管理權限開放給已驗證的 @ntusa.ntu.edu.tw 帳號；其他 NTU Email 需加入 <code>admin_users</code> 白名單。</p>
+      <button id="btn-admin-denied-logout" class="admin-secondary" type="button">登出並更換帳號</button>
+    </section>
+
+    <section id="admin-console" hidden>
+      <div class="admin-toolbar">
+        <div>
+          <h2>所有回報</h2>
+          <p id="admin-count">0 筆</p>
+        </div>
+        <label class="admin-filter">
+          <span>顯示</span>
+          <select id="admin-status-filter">
+            <option value="all">全部狀態</option>
+            <option value="public">公開</option>
+            <option value="hidden">已隱藏</option>
+          </select>
+        </label>
+      </div>
+      <div id="admin-list" class="admin-list" aria-live="polite"></div>
+    </section>
+  </main>
+
+  <script type="module" src="admin.js"></script>
+</body>
+</html>

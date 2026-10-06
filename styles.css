@@ -2440,3 +2440,109 @@ html.report-dialog-open #inc-fab {
   from { opacity: 0; transform: translateY(3%); }
   to { opacity: 1; transform: translateY(0); }
 }
+.panel-admin-link {
+  display: inline-flex;
+  min-height: 44px;
+  align-items: center;
+  color: var(--cyan);
+  font-size: 0.875rem;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+}
+
+.panel-admin-link:hover { color: var(--ink); }
+
+#panel .panel-insights-title,
+#panel .layer-group-title,
+#panel .panel-reports-title {
+  min-height: 56px;
+  font-size: 1rem;
+}
+
+#panel .stat-label,
+#panel .block-label,
+#panel .bar-name,
+#panel .layer-name,
+#panel .report-list-type,
+#panel .report-list-description {
+  font-size: 1rem;
+}
+
+#panel .bar-num,
+#panel .panel-reports-meta,
+#panel .report-list-time,
+#panel .report-list-meta,
+#panel .report-list-empty {
+  font-size: 0.8125rem;
+}
+
+#panel .panel-close,
+#panel .panel-logout {
+  font-size: 0.875rem;
+}
+
+#map-info-title { font-size: 1.25rem; }
+.map-info-body p { font-size: 1rem; }
+
+#map-legend .map-legend-title,
+.mobile-map-legend-content .map-legend-section {
+  font-size: 1rem;
+}
+
+#map-legend .map-legend-row,
+.mobile-map-legend-content .map-legend-row {
+  font-size: 0.875rem;
+}
+
+#map-legend .map-legend-unit,
+#map-legend .map-legend-note,
+.mobile-map-legend-content .map-legend-note {
+  font-size: 0.75rem;
+}
+
+@media (max-width: 760px) {
+  .panel-admin-link {
+    min-height: 44px;
+    font-size: 0.8125rem;
+  }
+
+  #panel .panel-insights-title,
+  #panel .layer-group-title,
+  #panel .panel-reports-title {
+    min-height: 52px;
+    font-size: 1rem;
+  }
+
+  #panel .stat-label,
+  #panel .block-label,
+  #panel .bar-name,
+  #panel .layer-name,
+  #panel .report-list-type,
+  #panel .report-list-description {
+    font-size: 1rem;
+  }
+}
+#dock .dock-btn { font-size: 0.9375rem; }
+
+#hex-tooltip,
+#report-hint {
+  font-size: 0.875rem;
+}
+
+.report-hint-kicker { font-size: 0.75rem; }
+.report-hint-copy strong { font-size: 1rem; }
+.report-hint-gps,
+.report-hint-cancel { font-size: 0.875rem; }
+
+@media (max-width: 760px) {
+  .report-hint {
+    font-size: 0.875rem;
+  }
+
+  .report-hint-copy strong { font-size: 0.9375rem; }
+  .report-hint-gps,
+  .report-hint-cancel {
+    font-size: 0.8125rem;
+  }
+}

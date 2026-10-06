@@ -59,19 +59,12 @@
           <p><strong>亮度</strong> 色階單位是 lux，顏色越亮代表亮度數值越高。</p>
           <p><strong>資料狀態</strong> 部分區域可能是推估值，尚未量測的區域不代表亮度為零。</p>
           <p><strong>回報安全事件</strong> 按下左下角按鈕，驗證 NTU Email 後選擇地圖上的六角區域。</p>
-          <p><strong>事件顏色與深淺</strong> 橘色代表事故，粉紅代表騷擾，上下雙色代表兩者皆有。顏色越深代表回報數量越多（深色為高頻熱點）。</p>
+          <p><strong>事件顏色與深淺</strong> 橘色代表事故，粉紅代表騷擾，上下雙色代表兩者皆有。顏色越淺代表回報數量越多。</p>
           <p><strong>圖層</strong> 右上角圖層按鈕可以切換亮度、安全事件與邊界資訊。</p>
         </div>
       </section>
     <div class="dock-div"></div>
 
-    <button class="dock-btn" id="btnReport" type="button" aria-label="回報事件" aria-pressed="false">
-      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-        <path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/>
-        <line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/>
-      </svg>
-      <span class="dock-tip">回報事件</span>
-    </button>
 
     <div class="dock-spacer"></div>
     <div class="dock-div"></div>
@@ -233,21 +226,21 @@
               <span class="map-legend-swatch" style="background:#fb923c;"></span>
               <span>夜間事故</span>
               <span class="map-legend-subswatches">
-                <span class="subswatch" style="background:#fed7aa;" title="少"></span>
+                <span class="subswatch" style="background:#d65a1f;" title="少"></span>
                 <span class="subswatch" style="background:#fb923c;" title="中"></span>
-                <span class="subswatch" style="background:#c2410c;" title="多"></span>
+                <span class="subswatch" style="background:#fed7aa;" title="多"></span>
               </span>
             </div>
             <div class="map-legend-row">
               <span class="map-legend-swatch" style="background:#ff4d6d;"></span>
               <span>夜間騷擾</span>
               <span class="map-legend-subswatches">
-                <span class="subswatch" style="background:#ff8da1;" title="少"></span>
+                <span class="subswatch" style="background:#c12850;" title="少"></span>
                 <span class="subswatch" style="background:#ff4d6d;" title="中"></span>
-                <span class="subswatch" style="background:#a31638;" title="多"></span>
+                <span class="subswatch" style="background:#ff8da1;" title="多"></span>
               </span>
             </div>
-            <div class="map-legend-note">分層：少 / 中 / 多（顏色越深，通報越多）</div>
+            <div class="map-legend-note">少→多：顏色由深至淺</div>
           </div>
         </details>
       </div>
@@ -297,21 +290,21 @@
           <span class="map-legend-swatch" style="background:#fb923c;"></span>
           <span>夜間事故</span>
           <span class="map-legend-subswatches">
-            <span class="subswatch" style="background:#fed7aa;" title="少"></span>
+            <span class="subswatch" style="background:#d65a1f;" title="少"></span>
             <span class="subswatch" style="background:#fb923c;" title="中"></span>
-            <span class="subswatch" style="background:#c2410c;" title="多"></span>
+            <span class="subswatch" style="background:#fed7aa;" title="多"></span>
           </span>
         </div>
         <div class="map-legend-row">
           <span class="map-legend-swatch" style="background:#ff4d6d;"></span>
           <span>夜間騷擾</span>
           <span class="map-legend-subswatches">
-            <span class="subswatch" style="background:#ff8da1;" title="少"></span>
+            <span class="subswatch" style="background:#c12850;" title="少"></span>
             <span class="subswatch" style="background:#ff4d6d;" title="中"></span>
-            <span class="subswatch" style="background:#a31638;" title="多"></span>
+            <span class="subswatch" style="background:#ff8da1;" title="多"></span>
           </span>
         </div>
-        <div class="map-legend-note">分層：少 / 中 / 多（顏色越深，通報越多）</div>
+        <div class="map-legend-note">少→多：顏色由深至淺</div>
       </aside>
     </div>
 
@@ -382,6 +375,11 @@
             <button class="btn-sec report-reselect" id="btn-reselect" type="button" disabled>重新選擇</button>
           </div>
           <div class="dlg-status" id="report-status">請在地圖上點選回報區</div>
+          <div class="dlg-field reporter-email-field">
+            <label for="reporter-email">回報人 Email</label>
+            <input id="reporter-email" type="email" readonly aria-readonly="true" autocomplete="email" />
+            <small class="dlg-field-help">使用已驗證的 NTU Email 紀錄</small>
+          </div>
           <div class="dlg-field">
             <span class="dlg-field-label">事件類型</span>
             <div class="incident-type-options" role="radiogroup" aria-label="事件類型">
@@ -412,6 +410,14 @@
             </label>
             <textarea id="inc-desc" maxlength="300" required placeholder="請描述事件情況、時間與附近地標..."></textarea>
           </div>
+          <label class="followup-consent" for="followup-consent">
+            <input id="followup-consent" type="checkbox" role="switch" />
+            <span class="followup-consent-copy">
+              <strong>是否同意學權部後續聯繫關心？</strong>
+              <small>不同意仍可正常送出回報</small>
+            </span>
+            <span class="followup-switch-track" aria-hidden="true"></span>
+          </label>
           <div class="dlg-actions">
             <button class="btn-sec" id="btn-cancel" type="button">取消</button>
             <button class="btn-pri" id="btn-submit" type="button" disabled>送出回報</button>
@@ -420,22 +426,25 @@
       </div>
     </div>
   </div>
-    <div id="inc-actions-group">
-      <button id="inc-fab" type="button" aria-label="回報安全事件">
-        <svg viewBox="0 0 24 24" aria-hidden="true"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-        回報安全事件
+  <div id="inc-actions-group">
+    <div id="inc-fab-menu" class="inc-fab-menu" role="group" aria-label="地圖快速操作" aria-hidden="true">
+      <button class="inc-fab-action" id="btnReport" type="button" aria-label="回報安全事件" aria-pressed="false" tabindex="-1">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3 2.5 20h19L12 3Z"/><path d="M12 9v5m0 3h.01"/></svg>
+        <span>回報事件</span>
       </button>
-      <button id="btn-gps" type="button" aria-label="定位目前位置">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-          <circle cx="12" cy="12" r="7"/>
-          <circle cx="12" cy="12" r="2" fill="currentColor"/>
-          <line x1="12" y1="2" x2="12" y2="5"/>
-          <line x1="12" y1="19" x2="12" y2="22"/>
-          <line x1="2" y1="12" x2="5" y2="12"/>
-          <line x1="19" y1="12" x2="22" y2="12"/>
-        </svg>
+      <button class="inc-fab-action" id="btn-gps" type="button" aria-label="定位目前位置" tabindex="-1">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3m0 14v3M2 12h3m14 0h3"/></svg>
+        <span>定位</span>
+      </button>
+      <button class="inc-fab-action" id="btn-event-visibility" type="button" aria-label="關閉事件顯示" aria-pressed="true" tabindex="-1">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2.5 12s3.3-6 9.5-6 9.5 6 9.5 6-3.3 6-9.5 6-9.5-6-9.5-6Z"/><circle cx="12" cy="12" r="2.5"/></svg>
+        <span id="event-visibility-label">事件顯示：開</span>
       </button>
     </div>
+    <button id="inc-fab" type="button" aria-label="開啟地圖快速操作" aria-expanded="false" aria-controls="inc-fab-menu">
+      <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 5v14M5 12h14"/></svg>
+    </button>
+  </div>
 </div>
 
 <script type="module" src="app.js"></script>

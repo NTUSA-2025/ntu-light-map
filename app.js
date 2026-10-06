@@ -14,6 +14,8 @@ const {
   btnLogout,
   btnPanelClose,
   incFab,
+  incFabMenu,
+  incActionsGroup,
   incDialog,
   dlgClose,
   authSec,
@@ -32,6 +34,8 @@ const {
   incTypeOptions,
   incDesc,
   incDescCount,
+  reporterEmail,
+  followupConsent,
   reportLocationValue,
   reportStepLocation,
   reportStepDetails,
@@ -43,6 +47,8 @@ const {
   btnPickCancel,
   btnPickGps,
   btnGps,
+  btnEventVisibility,
+  eventVisibilityLabel,
   mapInfoToggle,
   mapInfo,
   mapInfoClose,
@@ -136,6 +142,26 @@ function setMapInfoOpen(open) {
   mapInfoToggle.setAttribute('aria-label', open ? '關閉地圖說明' : '開啟地圖說明');
   mapInfoToggle.classList.toggle('active', open);
 }
+function setFabMenuOpen(open) {
+  const expanded = Boolean(open) && !incDialog.classList.contains('show');
+  incFabMenu.setAttribute('aria-hidden', String(!expanded));
+  incFab.setAttribute('aria-expanded', String(expanded));
+  incFab.setAttribute('aria-label', expanded ? '關閉地圖快速操作' : '開啟地圖快速操作');
+  incFabMenu.querySelectorAll('button').forEach(button => {
+    button.tabIndex = expanded ? 0 : -1;
+  });
+}
+
+function syncFabEventVisibility() {
+  const layerToggle = document.getElementById('tog-incident');
+  const visible = !layerToggle.classList.contains('off');
+  btnEventVisibility.setAttribute('aria-pressed', String(visible));
+  btnEventVisibility.setAttribute('aria-label', visible ? '關閉事件顯示' : '開啟事件顯示');
+  eventVisibilityLabel.textContent = `事件顯示：${visible ? '開' : '關'}`;
+}
+
+document.getElementById('tog-incident').addEventListener('click', syncFabEventVisibility);
+syncFabEventVisibility();
 
 mapInfoToggle.addEventListener('click', () => {
   setMapInfoOpen(mapInfo.hidden);
@@ -148,7 +174,9 @@ document.addEventListener('keydown', event => {
 
 function setAuthSession(session) {
   state.authSession = session?.authenticated ? session : null;
+  reporterEmail.value = state.authSession?.email || '';
   btnLogout.disabled = !state.authSession;
+  updateSubmitState();
 }
 
 
@@ -226,6 +254,7 @@ function closeDialog() {
   document.documentElement.classList.remove('report-dialog-open');
 
   incFab.classList.remove('active');
+  setFabMenuOpen(false);
   btnReport.classList.remove('active');
   btnReport.setAttribute('aria-pressed', 'false');
   authSec.classList.remove('hidden');
@@ -234,15 +263,17 @@ function closeDialog() {
   clearSelectedReportHex();
   incDesc.value = '';
   authCode.value = '';
+  followupConsent.checked = false;
   updateDescriptionCount();
   setAuthStep('email');
-  btnSubmit.disabled = true;
+  updateSubmitState();
   setStatus(reportStatus, '請在地圖上點選回報區');
   if (state.reportHexLayer && map.hasLayer(state.reportHexLayer)) map.removeLayer(state.reportHexLayer);
 }
 
 function updateSubmitState() {
-  btnSubmit.disabled = !state.selectedHex || incDesc.value.trim().length === 0;
+  const hasVerifiedEmail = Boolean(state.authSession?.authenticated && state.authSession.email && reporterEmail.value);
+  btnSubmit.disabled = !hasVerifiedEmail || !state.selectedHex || incDesc.value.trim().length === 0;
 }
 
 function incidentSubmitErrorMessage(errorData) {
@@ -431,7 +462,7 @@ async function beginIncidentFlow() {
   incidentFlowPending = true;
 
   try {
-
+    setFabMenuOpen(false);
     document.documentElement.classList.add('report-dialog-open');
     panel.classList.add('closed');
     syncPanelButtonState(false);
@@ -452,18 +483,36 @@ async function beginIncidentFlow() {
     } else {
       showAuth();
     }
+    if (!incDialog.classList.contains('pick-mode')) dlgClose.focus();
   } finally {
     incidentFlowPending = false;
   }
 }
 
-incFab.addEventListener('click', beginIncidentFlow);
+incFab.addEventListener('click', () => {
+  setFabMenuOpen(incFab.getAttribute('aria-expanded') !== 'true');
+});
+document.addEventListener('click', event => {
+  if (!incActionsGroup.contains(event.target) && incFab.getAttribute('aria-expanded') === 'true') {
+    setFabMenuOpen(false);
+  }
+});
+document.addEventListener('keydown', event => {
+  if (event.key === 'Escape' && incFab.getAttribute('aria-expanded') === 'true') {
+    setFabMenuOpen(false);
+  }
+});
 dlgClose.addEventListener('click', closeDialog);
 btnPickCancel.addEventListener('click', closeDialog);
 btnCancel.addEventListener('click', closeDialog);
-if (btnGps) {
-  btnGps.addEventListener('click', () => requestUserLocation({ pan: true }));
-}
+btnGps.addEventListener('click', () => {
+  setFabMenuOpen(false);
+  requestUserLocation({ pan: true });
+});
+btnEventVisibility.addEventListener('click', () => {
+  document.getElementById('tog-incident').click();
+  setFabMenuOpen(false);
+});
 if (btnPickGps) {
   btnPickGps.addEventListener('click', selectHexByCurrentLocation);
 }
@@ -652,7 +701,8 @@ btnSubmit.addEventListener('click', async () => {
         lat: state.selectedHex.center.lat,
         lng: state.selectedHex.center.lng,
         type: incType.value,
-        description: incDesc.value.trim()
+        description: incDesc.value.trim(),
+        followup_requested: followupConsent.checked
       })
     });
 

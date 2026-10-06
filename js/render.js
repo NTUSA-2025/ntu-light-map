@@ -48,14 +48,14 @@ export function renderReportList() {
 
 export function getTierColor(type, count) {
   if (type === 'harassment') {
-    if (count <= 1) return '#ff8da1'; // 少 (粉淺)
+    if (count <= 1) return '#c12850'; // 少 (較亮的深酒紅)
     if (count <= 2) return '#ff4d6d'; // 中 (粉紅)
-    return '#a31638';                 // 多 (深酒紅)
+    return '#ff8da1';                 // 多 (粉淺)
   }
   if (type === 'accident') {
-    if (count <= 1) return '#fed7aa'; // 少 (淡橘)
+    if (count <= 1) return '#d65a1f'; // 少 (較亮的深橘紅)
     if (count <= 2) return '#fb923c'; // 中 (亮橘)
-    return '#c2410c';                 // 多 (深橘紅)
+    return '#fed7aa';                 // 多 (淡橘)
   }
   return '#94a3b8';
 }

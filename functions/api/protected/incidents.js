@@ -51,8 +51,8 @@ export async function onRequestPost({ request, env }) {
     const incident = validated.incident;
     const insertResult = await env.DB.prepare(
       `INSERT INTO incidents
-        (report_hex_id, lat, lng, type, description, status, reporter_email_hash, ip_hash)
-       VALUES (?, ?, ?, ?, ?, 'public', ?, ?)`,
+        (report_hex_id, lat, lng, type, description, status, reporter_email, reporter_email_hash, ip_hash, followup_requested)
+       VALUES (?, ?, ?, ?, ?, 'public', ?, ?, ?, ?)`,
     )
       .bind(
         incident.report_hex_id,
@@ -60,8 +60,10 @@ export async function onRequestPost({ request, env }) {
         incident.lng,
         incident.type,
         incident.description,
+        email,
         reporterHash,
         ipHash,
+        incident.followup_requested ? 1 : 0,
       )
       .run();
 

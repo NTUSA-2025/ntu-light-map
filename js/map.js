@@ -6,16 +6,10 @@ import { escapeHtml } from './utils.js';
 const L = window.L;
 
 const CAMPUS_CENTER = [25.0168654, 121.53955895];
-const CAMPUS_BOUNDS = [
-  [25.0115824, 121.5329385],
-  [25.0221484, 121.5461794]
-];
 
 export const map = L.map('map', {
   zoomControl: false,
-  minZoom: 14,
-  maxBounds: L.latLngBounds(CAMPUS_BOUNDS),
-  maxBoundsViscosity: 0.85
+  minZoom: 14
 }).setView(CAMPUS_CENTER, 15);
 
 function waitForMapLayout() {

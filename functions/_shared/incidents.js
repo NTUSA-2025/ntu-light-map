@@ -11,7 +11,7 @@ export function validateIncidentInput(input) {
   const reportHexId = Number(input?.report_hex_id);
   const type = String(input?.type || "");
   const description = String(input?.description || "").trim();
-
+  const followupRequested = input?.followup_requested === true;
   const errors = {};
   if (!Number.isInteger(reportHexId) || !REPORT_HEX_IDS.has(reportHexId)) {
     errors.report_hex_id = "invalid_report_hex_id";
@@ -28,6 +28,9 @@ export function validateIncidentInput(input) {
   if (description.length < 1 || description.length > 300) {
     errors.description = "description_length";
   }
+  if (input?.followup_requested !== undefined && typeof input.followup_requested !== "boolean") {
+    errors.followup_requested = "invalid_followup_requested";
+  }
 
   if (Object.keys(errors).length > 0) {
     return { ok: false, errors };
@@ -41,6 +44,7 @@ export function validateIncidentInput(input) {
       lng,
       type,
       description,
+      followup_requested: followupRequested,
     },
   };
 }

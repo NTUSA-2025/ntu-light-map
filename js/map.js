@@ -26,7 +26,8 @@ function fitCampusBounds(bounds) {
 map.createPane('brightnessPane'); map.getPane('brightnessPane').style.zIndex = 350;
 map.createPane('safetyPane');     map.getPane('safetyPane').style.zIndex = 300;
 map.createPane('protectPane');    map.getPane('protectPane').style.zIndex = 250;
-map.createPane('incidentPane');   map.getPane('incidentPane').style.zIndex = 400;
+map.createPane('incidentPane'); map.getPane('incidentPane').style.zIndex = 400;
+map.createPane('reportPane');   map.getPane('reportPane').style.zIndex = 450;
 
 const VECTOR_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const VECTOR_ATTRIBUTION = '&copy; <a href="https://openfreemap.org/">OpenFreeMap</a> · <a href="https://www.openmaptiles.org/">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
@@ -46,6 +47,7 @@ loadVectorBasemap().catch(error => {
 
 export const layerMap = {};
 export const incidentHexRenderer = L.svg({ pane: 'incidentPane' });
+export const reportHexRenderer = L.svg({ pane: 'reportPane' });
 export const incidentHexLayer = L.layerGroup().addTo(map);
 layerMap.incident = incidentHexLayer;
 
@@ -193,7 +195,8 @@ export async function loadMapLayers(onSelectReportHex, hexTooltip) {
   });
 
   state.reportHexLayer = L.geoJSON(geoReport, {
-    pane: 'incidentPane',
+    pane: 'reportPane',
+    renderer: reportHexRenderer,
     style: {
       color: '#f1f6f4',
       weight: 0.8,

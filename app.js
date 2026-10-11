@@ -1,6 +1,6 @@
 import { dom } from './js/dom.js';
 import { state } from './js/state.js';
-import { map, makeToggle, loadCampusBoundary, loadMapLayers } from './js/map.js';
+import { map, reportHexRenderer, makeToggle, loadCampusBoundary, loadMapLayers } from './js/map.js';
 import { renderIncidents } from './js/render.js';
 import { findReportHexForCoords } from './js/utils.js';
 
@@ -156,8 +156,8 @@ function syncFabEventVisibility() {
   const layerToggle = document.getElementById('tog-incident');
   const visible = !layerToggle.classList.contains('off');
   btnEventVisibility.setAttribute('aria-pressed', String(visible));
-  btnEventVisibility.setAttribute('aria-label', visible ? '關閉事件顯示' : '開啟事件顯示');
-  eventVisibilityLabel.textContent = `事件顯示：${visible ? '開' : '關'}`;
+  btnEventVisibility.setAttribute('aria-label', visible ? '隱藏事件圖層' : '顯示事件圖層');
+  eventVisibilityLabel.textContent = visible ? '顯示中' : '已關閉';
 }
 
 document.getElementById('tog-incident').addEventListener('click', syncFabEventVisibility);
@@ -291,7 +291,8 @@ function selectReportHex(feature, layer) {
   if (state.selectedHexLayer) state.selectedHexLayer.remove();
 
   state.selectedHexLayer = L.geoJSON(feature, {
-    pane: 'incidentPane',
+    pane: 'reportPane',
+    renderer: reportHexRenderer,
     interactive: false,
     className: 'selected-report-cell',
     style: {

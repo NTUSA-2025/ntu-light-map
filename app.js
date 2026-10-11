@@ -71,6 +71,7 @@ function syncVisualViewport() {
 const keyboardFields = [authEmail, authCode, incDesc];
 
 let incidentFlowPending = false;
+let focusedReportHexLayer = null;
 
 
 if (window.visualViewport) {
@@ -440,6 +441,42 @@ async function loadIncidents() {
   state.allIncidents = Array.isArray(data.incidents) ? data.incidents : [];
   renderIncidents();
 }
+function focusReportHexFromQuery() {
+  const params = new URLSearchParams(window.location.search);
+  const rawHexId = params.get('focus_hex') || '';
+  if (!/^\d+$/.test(rawHexId)) return;
+
+  const hexId = Number(rawHexId);
+  if (!Number.isSafeInteger(hexId)) return;
+  const feature = state.reportHexFeatureById.get(hexId);
+  if (!feature) return;
+
+  focusedReportHexLayer?.remove();
+  focusedReportHexLayer = L.geoJSON(feature, {
+    pane: 'reportPane',
+    renderer: reportHexRenderer,
+    interactive: false,
+    className: 'admin-focused-cell',
+    style: {
+      color: '#fff2bf',
+      weight: 3.5,
+      opacity: 1,
+      fillColor: '#ffb347',
+      fillOpacity: 0.62
+    }
+  }).addTo(map);
+
+  const bounds = focusedReportHexLayer.getBounds();
+  map.flyToBounds(bounds, { padding: [90, 90], maxZoom: 18, duration: 0.85 });
+
+  const incidentId = Number(params.get('focus_incident'));
+  if (Number.isSafeInteger(incidentId) && incidentId > 0) {
+    focusedReportHexLayer
+      .bindTooltip(`回報 #${incidentId}`, { direction: 'top', offset: [0, -10], permanent: true })
+      .openTooltip();
+  }
+}
+
 
 
 async function getAuthSession() {
@@ -733,8 +770,10 @@ btnSubmit.addEventListener('click', async () => {
 });
 
 refreshAuthSession();
-loadCampusBoundary();
-loadMapLayers(selectReportHex, hexTooltip).then(() => loadIncidents()).then(() => {
+const campusBoundsReady = loadCampusBoundary();
+loadMapLayers(selectReportHex, hexTooltip).then(() => loadIncidents()).then(async () => {
+  await campusBoundsReady;
+  focusReportHexFromQuery();
   if (window.location.hash === '#new-incident') {
     history.replaceState(null, '', location.pathname + location.search);
     beginIncidentFlow();

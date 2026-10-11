@@ -61,14 +61,32 @@
           <h2>所有回報</h2>
           <p id="admin-count">0 筆</p>
         </div>
-        <label class="admin-filter">
-          <span>顯示</span>
-          <select id="admin-status-filter">
-            <option value="all">全部狀態</option>
-            <option value="public">公開</option>
-            <option value="hidden">已隱藏</option>
-          </select>
-        </label>
+        <div class="admin-filters">
+          <label class="admin-filter">
+            <span>事件類型</span>
+            <select id="admin-type-filter">
+              <option value="all">全部類型</option>
+              <option value="accident">夜間事故</option>
+              <option value="harassment">夜間騷擾</option>
+            </select>
+          </label>
+          <label class="admin-filter">
+            <span>學權部聯繫</span>
+            <select id="admin-followup-filter">
+              <option value="all">全部</option>
+              <option value="yes">同意</option>
+              <option value="no">不同意</option>
+            </select>
+          </label>
+          <label class="admin-filter">
+            <span>公開狀態</span>
+            <select id="admin-status-filter">
+              <option value="all">全部</option>
+              <option value="public">公開</option>
+              <option value="hidden">已隱藏</option>
+            </select>
+          </label>
+        </div>
       </div>
       <div id="admin-list" class="admin-list" aria-live="polite"></div>
     </section>

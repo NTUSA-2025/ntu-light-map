@@ -12,6 +12,8 @@ const verifyCodeButton = byId('btn-admin-verify-code');
 const logoutButton = byId('admin-logout');
 const list = byId('admin-list');
 const filter = byId('admin-status-filter');
+const typeFilter = byId('admin-type-filter');
+const followupFilter = byId('admin-followup-filter');
 const countLabel = byId('admin-count');
 const deniedEmail = byId('admin-denied-email');
 const whitelistList = byId('admin-whitelist-list');
@@ -175,7 +177,13 @@ function renderWhitelist() {
 
 function renderIncidents() {
   list.replaceChildren();
-  const visible = incidents.filter(incident => filter.value === 'all' || incident.status === filter.value);
+  const visible = incidents.filter(incident => {
+    const matchesStatus = filter.value === 'all' || incident.status === filter.value;
+    const matchesType = typeFilter.value === 'all' || incident.type === typeFilter.value;
+    const matchesFollowup = followupFilter.value === 'all'
+      || Boolean(incident.followup_requested) === (followupFilter.value === 'yes');
+    return matchesStatus && matchesType && matchesFollowup;
+  });
   countLabel.textContent = `${visible.length} / ${incidents.length} 筆`;
 
   if (visible.length === 0) {
@@ -228,6 +236,16 @@ function renderIncidents() {
 
     const actions = document.createElement('div');
     actions.className = 'admin-incident-actions';
+    const focusParams = new URLSearchParams({
+      focus_hex: String(incident.report_hex_id),
+      focus_incident: String(incident.id)
+    });
+    const viewLink = document.createElement('a');
+    viewLink.className = 'admin-view';
+    viewLink.textContent = '查看地圖';
+    viewLink.href = `/?${focusParams.toString()}`;
+    viewLink.target = '_blank';
+    viewLink.rel = 'noopener noreferrer';
     const saveButton = textElement('button', 'admin-primary', '儲存修改');
     saveButton.type = 'button';
     saveButton.addEventListener('click', async () => {
@@ -273,7 +291,7 @@ function renderIncidents() {
         deleteButton.disabled = false;
       }
     });
-    actions.append(saveButton, deleteButton);
+    actions.append(viewLink, saveButton, deleteButton);
     card.append(actions);
     list.append(card);
   });
@@ -365,6 +383,8 @@ async function logout() {
 logoutButton.addEventListener('click', logout);
 byId('btn-admin-denied-logout').addEventListener('click', logout);
 filter.addEventListener('change', renderIncidents);
+typeFilter.addEventListener('change', renderIncidents);
+followupFilter.addEventListener('change', renderIncidents);
 
 checkAdminAccess().catch(error => {
   showSection(loginSection);

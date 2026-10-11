@@ -157,7 +157,7 @@ function syncFabEventVisibility() {
   const visible = !layerToggle.classList.contains('off');
   btnEventVisibility.setAttribute('aria-pressed', String(visible));
   btnEventVisibility.setAttribute('aria-label', visible ? '隱藏事件圖層' : '顯示事件圖層');
-  eventVisibilityLabel.textContent = visible ? '顯示中' : '已關閉';
+  eventVisibilityLabel.textContent = visible ? '顯示' : '隱藏';
 }
 
 document.getElementById('tog-incident').addEventListener('click', syncFabEventVisibility);

@@ -212,10 +212,11 @@ function showReport() {
 }
 
 function setReportPickMode(active) {
-  const picking = Boolean(active && window.matchMedia('(max-width: 760px)').matches);
-  incDialog.classList.toggle('pick-mode', picking);
-  reportHint.classList.toggle('show', picking);
-  map.getContainer().classList.toggle('report-picking', picking);
+  const pickActive = Boolean(active);
+  const hideDialogForPicking = pickActive && window.matchMedia('(max-width: 760px)').matches;
+  incDialog.classList.toggle('pick-mode', hideDialogForPicking);
+  reportHint.classList.toggle('show', pickActive);
+  map.getContainer().classList.toggle('report-picking', pickActive);
 }
 
 function closeDialog() {

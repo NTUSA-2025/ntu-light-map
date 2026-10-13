@@ -1246,9 +1246,9 @@ html.report-dialog-open #btn-gps {
 #btn-gps.map-locate-button {
   position: static;
   display: grid;
-  width: 40px;
-  height: 40px;
-  min-height: 40px;
+  width: 36px;
+  height: 36px;
+  min-height: 36px;
   place-items: center;
   border: 1px solid rgba(156, 231, 216, 0.48);
   border-radius: 50%;
@@ -1270,8 +1270,8 @@ html.report-dialog-open #btn-gps {
 #btn-gps.map-locate-button:active { transform: translateY(1px); }
 
 #btn-gps.map-locate-button svg {
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
   fill: none;
   stroke: currentColor;
   stroke-width: 1.8;
@@ -1889,6 +1889,10 @@ html.report-dialog-open #btn-gps {
   }
   #dock .dock-btn::after {
     bottom: 25px;
+    right: auto;
+    left: 50%;
+    width: 16px;
+    transform: translateX(-50%);
   }
 
 

@@ -739,11 +739,12 @@ details[open] .layer-group-chevron .chevron-icon {
 #map-tools {
   position: absolute;
   right: 29px;
-  bottom: calc(88px + env(safe-area-inset-bottom));
+  bottom: calc(28px + env(safe-area-inset-bottom));
   z-index: 1000;
   display: flex;
+  flex-direction: column;
   align-items: flex-end;
-  gap: 8px;
+  gap: 12px;
 }
 
 #map-tools #map-legend {
@@ -1216,8 +1217,7 @@ html.report-dialog-open #btn-gps {
   min-height: 58px;
   place-items: center;
   border: 1px solid rgba(240, 153, 123, 0.72);
-  border-left: 3px solid var(--orange);
-  border-radius: 0;
+  border-radius: 50%;
   background: #0b1015;
   color: var(--orange);
   cursor: pointer;
@@ -1244,24 +1244,21 @@ html.report-dialog-open #btn-gps {
 }
 
 #btn-gps.map-locate-button {
-  position: fixed;
-  right: max(20px, env(safe-area-inset-right));
-  bottom: calc(18px + env(safe-area-inset-bottom));
-  z-index: 10001;
+  position: static;
   display: grid;
-  width: 50px;
-  height: 50px;
-  min-height: 50px;
+  width: 44px;
+  height: 44px;
+  min-height: 44px;
   place-items: center;
-  border: 1px solid rgba(156, 231, 216, 0.42);
-  border-right: 3px solid var(--cyan);
-  border-radius: 0;
+  border: 1px solid rgba(156, 231, 216, 0.48);
+  border-radius: 50%;
   background: #0b1015;
   color: var(--cyan);
   cursor: pointer;
-  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
   transition: background 0.16s, border-color 0.16s, transform 0.16s;
 }
+#map-tools > .map-locate-button { pointer-events: auto; }
 
 #btn-gps.map-locate-button:hover,
 #btn-gps.map-locate-button:focus-visible {
@@ -1953,7 +1950,18 @@ html.report-dialog-open #btn-gps {
   .topbar-title { font-size: 1rem; }
   .leaflet-control-zoom { margin: 64px 18px 18px !important; }
 
-  #map-tools { display: none; }
+  #map-tools {
+    position: fixed;
+    top: auto;
+    right: max(14px, env(safe-area-inset-right));
+    bottom: calc(26px + env(safe-area-inset-bottom));
+    left: auto;
+    z-index: 10001;
+    display: flex;
+    gap: 0;
+    pointer-events: none;
+  }
+  #map-tools #map-legend { display: none; }
   .mobile-map-legend { display: block; }
 
 
@@ -2234,10 +2242,7 @@ html.report-dialog-open #btn-gps {
     transform: translateX(-50%);
   }
 
-  #btn-gps.map-locate-button {
-    right: max(14px, env(safe-area-inset-right));
-    bottom: calc(14px + env(safe-area-inset-bottom));
-  }
+  
 
 
   #inc-dialog {

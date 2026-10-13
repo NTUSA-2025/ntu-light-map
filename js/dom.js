@@ -1,7 +1,6 @@
 export const dom = {
   panel: document.getElementById('panel'),
   btnPanel: document.getElementById('btnPanel'),
-  btnReport: document.getElementById('btnReport'),
   btnLogout: document.getElementById('btnLogout'),
   panelTitle: document.getElementById('panel-title'),
   dashboardPanel: document.getElementById('dashboard-panel'),
@@ -10,11 +9,7 @@ export const dom = {
 
   btnPanelClose: document.getElementById('btn-panel-close'),
   incFab: document.getElementById('inc-fab'),
-  incFabMenu: document.getElementById('inc-fab-menu'),
-  incActionsGroup: document.getElementById('inc-actions-group'),
   btnGps: document.getElementById('btn-gps'),
-  btnEventVisibility: document.getElementById('btn-event-visibility'),
-  eventVisibilityLabel: document.getElementById('event-visibility-label'),
   btnPickGps: document.getElementById('btn-pick-gps'),
   incDialog: document.getElementById('inc-dialog'),
   dlgClose: document.getElementById('dlg-close'),

@@ -10,12 +10,9 @@ const L = window.L;
 const {
   panel,
   btnPanel,
-  btnReport,
   btnLogout,
   btnPanelClose,
   incFab,
-  incFabMenu,
-  incActionsGroup,
   incDialog,
   dlgClose,
   authSec,
@@ -47,8 +44,6 @@ const {
   btnPickCancel,
   btnPickGps,
   btnGps,
-  btnEventVisibility,
-  eventVisibilityLabel,
   mapInfoToggle,
   mapInfo,
   mapInfoClose,
@@ -119,12 +114,6 @@ btnPanelClose.addEventListener('click', () => {
   window.setTimeout(() => map.invalidateSize(), 280);
 });
 
-btnReport.addEventListener('click', () => {
-  const active = !btnReport.classList.contains('active');
-  btnReport.classList.toggle('active', active);
-  btnReport.setAttribute('aria-pressed', String(active));
-  beginIncidentFlow();
-});
 
 
 function setStatus(el, message, state = '') {
@@ -143,26 +132,6 @@ function setMapInfoOpen(open) {
   mapInfoToggle.setAttribute('aria-label', open ? '關閉地圖說明' : '開啟地圖說明');
   mapInfoToggle.classList.toggle('active', open);
 }
-function setFabMenuOpen(open) {
-  const expanded = Boolean(open) && !incDialog.classList.contains('show');
-  incFabMenu.setAttribute('aria-hidden', String(!expanded));
-  incFab.setAttribute('aria-expanded', String(expanded));
-  incFab.setAttribute('aria-label', expanded ? '關閉地圖快速操作' : '開啟地圖快速操作');
-  incFabMenu.querySelectorAll('button').forEach(button => {
-    button.tabIndex = expanded ? 0 : -1;
-  });
-}
-
-function syncFabEventVisibility() {
-  const layerToggle = document.getElementById('tog-incident');
-  const visible = !layerToggle.classList.contains('off');
-  btnEventVisibility.setAttribute('aria-pressed', String(visible));
-  btnEventVisibility.setAttribute('aria-label', visible ? '隱藏事件圖層' : '顯示事件圖層');
-  eventVisibilityLabel.textContent = visible ? '顯示' : '隱藏';
-}
-
-document.getElementById('tog-incident').addEventListener('click', syncFabEventVisibility);
-syncFabEventVisibility();
 
 mapInfoToggle.addEventListener('click', () => {
   setMapInfoOpen(mapInfo.hidden);
@@ -254,10 +223,7 @@ function closeDialog() {
   document.documentElement.classList.remove('keyboard-open');
   document.documentElement.classList.remove('report-dialog-open');
 
-  incFab.classList.remove('active');
-  setFabMenuOpen(false);
-  btnReport.classList.remove('active');
-  btnReport.setAttribute('aria-pressed', 'false');
+  incFab.setAttribute('aria-pressed', 'false');
   authSec.classList.remove('hidden');
   reportSec.classList.add('hidden');
   setReportPickMode(false);
@@ -500,7 +466,6 @@ async function beginIncidentFlow() {
   incidentFlowPending = true;
 
   try {
-    setFabMenuOpen(false);
     document.documentElement.classList.add('report-dialog-open');
     panel.classList.add('closed');
     syncPanelButtonState(false);
@@ -513,8 +478,7 @@ async function beginIncidentFlow() {
     if (!state.authSession) await refreshAuthSession();
     incDialog.classList.add('show');
     setMapInfoOpen(false);
-    incFab.classList.add('active');
-    btnReport.setAttribute('aria-pressed', 'true');
+    incFab.setAttribute('aria-pressed', 'true');
     if (state.authSession?.authenticated) {
       showReport();
       setReportPickMode(true);
@@ -527,30 +491,11 @@ async function beginIncidentFlow() {
   }
 }
 
-incFab.addEventListener('click', () => {
-  setFabMenuOpen(incFab.getAttribute('aria-expanded') !== 'true');
-});
-document.addEventListener('click', event => {
-  if (!incActionsGroup.contains(event.target) && incFab.getAttribute('aria-expanded') === 'true') {
-    setFabMenuOpen(false);
-  }
-});
-document.addEventListener('keydown', event => {
-  if (event.key === 'Escape' && incFab.getAttribute('aria-expanded') === 'true') {
-    setFabMenuOpen(false);
-  }
-});
+incFab.addEventListener('click', beginIncidentFlow);
 dlgClose.addEventListener('click', closeDialog);
 btnPickCancel.addEventListener('click', closeDialog);
 btnCancel.addEventListener('click', closeDialog);
-btnGps.addEventListener('click', () => {
-  setFabMenuOpen(false);
-  requestUserLocation({ pan: true });
-});
-btnEventVisibility.addEventListener('click', () => {
-  document.getElementById('tog-incident').click();
-  setFabMenuOpen(false);
-});
+btnGps.addEventListener('click', () => requestUserLocation({ pan: true }));
 if (btnPickGps) {
   btnPickGps.addEventListener('click', selectHexByCurrentLocation);
 }
@@ -608,7 +553,7 @@ btnLogout.addEventListener('click', async () => {
     setAuthSession(previousSession);
     if (!incDialog.classList.contains('show')) {
       incDialog.classList.add('show');
-      btnReport.setAttribute('aria-pressed', 'true');
+      incFab.setAttribute('aria-pressed', 'true');
     }
     showReport();
     setReportPickMode(true);

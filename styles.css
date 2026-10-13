@@ -1894,6 +1894,13 @@ html.report-dialog-open #btn-gps {
     width: 18px;
     transform: translateX(-50%);
   }
+  #dock #btnPanel::after {
+    right: 12px;
+    left: 12px;
+    width: auto;
+    transform: none;
+  }
+
 
 
 

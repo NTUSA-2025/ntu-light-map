@@ -1951,7 +1951,7 @@ html.report-dialog-open #btn-gps {
     width: min(240px, calc(100vw - 36px));
   }
 
-  .topbar-title { font-size: 1rem; }
+  .topbar-title { font-size: 1.25rem; }
   .leaflet-control-zoom { margin: 64px 18px 18px !important; }
 
   #map-tools {

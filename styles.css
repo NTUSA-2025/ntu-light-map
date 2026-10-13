@@ -1888,7 +1888,7 @@ html.report-dialog-open #btn-gps {
     padding-top: 0;
   }
   #dock .dock-btn::after {
-    bottom: 10px;
+    bottom: 25px;
   }
 
 
@@ -2012,8 +2012,31 @@ html.report-dialog-open #btn-gps {
     right: 18px;
     left: 18px;
     min-width: 0;
-    justify-content: space-between;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 12px;
+    padding: 14px;
     transform: none;
+  }
+  .report-hint-actions {
+    display: grid;
+    width: 100%;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: stretch;
+    gap: 8px;
+  }
+
+  .report-hint-gps,
+  .report-hint-cancel {
+    width: 100%;
+    min-width: 0;
+    min-height: 48px;
+    justify-content: center;
+    gap: 7px;
+    padding: 0 6px;
+    font-size: 0.8125rem;
+    letter-spacing: 0;
   }
   #report-hint.show {
     transform: translateY(0);

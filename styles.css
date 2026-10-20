@@ -1216,20 +1216,25 @@ html.report-dialog-open #btn-gps {
   height: 58px;
   min-height: 58px;
   place-items: center;
-  border: 1px solid rgba(240, 153, 123, 0.72);
+  border: 1px solid var(--orange);
   border-radius: 50%;
-  background: #0b1015;
-  color: var(--orange);
+  background: var(--orange);
+  color: #070a0d;
   cursor: pointer;
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.28);
   transition: background 0.16s, border-color 0.16s, transform 0.16s;
 }
 
-#inc-fab:hover,
+#inc-fab:hover {
+  border-color: #ffa47d;
+  background: #ffa47d;
+}
+
 #inc-fab:focus-visible {
   border-color: var(--orange);
-  background: #171719;
-  outline: 0;
+  background: var(--orange);
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
 
 #inc-fab:active { transform: translateY(1px); }
@@ -1265,6 +1270,17 @@ html.report-dialog-open #btn-gps {
   border-color: var(--cyan);
   background: #101a1e;
   outline: 0;
+}
+
+#btn-gps.map-locate-button.located {
+  border-color: var(--cyan);
+  background: var(--cyan);
+  color: #070a0d;
+}
+
+#btn-gps.map-locate-button.located:focus-visible {
+  outline: 2px solid var(--ink);
+  outline-offset: 3px;
 }
 
 #btn-gps.map-locate-button:active { transform: translateY(1px); }
@@ -1344,14 +1360,14 @@ html.report-dialog-open #btn-gps {
 
 .dlg-close {
   display: inline-grid;
-  width: 40px;
-  height: 40px;
+  width: 48px;
+  height: 48px;
   flex-shrink: 0;
   place-items: center;
   border: 1px solid transparent;
   border-radius: var(--ui-radius);
   color: var(--ink-dim);
-  font-size: 1.125rem;
+  font-size: 1.5rem;
   line-height: 1;
   transition: color 0.2s, border-color 0.2s, background 0.2s, transform 0.25s;
 }
@@ -2071,7 +2087,7 @@ html.report-dialog-open #btn-gps {
     font-size: 16px;
   }
 
-  .dlg-close { width: 44px; height: 44px; }
+  .dlg-close { width: 48px; height: 48px; }
   .btn-pri,
   .btn-sec { min-height: 48px; }
   .dlg-actions > button { width: 100%; flex: 1; }

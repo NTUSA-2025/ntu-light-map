@@ -324,6 +324,7 @@ function requestUserLocation({ pan = true, onFound = null, onError = null } = {}
   navigator.geolocation.getCurrentPosition(
     position => {
       if (btnGps) btnGps.classList.remove('loading');
+      if (btnGps) btnGps.classList.add('located');
       if (btnPickGps) btnPickGps.disabled = false;
 
       const lat = position.coords.latitude;

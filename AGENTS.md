@@ -1,8 +1,6 @@
 # AGENTS.md
 
 ## Project Rules
-- Do not run Playwright, `npm run dev`, or production data operations unless explicitly asked.
-- Do not modify Cloudflare Console (Wrangler) settings. You can only suggest your modification in chat.
 - Commit small completed edits with conventional commit messages.
 - Keep committed repo files limited to durable project documentation and code. Put temporary implementation guidance or operator notes in `reference/` instead.
 - `.dev.vars.example` is a tracked example file and should be committed when intentionally changed.

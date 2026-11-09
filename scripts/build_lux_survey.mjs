@@ -1,7 +1,8 @@
 import fs from "node:fs";
 import path from "node:path";
 
-const SURVEY_DIRECTORY = "data/survey";
+// Raw survey CSVs stay out of git (reference/ is ignored); only aggregated outputs are committed.
+const SURVEY_DIRECTORY = "reference/survey";
 const ROAD_HEX_PATH = "data/hex_hit_with_safe.geojson";
 const HEX_OUTPUT_PATH = "data/lux_survey_hexes.geojson";
 const TRACK_OUTPUT_PATH = "data/lux_survey_track.geojson";

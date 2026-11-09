@@ -6,7 +6,7 @@ const AREA_PATH = "data/ntu_area.geojson";
 const REFERENCE_HEX_PATH = "data/hex_hit_with_safe.geojson";
 const EXTRA_HEX_PATHS = [
   "data/hex_hit_with_safe.geojson",
-  "data/merge_sur_zhoushan.geojson",
+  "data/lux_survey_hexes.geojson",
 ];
 const OUTPUT_PATH = "data/report_hex_cells_4326.geojson";
 

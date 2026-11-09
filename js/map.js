@@ -24,6 +24,7 @@ function fitCampusBounds(bounds) {
 }
 
 map.createPane('brightnessPane'); map.getPane('brightnessPane').style.zIndex = 350;
+map.createPane('trackPane');      map.getPane('trackPane').style.zIndex = 380;
 map.createPane('safetyPane');     map.getPane('safetyPane').style.zIndex = 300;
 map.createPane('protectPane');    map.getPane('protectPane').style.zIndex = 250;
 map.createPane('incidentPane'); map.getPane('incidentPane').style.zIndex = 400;
@@ -48,15 +49,34 @@ loadVectorBasemap().catch(error => {
 export const layerMap = {};
 export const incidentHexRenderer = L.svg({ pane: 'incidentPane' });
 export const reportHexRenderer = L.svg({ pane: 'reportPane' });
+const trackRenderer = L.canvas({ pane: 'trackPane' });
 export const incidentHexLayer = L.layerGroup().addTo(map);
 layerMap.incident = incidentHexLayer;
 
-export function makeToggle(id, layerKey) {
+export function makeToggle(id, layerKey, loadLayer) {
   const btn = document.getElementById(id);
-  btn.addEventListener('click', () => {
+  let loading = false;
+  btn.addEventListener('click', async () => {
+    if (loading) return;
     btn.classList.toggle('off');
     btn.setAttribute('aria-pressed', String(!btn.classList.contains('off')));
-    const layer = layerMap[layerKey];
+    let layer = layerMap[layerKey];
+    if (!layer && loadLayer) {
+      loading = true;
+      btn.disabled = true;
+      try {
+        layer = await loadLayer();
+        layerMap[layerKey] = layer;
+      } catch (error) {
+        console.error('layer_load_failed', layerKey, error);
+        btn.classList.add('off');
+        btn.setAttribute('aria-pressed', 'false');
+        return;
+      } finally {
+        loading = false;
+        btn.disabled = false;
+      }
+    }
     if (!layer) return;
     if (btn.classList.contains('off')) map.removeLayer(layer);
     else layer.addTo(map);
@@ -111,6 +131,40 @@ function formatBrightness(record) {
   return `${record.value.toFixed(2)} ${record.unit} · ${brightnessStatusLabel(record.status)}`;
 }
 
+const ramp = ['#0b1020', '#1f2a5a', '#2f6f9f', '#6fd0c2', '#f3f6ff'];
+const getColor = value => value == null
+  ? '#596575'
+  : value <= 1 ? ramp[0]
+    : value <= 12 ? ramp[1]
+      : value <= 29 ? ramp[2]
+        : value <= 54 ? ramp[3]
+          : ramp[4];
+
+export async function loadTrackLayer() {
+  const response = await fetch(assetUrl('/data/lux_survey_track.geojson'));
+  if (!response.ok) throw new Error(`Track layer request failed: ${response.status}`);
+  const geoTrack = await response.json();
+  return L.geoJSON(geoTrack, {
+    pane: 'trackPane',
+    pointToLayer: (feature, latlng) => L.circleMarker(latlng, {
+      pane: 'trackPane',
+      renderer: trackRenderer,
+      radius: 2.5,
+      stroke: false,
+      fillOpacity: 0.9,
+      fillColor: getColor(feature.properties.lux)
+    }),
+    onEachFeature: (feature, layer) => {
+      const { t, lux } = feature.properties;
+      layer.on('mouseover', () => {
+        dom.hexTooltip.textContent = `${t.slice(11, 19)} · ${lux.toFixed(2)} lux`;
+        dom.hexTooltip.classList.add('show');
+      });
+      layer.on('mouseout', () => dom.hexTooltip.classList.remove('show'));
+    }
+  });
+}
+
 export async function loadCampusBoundary() {
   try {
     const response = await fetch(assetUrl('/data/ntu_area.geojson'));
@@ -130,15 +184,7 @@ export async function loadCampusBoundary() {
 }
 
 export async function loadMapLayers(onSelectReportHex, hexTooltip) {
-  const geoBrightness = await loadJSON(assetUrl('/data/merge_sur_zhoushan.geojson'));
-  const ramp = ['#0b1020', '#1f2a5a', '#2f6f9f', '#6fd0c2', '#f3f6ff'];
-  const getColor = ({ value }) => value == null
-    ? '#596575'
-    : value <= 1 ? ramp[0]
-      : value <= 12 ? ramp[1]
-        : value <= 29 ? ramp[2]
-          : value <= 54 ? ramp[3]
-            : ramp[4];
+  const geoBrightness = await loadJSON(assetUrl('/data/lux_survey_hexes.geojson'));
 
   const brightLayer = L.geoJSON(geoBrightness, {
     pane: 'brightnessPane',
@@ -147,7 +193,7 @@ export async function loadMapLayers(onSelectReportHex, hexTooltip) {
       return {
         color: 'rgba(6,10,18,.55)',
         weight: 0.25,
-        fillColor: getColor(record),
+        fillColor: getColor(record.value),
         fillOpacity: 0.9
       };
     },

@@ -1,6 +1,6 @@
 import { dom } from './js/dom.js';
 import { state } from './js/state.js';
-import { map, reportHexRenderer, makeToggle, loadCampusBoundary, loadMapLayers } from './js/map.js';
+import { map, reportHexRenderer, makeToggle, loadCampusBoundary, loadMapLayers, loadTrackLayer } from './js/map.js';
 import { renderIncidents } from './js/render.js';
 import { findReportHexForCoords } from './js/utils.js';
 
@@ -90,6 +90,7 @@ keyboardFields.forEach(field => {
 });
 
 makeToggle('tog-brightness', 'brightness');
+makeToggle('tog-track', 'track', loadTrackLayer);
 makeToggle('tog-safety', 'safety');
 makeToggle('tog-incident', 'incident');
 makeToggle('tog-protect', 'protect');

@@ -89,7 +89,8 @@ function clippedLength(segment, edges) {
 const roadGeojson = JSON.parse(fs.readFileSync(ROAD_PATH, "utf8"));
 const cellGeojson = JSON.parse(fs.readFileSync(CELL_PATH, "utf8"));
 const roads = roadGeojson.features.map((road) => ({
-  safety: Number(road.properties.safety),
+  // Roads surveyed but not yet rated carry `safety: null`; they add hexes without affecting safety scores.
+  safety: road.properties.safety == null ? null : Number(road.properties.safety),
   segments: roadSegments(road.geometry),
 }));
 const features = [];
@@ -103,14 +104,15 @@ for (const cell of cellGeojson.features) {
     dx: ring[index + 1][0] - x,
     dy: ring[index + 1][1] - y,
   }));
+  let hit = false;
   let worst = -Infinity;
   let safetySum = 0;
-  let hitCount = 0;
+  let ratedCount = 0;
   let totalLength = 0;
   let weightedSafety = 0;
 
   for (const road of roads) {
-    let hit = false;
+    let roadHit = false;
     let roadLength = 0;
     for (const segment of road.segments) {
       if (
@@ -120,26 +122,30 @@ for (const cell of cellGeojson.features) {
 
       const length = clippedLength(segment, edges);
       if (length !== null) {
-        hit = true;
+        roadHit = true;
         roadLength += length;
       }
     }
-    if (!hit) continue;
+    if (!roadHit) continue;
+    hit = true;
+    if (road.safety === null) continue;
 
     worst = Math.max(worst, road.safety);
     safetySum += road.safety;
-    hitCount += 1;
+    ratedCount += 1;
     totalLength += roadLength;
     weightedSafety += road.safety * roadLength;
   }
 
-  if (hitCount === 0) continue;
+  if (!hit) continue;
+  let safeMean = null;
+  if (ratedCount > 0) safeMean = totalLength > 0 ? weightedSafety / totalLength : safetySum / ratedCount;
   features.push({
     type: "Feature",
     properties: {
       ...cell.properties,
-      safe_worst: worst,
-      safe_mean: totalLength > 0 ? weightedSafety / totalLength : safetySum / hitCount,
+      safe_worst: ratedCount > 0 ? worst : null,
+      safe_mean: safeMean,
     },
     geometry: cell.geometry,
   });

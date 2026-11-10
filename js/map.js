@@ -217,6 +217,8 @@ export async function loadMapLayers(onSelectReportHex, hexTooltip) {
   const safetyLayer = L.geoJSON(geoSafety, {
     pane: 'safetyPane',
     interactive: false,
+    // Newly surveyed roads without a safety rating have no outline yet.
+    filter: feature => feature.properties?.safe_worst != null,
     style: feature => ({
       color: safeColor(Number(feature.properties?.safe_worst)),
       weight: 1.05,

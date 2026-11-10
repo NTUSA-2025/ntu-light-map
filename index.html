@@ -56,7 +56,7 @@
           <button id="map-info-close" type="button" aria-label="關閉地圖說明">×</button>
         </div>
         <div class="map-info-body" id="map-info-content">
-          <p><strong>亮度</strong> 色階單位是 lux，顏色越亮代表亮度數值越高。</p>
+          <p><strong>亮度</strong> 色階單位是 lux，數值已依標準照度計校正。分界參考 EN 13201 人行道照明等級：2 lux 以下低於最低等級 P6，15 lux 以上達到最高等級 P1。</p>
           <p><strong>資料狀態</strong> 部分區域可能是推估值，尚未量測的區域不代表亮度為零。</p>
           <p><strong>回報安全事件</strong> 按下左下角按鈕，驗證 NTU Email 後選擇地圖上的六角區域。</p>
           <p><strong>事件顏色與深淺</strong> 橘色代表事故，粉紅代表騷擾，上下雙色代表兩者皆有。顏色越淺代表回報數量越多。</p>
@@ -224,11 +224,11 @@
             </span>
           </summary>
           <div class="layer-group-content mobile-map-legend-content">
-            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#0b1020;"></span><span>0 - 1 lux</span></div>
-            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#1f2a5a;"></span><span>1 - 12 lux</span></div>
-            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#2f6f9f;"></span><span>12 - 29 lux</span></div>
-            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#6fd0c2;"></span><span>29 - 54 lux</span></div>
-            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#f3f6ff;"></span><span>54 + lux</span></div>
+            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#0b1020;"></span><span>0 - 2 lux</span></div>
+            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#1f2a5a;"></span><span>2 - 5 lux</span></div>
+            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#2f6f9f;"></span><span>5 - 10 lux</span></div>
+            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#6fd0c2;"></span><span>10 - 15 lux</span></div>
+            <div class="map-legend-row"><span class="map-legend-swatch" style="background:#f3f6ff;"></span><span>15 + lux</span></div>
             <div class="map-legend-section">安全事件</div>
             <div class="map-legend-row">
               <span class="map-legend-swatch" style="background:#fb923c;"></span>
@@ -291,11 +291,11 @@
           <span>亮度</span>
           <span class="map-legend-unit">lux</span>
         </div>
-        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#0b1020;"></span><span>0 - 1</span></div>
-        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#1f2a5a;"></span><span>1 - 12</span></div>
-        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#2f6f9f;"></span><span>12 - 29</span></div>
-        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#6fd0c2;"></span><span>29 - 54</span></div>
-        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#f3f6ff;"></span><span>54 +</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#0b1020;"></span><span>0 - 2</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#1f2a5a;"></span><span>2 - 5</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#2f6f9f;"></span><span>5 - 10</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#6fd0c2;"></span><span>10 - 15</span></div>
+        <div class="map-legend-row"><span class="map-legend-swatch" style="background:#f3f6ff;"></span><span>15 +</span></div>
         <div class="map-legend-section">安全事件</div>
         <div class="map-legend-row">
           <span class="map-legend-swatch" style="background:#fb923c;"></span>

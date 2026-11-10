@@ -132,12 +132,13 @@ function formatBrightness(record) {
 }
 
 const ramp = ['#0b1020', '#1f2a5a', '#2f6f9f', '#6fd0c2', '#f3f6ff'];
+// Breakpoints follow the EN 13201-2 P-class average illuminance for footpaths (P6 2, P4 5, P2 10, P1 15 lux).
 const getColor = value => value == null
   ? '#596575'
-  : value <= 1 ? ramp[0]
-    : value <= 12 ? ramp[1]
-      : value <= 29 ? ramp[2]
-        : value <= 54 ? ramp[3]
+  : value < 2 ? ramp[0]
+    : value < 5 ? ramp[1]
+      : value < 10 ? ramp[2]
+        : value < 15 ? ramp[3]
           : ramp[4];
 
 export async function loadTrackLayer() {

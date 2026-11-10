@@ -12,6 +12,7 @@ const RADIANS = Math.PI / 180;
 // real = 1.166 * raw^0.910. Raw 0 means below the 0.46 lux step and stays 0.
 const CALIBRATION_SCALE = 1.1659;
 const CALIBRATION_EXPONENT = 0.9103;
+const MAX_SNAP_METERS = 25;
 const CELL_PROPERTIES = [
   "id", "left", "top", "right", "bottom", "row_index", "col_index",
 ];
@@ -117,7 +118,8 @@ function assignHex(point, hexes) {
       nearestDistanceSquared = distanceSquared;
     }
   }
-  return Math.sqrt(nearestDistanceSquared) * Math.cos(point.latitude * RADIANS) <= 15
+  // 25 m covers sidewalks on both sides of wide roads (椰林大道 sidewalks sit up to ~21 m from the nearest centre hex).
+  return Math.sqrt(nearestDistanceSquared) * Math.cos(point.latitude * RADIANS) <= MAX_SNAP_METERS
     ? nearest
     : null;
 }

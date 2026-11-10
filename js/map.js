@@ -213,19 +213,16 @@ export async function loadMapLayers(onSelectReportHex, hexTooltip) {
   layerMap.brightness = brightLayer;
 
   const geoSafety = await loadJSON(assetUrl('/data/hex_hit_with_safe.geojson'));
-  const safeColor = score => score === 1 ? '#7bcfa1' : score === 2 ? '#e6c07a' : score === 3 ? '#e08a8a' : '#8aa2d6';
   const safetyLayer = L.geoJSON(geoSafety, {
     pane: 'safetyPane',
     interactive: false,
-    // Newly surveyed roads without a safety rating have no outline yet.
-    filter: feature => feature.properties?.safe_worst != null,
-    style: feature => ({
-      color: safeColor(Number(feature.properties?.safe_worst)),
+    style: {
+      color: '#7bcfa1',
       weight: 1.05,
       opacity: 0.9,
       fillOpacity: 0,
       fill: false
-    })
+    }
   }).addTo(map);
   layerMap.safety = safetyLayer;
 

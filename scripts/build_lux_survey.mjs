@@ -8,6 +8,10 @@ const HEX_OUTPUT_PATH = "data/lux_survey_hexes.geojson";
 const TRACK_OUTPUT_PATH = "data/lux_survey_track.geojson";
 const EARTH_RADIUS = 6378137;
 const RADIANS = Math.PI / 180;
+// Power-law fit of the ESP32 sensor against a reference lux meter (8 paired readings, 4.6–395 lux):
+// real = 1.166 * raw^0.910. Raw 0 means below the 0.46 lux step and stays 0.
+const CALIBRATION_SCALE = 1.1659;
+const CALIBRATION_EXPONENT = 0.9103;
 const CELL_PROPERTIES = [
   "id", "left", "top", "right", "bottom", "row_index", "col_index",
 ];
@@ -69,13 +73,19 @@ function readSurvey(filePath) {
   }
   rows.sort((a, b) => a.time - b.time);
   // Detect isolated dropouts simultaneously, without joining separate survey files.
-  return rows.filter((row, index) => {
+  const kept = rows.filter((row, index) => {
     if (row.lux === 0 && rows[index - 1]?.lux >= 5 && rows[index + 1]?.lux >= 5) {
       counts.dropout += 1;
       return false;
     }
     return true;
   });
+  // Cleaning thresholds above apply to raw sensor values; convert only the kept rows.
+  return kept.map((row) => ({ ...row, lux: calibrate(row.lux) }));
+}
+
+function calibrate(rawLux) {
+  return CALIBRATION_SCALE * rawLux ** CALIBRATION_EXPONENT;
 }
 
 function mercator(longitude, latitude) {

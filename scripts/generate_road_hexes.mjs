@@ -12,144 +12,108 @@ function toMercator([lon, lat]) {
   ];
 }
 
-function roadSegments(geometry) {
-  let lines;
-  if (geometry.type === "LineString") {
-    lines = [geometry.coordinates];
-  } else if (geometry.type === "MultiLineString") {
-    lines = geometry.coordinates;
-  } else {
-    throw new Error(`Unsupported road geometry: ${geometry.type}`);
-  }
-
-  const segments = [];
-  for (const line of lines) {
-    const points = line.map(toMercator);
-    for (let i = 1; i < points.length; i += 1) {
-      const [ax, ay] = points[i - 1];
-      const [bx, by] = points[i];
-      const dx = bx - ax;
-      const dy = by - ay;
-      segments.push({
-        ax,
-        ay,
-        dx,
-        dy,
-        length: Math.hypot(dx, dy),
-        left: Math.min(ax, bx),
-        right: Math.max(ax, bx),
-        bottom: Math.min(ay, by),
-        top: Math.max(ay, by),
-      });
-    }
-  }
-  return segments;
+function roadLines(geometry) {
+  if (geometry.type === "LineString") return [geometry.coordinates];
+  if (geometry.type === "MultiLineString") return geometry.coordinates;
+  throw new Error(`Unsupported road geometry: ${geometry.type}`);
 }
 
-function hexRing({ left, top, right, bottom }) {
-  const midY = (top + bottom) / 2;
-  const width = right - left;
-  return [
-    [left, midY],
-    [left + width / 4, top],
-    [left + width * 3 / 4, top],
-    [right, midY],
-    [left + width * 3 / 4, bottom],
-    [left + width / 4, bottom],
-    [left, midY],
-  ];
+// Flat-top hexes with odd columns shifted down (rows grow southward): "odd-q" offset coordinates.
+function offsetToCube(col, row) {
+  const q = col;
+  const r = row - (col - (col & 1)) / 2;
+  return [q, r, -q - r];
 }
 
-function clippedLength(segment, edges) {
-  let enter = 0;
-  let leave = 1;
+function cubeToOffset(q, r) {
+  return [q, r + (q - (q & 1)) / 2];
+}
 
-  // The ring is clockwise: each interior half-plane has cross(edge, point) <= 0.
-  for (const { x, y, dx, dy } of edges) {
-    const distance = dx * (segment.ay - y) - dy * (segment.ax - x);
-    const rate = dx * segment.dy - dy * segment.dx;
-    if (rate === 0) {
-      if (distance > 0) return null;
-      continue;
-    }
+function cubeRound(q, r, s) {
+  let rq = Math.round(q);
+  let rr = Math.round(r);
+  let rs = Math.round(s);
+  const dq = Math.abs(rq - q);
+  const dr = Math.abs(rr - r);
+  const ds = Math.abs(rs - s);
+  if (dq > dr && dq > ds) rq = -rr - rs;
+  else if (dr > ds) rr = -rq - rs;
+  else rs = -rq - rr;
+  return [rq, rr, rs];
+}
 
-    const crossing = -distance / rate;
-    if (rate < 0) {
-      enter = Math.max(enter, crossing);
-    } else {
-      leave = Math.min(leave, crossing);
-    }
-    if (enter > leave) return null;
+// Minimal edge-connected chain of hexes between two cells, so each road is one hex wide.
+function hexLine(from, to) {
+  const a = offsetToCube(...from);
+  const b = offsetToCube(...to);
+  const steps = Math.max(...a.map((value, index) => Math.abs(value - b[index])));
+  const chain = [];
+  for (let i = 0; i <= steps; i += 1) {
+    const t = steps === 0 ? 0 : i / steps;
+    // A tiny nudge keeps rounding deterministic when the line runs exactly along a hex edge.
+    const [q, r] = cubeRound(
+      a[0] + (b[0] - a[0]) * t + 1e-6,
+      a[1] + (b[1] - a[1]) * t + 1e-6,
+      a[2] + (b[2] - a[2]) * t - 2e-6,
+    );
+    chain.push(cubeToOffset(q, r));
   }
-
-  // A zero-length intersection still counts as a hit at an edge or vertex.
-  return (leave - enter) * segment.length;
+  return chain;
 }
 
 const roadGeojson = JSON.parse(fs.readFileSync(ROAD_PATH, "utf8"));
-const cellGeojson = JSON.parse(fs.readFileSync(CELL_PATH, "utf8"));
-const roads = roadGeojson.features.map((road) => ({
-  // Roads surveyed but not yet rated carry `safety: null`; they add hexes without affecting safety scores.
-  safety: road.properties.safety == null ? null : Number(road.properties.safety),
-  segments: roadSegments(road.geometry),
-}));
-const features = [];
-
-for (const cell of cellGeojson.features) {
+const cells = JSON.parse(fs.readFileSync(CELL_PATH, "utf8")).features;
+const cellByOffset = new Map(cells.map((cell) => [
+  `${cell.properties.col_index},${cell.properties.row_index}`,
+  cell,
+]));
+const centres = cells.map((cell) => {
   const { left, top, right, bottom } = cell.properties;
-  const ring = hexRing(cell.properties);
-  const edges = ring.slice(0, -1).map(([x, y], index) => ({
-    x,
-    y,
-    dx: ring[index + 1][0] - x,
-    dy: ring[index + 1][1] - y,
-  }));
-  let hit = false;
-  let worst = -Infinity;
-  let safetySum = 0;
-  let ratedCount = 0;
-  let totalLength = 0;
-  let weightedSafety = 0;
+  return { cell, x: (left + right) / 2, y: (top + bottom) / 2 };
+});
 
-  for (const road of roads) {
-    let roadHit = false;
-    let roadLength = 0;
-    for (const segment of road.segments) {
-      if (
-        segment.right < left || segment.left > right ||
-        segment.top < bottom || segment.bottom > top
-      ) continue;
+function cellAt([x, y]) {
+  let nearest = null;
+  let nearestDistance = Infinity;
+  for (const centre of centres) {
+    const distance = (centre.x - x) ** 2 + (centre.y - y) ** 2;
+    if (distance < nearestDistance) {
+      nearest = centre.cell;
+      nearestDistance = distance;
+    }
+  }
+  return [nearest.properties.col_index, nearest.properties.row_index];
+}
 
-      const length = clippedLength(segment, edges);
-      if (length !== null) {
-        roadHit = true;
-        roadLength += length;
+const safetyByCell = new Map();
+for (const road of roadGeojson.features) {
+  // Roads surveyed but not yet rated carry `safety: null`; they add hexes without affecting safety scores.
+  const safety = road.properties.safety == null ? null : Number(road.properties.safety);
+  const roadCells = new Set();
+  for (const line of roadLines(road.geometry)) {
+    const vertices = line.map(toMercator).map(cellAt);
+    for (let i = 1; i < vertices.length; i += 1) {
+      for (const [col, row] of hexLine(vertices[i - 1], vertices[i])) {
+        const cell = cellByOffset.get(`${col},${row}`);
+        if (cell) roadCells.add(cell);
       }
     }
-    if (!roadHit) continue;
-    hit = true;
-    if (road.safety === null) continue;
-
-    worst = Math.max(worst, road.safety);
-    safetySum += road.safety;
-    ratedCount += 1;
-    totalLength += roadLength;
-    weightedSafety += road.safety * roadLength;
   }
-
-  if (!hit) continue;
-  let safeMean = null;
-  if (ratedCount > 0) safeMean = totalLength > 0 ? weightedSafety / totalLength : safetySum / ratedCount;
-  features.push({
-    type: "Feature",
-    properties: {
-      ...cell.properties,
-      safe_worst: ratedCount > 0 ? worst : null,
-      safe_mean: safeMean,
-    },
-    geometry: cell.geometry,
-  });
+  for (const cell of roadCells) {
+    if (!safetyByCell.has(cell)) safetyByCell.set(cell, []);
+    if (safety !== null) safetyByCell.get(cell).push(safety);
+  }
 }
+
+const features = [...safetyByCell].map(([cell, ratings]) => ({
+  type: "Feature",
+  properties: {
+    ...cell.properties,
+    safe_worst: ratings.length ? Math.max(...ratings) : null,
+    safe_mean: ratings.length ? ratings.reduce((sum, value) => sum + value, 0) / ratings.length : null,
+  },
+  geometry: cell.geometry,
+}));
 
 features.sort((a, b) => a.properties.id - b.properties.id);
 const output = [

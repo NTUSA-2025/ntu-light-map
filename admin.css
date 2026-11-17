@@ -62,8 +62,7 @@ body.admin-page {
 }
 
 .admin-card h2,
-.admin-toolbar h2,
-.admin-whitelist > summary {
+.admin-toolbar h2 {
   font-size: 1rem;
   font-weight: 600;
   letter-spacing: 0.015em;
@@ -72,13 +71,11 @@ body.admin-page {
 .admin-card h2 { margin-bottom: 12px; }
 
 .admin-card p,
-.admin-toolbar p,
-.admin-whitelist > p { color: var(--ink-dim); }
+.admin-toolbar p { color: var(--ink-dim); }
 
 .admin-card p + p { margin-top: 12px; }
 .admin-card > button { margin-top: 16px; }
-.admin-denied code,
-.admin-whitelist code { font-family: var(--mono); }
+.admin-denied code { font-family: var(--mono); }
 
 .admin-field {
   min-width: 0;
@@ -86,76 +83,6 @@ body.admin-page {
   color: var(--ink-dim);
   letter-spacing: 0.02em;
 }
-
-.admin-whitelist {
-  margin-bottom: 32px;
-  padding-bottom: 20px;
-  border-block: 1px solid var(--line);
-}
-
-.admin-whitelist:not([open]) { padding-bottom: 0; }
-
-.admin-whitelist > summary {
-  min-height: 56px;
-  gap: 16px;
-}
-
-.admin-whitelist > summary::after {
-  content: '+';
-  color: var(--ink-dim);
-  font-family: var(--mono);
-}
-
-.admin-whitelist[open] > summary::after { content: '−'; }
-
-.admin-whitelist > summary span:last-child {
-  margin-left: auto;
-  color: var(--ink-faint);
-  font-size: 0.8125rem;
-  font-weight: 400;
-}
-
-.admin-whitelist > p {
-  margin: 4px 0 20px;
-  font-size: 0.875rem;
-}
-
-.admin-whitelist-form {
-  display: flex;
-  align-items: end;
-  gap: 16px;
-  margin-bottom: 16px;
-}
-
-.admin-whitelist-form .admin-field {
-  flex: 1;
-  margin-top: 0;
-}
-
-.admin-whitelist-row {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  padding: 12px 0;
-  border-top: 1px solid var(--line);
-}
-
-.admin-whitelist-email-entry {
-  display: block;
-  overflow-wrap: anywhere;
-  font-size: 0.9375rem;
-  font-weight: 500;
-}
-
-.admin-whitelist-meta {
-  display: block;
-  margin-top: 4px;
-  color: var(--ink-faint);
-  font-size: 0.75rem;
-}
-
-.admin-whitelist-row button { flex-shrink: 0; }
 
 .admin-toolbar {
   display: flex;
@@ -309,7 +236,6 @@ body.admin-page {
   .admin-header .panel-admin-link { grid-column: 1; grid-row: 1; min-height: 28px; }
   .admin-header .panel-logout { grid-column: 2; grid-row: 1 / span 2; }
   .admin-main { width: calc(100% - 40px); margin: 24px auto 48px; }
-  .admin-whitelist-form { align-items: stretch; flex-direction: column; }
   .admin-filters { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .admin-filter { grid-column: span 2; }
   .admin-filter:has(input[type="date"]) { grid-column: span 3; }

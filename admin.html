@@ -20,7 +20,7 @@
 
     <section id="admin-login" class="admin-card" hidden>
       <h2>管理員登入</h2>
-      <p>使用NTU／NTUSA Email驗證。只有加入管理白名單的帳號能查看及管理回報。</p>
+      <p>使用NTUSA Email驗證。只有學權部與資訊部群組成員能查看及管理回報。</p>
       <label class="dlg-field admin-field">
         <span>Email</span>
         <input id="admin-email" type="email" autocomplete="email" placeholder="name@ntu.edu.tw" />
@@ -36,26 +36,11 @@
     <section id="admin-denied" class="admin-card admin-denied" hidden>
       <h2>此帳號沒有管理權限</h2>
       <p>登入Email：<strong id="admin-denied-email"></strong></p>
-      <p>管理權限開放給學權部與資訊部群組成員，以及加入管理白名單的帳號。</p>
+      <p>管理權限只開放給學權部與資訊部群組成員。</p>
       <button id="btn-admin-denied-logout" class="btn-sec" type="button">登出並更換帳號</button>
     </section>
 
     <section id="admin-console" hidden>
-      <details class="admin-whitelist">
-        <summary class="panel-reports-title">
-          <span>管理白名單</span>
-          <span id="admin-whitelist-count">0 個項目</span>
-        </summary>
-        <p>學權部與資訊部群組成員可直接登入。不在群組內但需要管理權限的人，請在這裡加入他的NTU Email。</p>
-        <form id="admin-whitelist-form" class="admin-whitelist-form">
-          <label class="dlg-field admin-field" for="admin-whitelist-email">
-            <span>Email</span>
-            <input id="admin-whitelist-email" type="text" autocomplete="off" placeholder="name@ntu.edu.tw" />
-          </label>
-          <button id="btn-add-admin" class="btn-pri" type="submit">新增白名單</button>
-        </form>
-        <div id="admin-whitelist-list" class="admin-whitelist-list"></div>
-      </details>
       <div class="admin-toolbar">
         <div>
           <h2>所有回報</h2>

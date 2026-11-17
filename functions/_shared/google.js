@@ -27,7 +27,7 @@ function privateKeyBytes(pem) {
   return Uint8Array.from(atob(body), (char) => char.charCodeAt(0));
 }
 
-export function googleGroupsConfigured(env) {
+function googleGroupsConfigured(env) {
   return Boolean(
     env.GOOGLE_SERVICE_ACCOUNT_EMAIL
       && env.GOOGLE_PRIVATE_KEY

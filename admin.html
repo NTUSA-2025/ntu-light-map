@@ -6,7 +6,7 @@
   <meta name="color-scheme" content="dark" />
   <title>回報管理｜台大夜間亮度地圖</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="admin.css?v=shared-controls-date-filter-1" />
+  <link rel="stylesheet" href="admin.css?v=shared-controls-date-filter-2" />
 </head>
 <body class="admin-page">
   <header class="admin-header">
@@ -41,7 +41,7 @@
     </section>
 
     <section id="admin-console" hidden>
-      <details class="admin-whitelist" open>
+      <details class="admin-whitelist">
         <summary class="panel-reports-title">
           <span>管理白名單</span>
           <span id="admin-whitelist-count">0 個項目</span>
@@ -88,13 +88,12 @@
           </label>
           <label class="dlg-field admin-filter">
             <span>開始日期</span>
-            <input id="admin-start-date-filter" type="date" aria-describedby="admin-date-help" />
+            <input id="admin-start-date-filter" type="date" required />
           </label>
           <label class="dlg-field admin-filter">
             <span>結束日期</span>
-            <input id="admin-end-date-filter" type="date" aria-describedby="admin-date-help" />
+            <input id="admin-end-date-filter" type="date" required />
           </label>
-          <p id="admin-date-help" class="admin-filter-help">日期以台北時間計算，包含起訖日；留空不限。</p>
         </div>
       </div>
       <div id="admin-incident-filter" class="admin-incident-filter" role="group" aria-label="案件篩選" hidden>

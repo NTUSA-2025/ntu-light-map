@@ -183,14 +183,30 @@ body.admin-page {
   letter-spacing: 0.02em;
 }
 
-.admin-filter input { min-width: 0; }
-
-.admin-filters .admin-filter-help {
-  grid-column: 1 / -1;
-  color: var(--ink-faint);
-  font-size: 0.75rem;
-  text-align: right;
+/* Safari draws native selects and date inputs at their own compact size; force one control height. */
+.admin-filter select,
+.admin-filter input {
+  height: 46px;
+  min-height: 46px;
+  margin: 0;
+  -webkit-appearance: none;
+  appearance: none;
+  line-height: 1.2;
 }
+
+.admin-filter select,
+.admin-filter select:focus {
+  padding-right: 34px;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23a4aaa7' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 12px center;
+}
+
+.admin-filter input { min-width: 0; }
+.admin-filter input::-webkit-date-and-time-value { text-align: left; }
+
+/* Empty date inputs are `required` so `:invalid` hides the browser's placeholder or today's date. */
+.admin-filter input[type="date"]:invalid:not(:focus)::-webkit-datetime-edit { color: transparent; }
 
 .admin-incident-filter {
   display: flex;
@@ -297,7 +313,6 @@ body.admin-page {
   .admin-filters { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   .admin-filter { grid-column: span 2; }
   .admin-filter:has(input[type="date"]) { grid-column: span 3; }
-  .admin-filters .admin-filter-help { text-align: left; }
   .admin-incident-head { align-items: start; flex-direction: column; gap: 4px; }
   .admin-incident-fields { grid-template-columns: 1fr; }
   .admin-incident-actions > * { flex: 1; white-space: nowrap; }

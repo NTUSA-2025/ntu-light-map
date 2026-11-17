@@ -7,10 +7,11 @@ import {
   publicIncident,
   validateIncidentInput,
 } from "../../_shared/incidents.js";
+import { sendFollowupNotification } from "../../_shared/smtp.js";
 
 const RATE_LIMIT_COUNT = 5;
 
-export async function onRequestPost({ request, env }) {
+export async function onRequestPost({ request, env, waitUntil }) {
   const salt = hashSalt(env);
   if (!salt) {
     return serverMisconfigured("missing_hash_salt");
@@ -80,6 +81,19 @@ export async function onRequestPost({ request, env }) {
 
     if (!result) {
       throw new Error("incident_insert_missing_row");
+    }
+
+    if (incident.followup_requested) {
+      // Send after responding so a mail outage never blocks the report itself.
+      waitUntil(
+        sendFollowupNotification(env, {
+          incident: result,
+          reporterEmail: email,
+          origin: new URL(request.url).origin,
+        }).catch((error) => {
+          console.error("followup_notification_failed", { id: insertedId, message: error?.message });
+        }),
+      );
     }
 
     return json({ incident: publicIncident(result) }, { status: 201 });

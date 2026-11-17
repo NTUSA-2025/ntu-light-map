@@ -14,16 +14,28 @@ const list = byId('admin-list');
 const filter = byId('admin-status-filter');
 const typeFilter = byId('admin-type-filter');
 const followupFilter = byId('admin-followup-filter');
+const startDateFilter = byId('admin-start-date-filter');
+const endDateFilter = byId('admin-end-date-filter');
+const reportTimeFormat = new Intl.DateTimeFormat('zh-TW', {
+  timeZone: 'Asia/Taipei',
+  dateStyle: 'medium',
+  timeStyle: 'short',
+  hour12: false
+});
 const countLabel = byId('admin-count');
 const deniedEmail = byId('admin-denied-email');
 const whitelistList = byId('admin-whitelist-list');
 const whitelistCount = byId('admin-whitelist-count');
 const whitelistForm = byId('admin-whitelist-form');
 const whitelistEmailInput = byId('admin-whitelist-email');
+const incidentFilterRow = byId('admin-incident-filter');
+const incidentFilterLabel = byId('admin-incident-filter-label');
+const clearIncidentFilterButton = byId('admin-clear-incident-filter');
 
 let incidents = [];
 let whitelistEntries = [];
 let authenticatedEmail = '';
+let incidentFilterId = new URLSearchParams(window.location.search).get('incident');
 
 function setStatus(message, kind = '') {
   status.textContent = message;
@@ -119,7 +131,7 @@ function makeSelect(options, value, ariaLabel) {
 
 function makeField(labelText, control) {
   const label = document.createElement('label');
-  label.className = 'admin-field';
+  label.className = 'dlg-field admin-field';
   label.append(textElement('span', '', labelText), control);
   return label;
 }
@@ -148,7 +160,7 @@ function renderWhitelist() {
       textElement('strong', 'admin-whitelist-email-entry', entry.email),
       textElement('small', 'admin-whitelist-meta', `新增者：${entry.created_by || '系統'} · ${entry.created_at || ''}`)
     );
-    const removeButton = textElement('button', 'admin-danger', '移除');
+    const removeButton = textElement('button', 'btn-sec admin-danger', '移除');
     removeButton.type = 'button';
     removeButton.addEventListener('click', async () => {
       if (!window.confirm(`確定移除白名單項目 ${entry.email}？`)) return;
@@ -177,17 +189,33 @@ function renderWhitelist() {
 
 function renderIncidents() {
   list.replaceChildren();
+  incidentFilterRow.hidden = incidentFilterId === null;
+  incidentFilterLabel.textContent = incidentFilterId === null ? '' : `只顯示案件 #${incidentFilterId}`;
+  // D1 timestamps are UTC; inclusive dates use Asia/Taipei's UTC+08:00 boundaries.
+  const startAt = startDateFilter.value
+    ? Date.parse(`${startDateFilter.value}T00:00:00+08:00`) : -Infinity;
+  const endBefore = endDateFilter.value
+    ? Date.parse(`${endDateFilter.value}T00:00:00+08:00`) + 86400000 : Infinity;
   const visible = incidents.filter(incident => {
+    const matchesIncident = incidentFilterId === null || String(incident.id) === incidentFilterId;
     const matchesStatus = filter.value === 'all' || incident.status === filter.value;
     const matchesType = typeFilter.value === 'all' || incident.type === typeFilter.value;
     const matchesFollowup = followupFilter.value === 'all'
       || Boolean(incident.followup_requested) === (followupFilter.value === 'yes');
-    return matchesStatus && matchesType && matchesFollowup;
+    const createdAt = Date.parse(`${incident.created_at.replace(' ', 'T')}Z`);
+    const matchesDate = !startDateFilter.value && !endDateFilter.value
+      || createdAt >= startAt && createdAt < endBefore;
+    return matchesIncident && matchesStatus && matchesType && matchesFollowup && matchesDate;
   });
   countLabel.textContent = `${visible.length} / ${incidents.length} 筆`;
 
   if (visible.length === 0) {
-    list.append(textElement('p', 'admin-empty', incidents.length ? '此狀態沒有回報' : '目前沒有回報資料'));
+    const incidentNotFound = incidentFilterId !== null
+      && !incidents.some(incident => String(incident.id) === incidentFilterId);
+    const message = incidentNotFound
+      ? `找不到案件 #${incidentFilterId}，請清除案件篩選查看所有回報`
+      : incidents.length ? '沒有符合篩選條件的回報' : '目前沒有回報資料';
+    list.append(textElement('p', 'admin-empty', message));
     return;
   }
 
@@ -197,9 +225,12 @@ function renderIncidents() {
 
     const header = document.createElement('div');
     header.className = 'admin-incident-head';
+    const createdAt = new Date(`${incident.created_at.replace(' ', 'T')}Z`);
+    const time = textElement('time', '', `${reportTimeFormat.format(createdAt)} 台北時間`);
+    time.dateTime = createdAt.toISOString();
     header.append(
       textElement('h3', '', `回報 #${incident.id} · Hex ${incident.report_hex_id}`),
-      textElement('time', '', incident.created_at || '')
+      time
     );
     card.append(header);
 
@@ -241,12 +272,12 @@ function renderIncidents() {
       focus_incident: String(incident.id)
     });
     const viewLink = document.createElement('a');
-    viewLink.className = 'admin-view';
+    viewLink.className = 'btn-sec admin-view';
     viewLink.textContent = '查看地圖';
     viewLink.href = `/?${focusParams.toString()}`;
     viewLink.target = '_blank';
     viewLink.rel = 'noopener noreferrer';
-    const saveButton = textElement('button', 'admin-primary', '儲存修改');
+    const saveButton = textElement('button', 'btn-pri', '儲存修改');
     saveButton.type = 'button';
     saveButton.addEventListener('click', async () => {
       saveButton.disabled = true;
@@ -271,7 +302,7 @@ function renderIncidents() {
       }
     });
 
-    const deleteButton = textElement('button', 'admin-danger', '刪除回報');
+    const deleteButton = textElement('button', 'btn-sec admin-danger', '刪除回報');
     deleteButton.type = 'button';
     deleteButton.addEventListener('click', async () => {
       if (!window.confirm(`確定永久刪除回報 #${incident.id}？`)) return;
@@ -380,11 +411,21 @@ async function logout() {
   window.location.reload();
 }
 
+clearIncidentFilterButton.addEventListener('click', () => {
+  incidentFilterId = null;
+  const url = new URL(window.location.href);
+  url.searchParams.delete('incident');
+  window.history.replaceState(null, '', url);
+  renderIncidents();
+});
+
 logoutButton.addEventListener('click', logout);
 byId('btn-admin-denied-logout').addEventListener('click', logout);
 filter.addEventListener('change', renderIncidents);
 typeFilter.addEventListener('change', renderIncidents);
 followupFilter.addEventListener('change', renderIncidents);
+startDateFilter.addEventListener('change', renderIncidents);
+endDateFilter.addEventListener('change', renderIncidents);
 
 checkAdminAccess().catch(error => {
   showSection(loginSection);

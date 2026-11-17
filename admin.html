@@ -6,13 +6,13 @@
   <meta name="color-scheme" content="dark" />
   <title>回報管理｜台大夜間亮度地圖</title>
   <link rel="stylesheet" href="styles.css" />
-  <link rel="stylesheet" href="admin.css?v=map-view-rounded-1" />
+  <link rel="stylesheet" href="admin.css?v=shared-controls-date-filter-1" />
 </head>
 <body class="admin-page">
   <header class="admin-header">
-    <a class="admin-back" href="/">← 返回地圖</a>
+    <a class="panel-admin-link" href="/">← 返回地圖</a>
     <h1>回報管理</h1>
-    <button id="admin-logout" class="admin-logout" type="button" hidden>登出</button>
+    <button id="admin-logout" class="panel-logout" type="button" hidden>登出</button>
   </header>
 
   <main class="admin-main">
@@ -20,39 +20,39 @@
 
     <section id="admin-login" class="admin-card" hidden>
       <h2>管理員登入</h2>
-      <p>使用 NTU／NTUSA Email 驗證。只有加入管理白名單的帳號能查看及管理回報。</p>
-      <label class="admin-field">
+      <p>使用NTU／NTUSA Email驗證。只有加入管理白名單的帳號能查看及管理回報。</p>
+      <label class="dlg-field admin-field">
         <span>Email</span>
         <input id="admin-email" type="email" autocomplete="email" placeholder="name@ntu.edu.tw" />
       </label>
-      <button id="btn-admin-request-code" class="admin-primary" type="button">寄送驗證碼</button>
-      <label id="admin-code-field" class="admin-field" hidden>
+      <button id="btn-admin-request-code" class="btn-pri" type="button">寄送驗證碼</button>
+      <label id="admin-code-field" class="dlg-field admin-field" hidden>
         <span>驗證碼</span>
         <input id="admin-code" inputmode="numeric" maxlength="6" autocomplete="one-time-code" placeholder="6 位數字" />
       </label>
-      <button id="btn-admin-verify-code" class="admin-primary" type="button" hidden>驗證並登入</button>
+      <button id="btn-admin-verify-code" class="btn-pri" type="button" hidden>驗證並登入</button>
     </section>
 
     <section id="admin-denied" class="admin-card admin-denied" hidden>
       <h2>此帳號沒有管理權限</h2>
-      <p>登入 Email：<strong id="admin-denied-email"></strong></p>
-      <p>管理權限開放給已驗證的 @ntusa.ntu.edu.tw 帳號；其他 NTU Email 需加入 <code>admin_users</code> 白名單。</p>
-      <button id="btn-admin-denied-logout" class="admin-secondary" type="button">登出並更換帳號</button>
+      <p>登入Email：<strong id="admin-denied-email"></strong></p>
+      <p>管理權限開放給已驗證的@ntusa.ntu.edu.tw帳號；其他NTU Email需加入<code>admin_users</code>白名單。</p>
+      <button id="btn-admin-denied-logout" class="btn-sec" type="button">登出並更換帳號</button>
     </section>
 
     <section id="admin-console" hidden>
       <details class="admin-whitelist" open>
-        <summary>
+        <summary class="panel-reports-title">
           <span>管理白名單</span>
           <span id="admin-whitelist-count">0 個項目</span>
         </summary>
-        <p>加入已驗證的 NTU Email，或使用 <code>*@ntusa.ntu.edu.tw</code> 開放整個 NTUSA 網域；其他萬用字元網域不接受。</p>
+        <p>加入已驗證的NTU Email，或使用<code>*@ntusa.ntu.edu.tw</code>開放整個NTUSA網域；其他萬用字元網域不接受。</p>
         <form id="admin-whitelist-form" class="admin-whitelist-form">
-          <label class="admin-field" for="admin-whitelist-email">
+          <label class="dlg-field admin-field" for="admin-whitelist-email">
             <span>Email 或萬用字元</span>
             <input id="admin-whitelist-email" type="text" autocomplete="off" placeholder="name@ntu.edu.tw" />
           </label>
-          <button id="btn-add-admin" class="admin-primary" type="submit">新增白名單</button>
+          <button id="btn-add-admin" class="btn-pri" type="submit">新增白名單</button>
         </form>
         <div id="admin-whitelist-list" class="admin-whitelist-list"></div>
       </details>
@@ -62,7 +62,7 @@
           <p id="admin-count">0 筆</p>
         </div>
         <div class="admin-filters">
-          <label class="admin-filter">
+          <label class="dlg-field admin-filter">
             <span>事件類型</span>
             <select id="admin-type-filter">
               <option value="all">全部類型</option>
@@ -70,7 +70,7 @@
               <option value="harassment">夜間騷擾</option>
             </select>
           </label>
-          <label class="admin-filter">
+          <label class="dlg-field admin-filter">
             <span>學權部聯繫</span>
             <select id="admin-followup-filter">
               <option value="all">全部</option>
@@ -78,7 +78,7 @@
               <option value="no">不同意</option>
             </select>
           </label>
-          <label class="admin-filter">
+          <label class="dlg-field admin-filter">
             <span>公開狀態</span>
             <select id="admin-status-filter">
               <option value="all">全部</option>
@@ -86,7 +86,20 @@
               <option value="hidden">已隱藏</option>
             </select>
           </label>
+          <label class="dlg-field admin-filter">
+            <span>開始日期</span>
+            <input id="admin-start-date-filter" type="date" aria-describedby="admin-date-help" />
+          </label>
+          <label class="dlg-field admin-filter">
+            <span>結束日期</span>
+            <input id="admin-end-date-filter" type="date" aria-describedby="admin-date-help" />
+          </label>
+          <p id="admin-date-help" class="admin-filter-help">日期以台北時間計算，包含起訖日；留空不限。</p>
         </div>
+      </div>
+      <div id="admin-incident-filter" class="admin-incident-filter" role="group" aria-label="案件篩選" hidden>
+        <p id="admin-incident-filter-label"></p>
+        <button id="admin-clear-incident-filter" class="btn-sec" type="button">清除</button>
       </div>
       <div id="admin-list" class="admin-list" aria-live="polite"></div>
     </section>

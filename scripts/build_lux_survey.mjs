@@ -26,6 +26,7 @@ const counts = {
   negativeLux: 0,
   accuracy: 0,
   dropout: 0,
+  duplicate: 0,
   assigned: 0,
   unassigned: 0,
 };
@@ -70,6 +71,7 @@ function readSurvey(filePath) {
       lux,
       t: values[columns.recorded_at_taipei],
       time: Date.parse(values[columns.recorded_at]),
+      key: `${values[columns.session_id]}|${values[columns.recorded_at]}`,
     });
   }
   rows.sort((a, b) => a.time - b.time);
@@ -152,10 +154,20 @@ const hexes = JSON.parse(fs.readFileSync(ROAD_HEX_PATH, "utf8")).features
       count: 0,
     };
   });
+// Exports are often cumulative, so the same reading can appear in several CSVs; keep it once.
+const seen = new Set();
 const points = fs.readdirSync(SURVEY_DIRECTORY)
   .filter((file) => file.endsWith(".csv"))
   .sort()
   .flatMap((file) => readSurvey(path.join(SURVEY_DIRECTORY, file)))
+  .filter((point) => {
+    if (seen.has(point.key)) {
+      counts.duplicate += 1;
+      return false;
+    }
+    seen.add(point.key);
+    return true;
+  })
   .sort((a, b) => a.time - b.time);
 
 for (const point of points) {
@@ -217,6 +229,7 @@ writeCollection(TRACK_OUTPUT_PATH, "lux_survey_track", points.map((point) => ({
 console.log(`Rows read: ${counts.rows}`);
 console.log(`Rule 1 dropped: ${counts.nonFinite + counts.negativeLux + counts.accuracy} (non-finite lat/lon/lux: ${counts.nonFinite}, negative lux: ${counts.negativeLux}, accuracy > 15 m: ${counts.accuracy})`);
 console.log(`Rule 2 dropped (isolated zero dropout): ${counts.dropout}`);
+console.log(`Duplicate rows across CSVs dropped: ${counts.duplicate}`);
 console.log(`Assigned: ${counts.assigned}; unassigned: ${counts.unassigned}`);
 console.log(`Observed hexes: ${observed.length}; KNN hexes: ${knnCount}`);
 for (const filePath of [HEX_OUTPUT_PATH, TRACK_OUTPUT_PATH]) {

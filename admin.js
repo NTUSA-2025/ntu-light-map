@@ -139,7 +139,7 @@ function whitelistErrorMessage(code) {
   if (code === 'whitelist_entry_exists') return '這個白名單項目已存在';
   if (code === 'cannot_remove_last_whitelist_entry') return '至少需要保留一個白名單項目';
   if (code === 'cannot_remove_current_access') return '請先新增另一個可保留目前管理權限的項目';
-  if (code === 'invalid_whitelist_email') return '只接受有效的 NTU Email 或指定的 NTUSA 萬用網域';
+  if (code === 'invalid_whitelist_email') return '只接受有效的 NTU Email';
   return code || '白名單操作失敗';
 }
 
@@ -381,7 +381,7 @@ whitelistForm.addEventListener('submit', async event => {
   event.preventDefault();
   const email = whitelistEmailInput.value.trim().toLowerCase();
   if (!email) {
-    setStatus('請輸入 Email 或 *@ntusa.ntu.edu.tw', 'error');
+    setStatus('請輸入 NTU Email', 'error');
     return;
   }
   const submitButton = byId('btn-add-admin');

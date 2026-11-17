@@ -1,4 +1,9 @@
-import { requireAdmin, normalizeAdminWhitelistEntry, whitelistEntryMatches } from "../../../_shared/admin.js";
+import {
+  requireAdmin,
+  normalizeAdminWhitelistEntry,
+  normalizeRemovableWhitelistEntry,
+  whitelistEntryMatches,
+} from "../../../_shared/admin.js";
 import { badRequest, json, methodNotAllowed } from "../../../_shared/http.js";
 
 export async function onRequestGet({ request, env }) {
@@ -61,19 +66,21 @@ export async function onRequestDelete({ request, env }) {
     return badRequest("invalid_json");
   }
 
-  const email = normalizeAdminWhitelistEntry(input?.email);
+  const email = normalizeRemovableWhitelistEntry(input?.email);
   if (!email) return badRequest("invalid_whitelist_email");
 
-  const { results } = await env.DB.prepare(
-    "SELECT lower(email) AS email FROM admin_users",
-  ).all();
-  const remaining = results.filter(user => user.email !== email);
-  if (remaining.length === 0) {
-    return json({ error: "cannot_remove_last_whitelist_entry" }, { status: 409 });
-  }
-  if (!remaining.some(user => normalizeAdminWhitelistEntry(user.email)
-    && whitelistEntryMatches(user.email, access.email))) {
-    return json({ error: "cannot_remove_current_access" }, { status: 409 });
+  // Group members keep access regardless of the whitelist, so only whitelist-based admins need these guards.
+  if (access.via === "whitelist") {
+    const { results } = await env.DB.prepare(
+      "SELECT lower(email) AS email FROM admin_users",
+    ).all();
+    const remaining = results.filter(user => user.email !== email);
+    if (remaining.length === 0) {
+      return json({ error: "cannot_remove_last_whitelist_entry" }, { status: 409 });
+    }
+    if (!remaining.some(user => whitelistEntryMatches(user.email, access.email))) {
+      return json({ error: "cannot_remove_current_access" }, { status: 409 });
+    }
   }
 
   const deletion = await env.DB.prepare(

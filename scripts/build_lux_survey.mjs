@@ -182,27 +182,33 @@ for (const point of points) {
 }
 
 const observed = hexes.filter((hex) => hex.count > 0);
+const valueByHex = new Map(observed.map((hex) => [hex, hex.sum / hex.count]));
+// Fill unmeasured road hexes ring by ring from adjacent hexes that already have a value.
+// Each round only reads values from earlier rounds, so the first ring uses observations alone.
+for (;;) {
+  const filled = [];
+  for (const hex of hexes) {
+    if (valueByHex.has(hex)) continue;
+    let weightedSum = 0;
+    let weightSum = 0;
+    for (const [neighbour, value] of valueByHex) {
+      const distance = Math.hypot(hex.x - neighbour.x, hex.y - neighbour.y);
+      if (distance > 1.05 * hex.height) continue;
+      weightedSum += value / distance;
+      weightSum += 1 / distance;
+    }
+    if (weightSum > 0) filled.push([hex, weightedSum / weightSum]);
+  }
+  if (filled.length === 0) break;
+  for (const [hex, value] of filled) valueByHex.set(hex, value);
+}
+
 const brightnessFeatures = [];
 let knnCount = 0;
 for (const hex of hexes) {
-  let value;
-  if (hex.count > 0) {
-    value = hex.sum / hex.count;
-  } else {
-    let weightedSum = 0;
-    let weightSum = 0;
-    // Only original observations can contribute; filled cells never propagate.
-    for (const neighbour of observed) {
-      const distance = Math.hypot(hex.x - neighbour.x, hex.y - neighbour.y);
-      if (distance > 1.05 * hex.height) continue;
-      const weight = 1 / distance;
-      weightedSum += (neighbour.sum / neighbour.count) * weight;
-      weightSum += weight;
-    }
-    if (weightSum === 0) continue;
-    value = weightedSum / weightSum;
-    knnCount += 1;
-  }
+  if (!valueByHex.has(hex)) continue;
+  const value = valueByHex.get(hex);
+  if (hex.count === 0) knnCount += 1;
   brightnessFeatures.push({
     type: "Feature",
     properties: {

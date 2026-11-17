@@ -75,13 +75,13 @@ export async function sendFollowupNotification(env, { incident, reporterEmail, o
     `事件類型：${typeLabel}`,
     `回報時間：${taipeiTime(incident.created_at)}`,
     `回報區域：${incident.report_hex_id}`,
-    `地圖位置：https://www.google.com/maps?q=${incident.lat},${incident.lng}`,
+    `地圖位置：${origin}/?focus_hex=${incident.report_hex_id}&focus_incident=${incident.id}`,
     `回報者信箱：${reporterEmail}`,
     "",
     "事件描述：",
     incident.description || "沒有描述",
     "",
-    `回報管理頁面：${origin}/admin.html`,
+    `回報管理頁面：${origin}/admin.html?incident=${incident.id}`,
   ].join("\n");
 
   if (!env.RESEND_API_KEY && env.ALLOW_DEV_AUTH === "true") {

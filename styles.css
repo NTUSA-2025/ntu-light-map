@@ -884,19 +884,6 @@ html.report-dialog-open #btn-gps {
   letter-spacing: 0;
 }
 
-.landmark-label span {
-  position: absolute;
-  transform: translate(-50%, -50%);
-  color: var(--ink);
-  font-family: var(--font);
-  font-size: 0.8125rem;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  white-space: nowrap;
-  pointer-events: none;
-  text-shadow: 0 0 3px #070a0d, 0 0 6px #070a0d, 0 0 10px #070a0d;
-}
-
 .map-legend-row {
   display: flex;
   align-items: center;

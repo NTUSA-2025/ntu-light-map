@@ -29,7 +29,6 @@ map.createPane('safetyPane');     map.getPane('safetyPane').style.zIndex = 300;
 map.createPane('protectPane');    map.getPane('protectPane').style.zIndex = 250;
 map.createPane('incidentPane'); map.getPane('incidentPane').style.zIndex = 400;
 map.createPane('reportPane');   map.getPane('reportPane').style.zIndex = 450;
-map.createPane('labelPane');    map.getPane('labelPane').style.zIndex = 460;
 
 const VECTOR_STYLE_URL = 'https://tiles.openfreemap.org/styles/liberty';
 const VECTOR_ATTRIBUTION = '&copy; <a href="https://openfreemap.org/">OpenFreeMap</a> · <a href="https://www.openmaptiles.org/">OpenMapTiles</a> · <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
@@ -233,21 +232,6 @@ export async function loadMapLayers(onSelectReportHex, hexTooltip) {
     style: { color: '#b79af5', fillColor: '#b79af5', fillOpacity: 0.18, weight: 0 }
   }).addTo(map);
   layerMap.protect = protectLayer;
-
-  const geoLandmarks = await loadJSON(assetUrl('/data/landmarks.geojson'));
-  const landmarkLayer = L.geoJSON(geoLandmarks, {
-    pointToLayer: (feature, latlng) => L.marker(latlng, {
-      pane: 'labelPane',
-      interactive: false,
-      keyboard: false,
-      icon: L.divIcon({
-        className: 'landmark-label',
-        html: `<span>${escapeHtml(feature.properties.name)}</span>`,
-        iconSize: null
-      })
-    })
-  }).addTo(map);
-  layerMap.landmark = landmarkLayer;
 
   const geoReport = await loadJSON(assetUrl('/data/report_hex_cells_4326.geojson'));
   state.reportHexFeatureById.clear();

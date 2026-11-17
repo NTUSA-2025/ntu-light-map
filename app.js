@@ -94,7 +94,6 @@ makeToggle('tog-track', 'track', loadTrackLayer);
 makeToggle('tog-safety', 'safety');
 makeToggle('tog-incident', 'incident');
 makeToggle('tog-protect', 'protect');
-makeToggle('tog-landmark', 'landmark');
 
 function syncPanelButtonState(open) {
   btnPanel.classList.toggle('active', open);

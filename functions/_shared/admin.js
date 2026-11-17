@@ -1,4 +1,5 @@
 import { getSessionEmail, isAllowedNtuEmail } from "./auth.js";
+import { isInAdminGroup } from "./google.js";
 import { json } from "./http.js";
 
 export async function requireAdmin(request, env) {
@@ -15,8 +16,18 @@ export async function requireAdmin(request, env) {
      WHERE lower(email) = ? OR lower(email) = ?
      LIMIT 1`,
   ).bind(normalizedEmail, `*@${domain}`).first();
+  if (row) {
+    return { ok: true, email: normalizedEmail };
+  }
 
-  if (!row) {
+  let groupMember = false;
+  try {
+    groupMember = await isInAdminGroup(env, normalizedEmail);
+  } catch (error) {
+    // A Google outage must not grant access; whitelist entries above keep working.
+    console.error("admin_group_check_failed", { message: error?.message });
+  }
+  if (!groupMember) {
     return { ok: false, response: json({ error: "admin_forbidden" }, { status: 403 }) };
   }
 

@@ -56,13 +56,19 @@ async function accessToken(env) {
     iat: now,
     exp: now + 3600,
   })}`;
-  const key = await crypto.subtle.importKey(
-    "pkcs8",
-    privateKeyBytes(env.GOOGLE_PRIVATE_KEY),
-    { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
-    false,
-    ["sign"],
-  );
+  let key;
+  try {
+    key = await crypto.subtle.importKey(
+      "pkcs8",
+      privateKeyBytes(env.GOOGLE_PRIVATE_KEY),
+      { name: "RSASSA-PKCS1-v1_5", hash: "SHA-256" },
+      false,
+      ["sign"],
+    );
+  } catch (error) {
+    // Usually a truncated or mangled paste of `private_key`; never log the key itself.
+    throw new Error(`google_private_key_invalid: ${error?.name || "error"}`);
+  }
   const signature = await crypto.subtle.sign("RSASSA-PKCS1-v1_5", key, new TextEncoder().encode(unsigned));
 
   const response = await fetch(TOKEN_URL, {
